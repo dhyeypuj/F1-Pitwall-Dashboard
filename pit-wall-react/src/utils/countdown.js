@@ -3,18 +3,18 @@ export const calculateCountdown = (targetDate) => {
     return { days: 0, hours: 0, minutes: 0, seconds: 0 }
   }
 
-  const target = new Date(targetDate).getTime()
-  const now = new Date().getTime()
+  const target = typeof targetDate === 'number' ? targetDate : new Date(targetDate).getTime()
+  const now = Date.now()
   const diff = target - now
 
   if (isNaN(target) || diff <= 0) {
     return { days: 0, hours: 0, minutes: 0, seconds: 0 }
   }
 
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+  const days = Math.floor(diff / 86400000)
+  const hours = Math.floor((diff % 86400000) / 3600000)
+  const minutes = Math.floor((diff % 3600000) / 60000)
+  const seconds = Math.floor((diff % 60000) / 1000)
 
   return { days, hours, minutes, seconds }
 }
