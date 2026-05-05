@@ -68,6 +68,7 @@ const useStore = create((set) => ({
       title: "Grand Prix",
       circuit: "Miami International Autodrome",
       location: "Hard Rock Stadium",
+      date: "2026-05-03T20:00:00Z",
       details: "Round 4 of 23 · 57 laps · 308.326 km",
       stats: [
         { label: "Lap Record", value: "1:29.708" },
