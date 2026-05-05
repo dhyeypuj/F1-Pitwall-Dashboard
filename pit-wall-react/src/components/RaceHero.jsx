@@ -1,30 +1,28 @@
+import useStore from '../store/useStore'
+
 const RaceHero = () => {
+  const { nextRace } = useStore((state) => state.race)
+
   return (
     <section className="race-hero">
       <div className="race-block">
         <div className="race-grid">
           <div className="race-left">
             <div className="race-meta-row">
-              <span className="race-round">◆ Round 04 · Up Next</span>
-              <span className="race-flag-big">🇺🇸</span>
+              <span className="race-round">◆ {nextRace.round} · {nextRace.status}</span>
+              <span className="race-flag-big">{nextRace.flag}</span>
             </div>
-            <h2 className="race-name">Miami <em>Grand Prix</em></h2>
-            <div className="race-circuit"><strong>Miami International Autodrome</strong> · Hard Rock Stadium</div>
-            <div className="race-circuit">Round 4 of 23 · 57 laps · 308.326 km</div>
+            <h2 className="race-name">{nextRace.city} <em>{nextRace.title}</em></h2>
+            <div className="race-circuit"><strong>{nextRace.circuit}</strong> · {nextRace.location}</div>
+            <div className="race-circuit">{nextRace.details}</div>
 
             <div className="race-stats">
-              <div className="race-stat">
-                <div className="race-stat-label">Lap Record</div>
-                <div className="race-stat-val">1:29.708</div>
-              </div>
-              <div className="race-stat">
-                <div className="race-stat-label">Pole 2025</div>
-                <div className="race-stat-val">M. Verstappen</div>
-              </div>
-              <div className="race-stat">
-                <div className="race-stat-label">Dates</div>
-                <div className="race-stat-val">May 1 – 3</div>
-              </div>
+              {nextRace.stats.map((stat, idx) => (
+                <div className="race-stat" key={idx}>
+                  <div className="race-stat-label">{stat.label}</div>
+                  <div className="race-stat-val">{stat.value}</div>
+                </div>
+              ))}
             </div>
           </div>
 

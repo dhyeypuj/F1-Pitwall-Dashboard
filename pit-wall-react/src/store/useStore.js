@@ -80,6 +80,12 @@ const useStore = create((set) => ({
       body: "Iran war fallout leaves the season at 23 rounds, Australia to Abu Dhabi. Feeder series affected too."
     }
   ],
+  stats: [
+    { id: 1, label: "Championship Lead", bigHtml: "<em>+9</em> pts", sub: "Antonelli over Russell" },
+    { id: 2, label: "Fastest Lap 2026", bigHtml: "1:28.411", sub: "Russell · Japan Q3" },
+    { id: 3, label: "Fastest Pit Stop", bigHtml: "1.94<em>s</em>", sub: "McLaren · Japanese GP" },
+    { id: 4, label: "Verstappen Gap", bigHtml: "P9 <em>·</em> −60", sub: "Worst start since 2017" }
+  ],
 
   setUser: (user) => set({ user }),
   setPreferences: (preferences) => set({ preferences }),
