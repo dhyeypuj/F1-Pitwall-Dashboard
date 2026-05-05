@@ -1,7 +1,8 @@
-import useStore from '../store/useStore'
+import useStore, { getNextRaceName } from '../store/useStore'
 
 const RaceHero = () => {
   const { nextRace } = useStore((state) => state.race)
+  const nextRaceName = useStore(getNextRaceName)
 
   return (
     <section className="race-hero">
@@ -12,7 +13,7 @@ const RaceHero = () => {
               <span className="race-round">◆ {nextRace.round} · {nextRace.status}</span>
               <span className="race-flag-big">{nextRace.flag}</span>
             </div>
-            <h2 className="race-name">{nextRace.city} <em>{nextRace.title}</em></h2>
+            <h2 className="race-name">{nextRaceName}</h2>
             <div className="race-circuit"><strong>{nextRace.circuit}</strong> · {nextRace.location}</div>
             <div className="race-circuit">{nextRace.details}</div>
 

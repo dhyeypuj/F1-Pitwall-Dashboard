@@ -150,4 +150,8 @@ const useStore = create((set) => ({
   setNews: (news) => set({ news }),
 }))
 
+export const getTopDriver = (state) => state.standings.drivers[0]
+export const getNextRaceName = (state) => `${state.race.nextRace.city} ${state.race.nextRace.title}`
+export const getTeamTheme = (state) => state.preferences.team
+
 export default useStore
