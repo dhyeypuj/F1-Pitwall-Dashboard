@@ -6,12 +6,27 @@ const RaceHero = () => {
   const { nextRace } = useStore((state) => state.race)
   const nextRaceName = useStore(getNextRaceName)
   const { days, hours, minutes, seconds } = useCountdown(nextRace?.date)
+  const isLoading = useStore((state) => state.isLoadingRace)
+
+  if (isLoading) {
+    return (
+      <section className="race-hero">
+        <div className="race-block" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', opacity: 0.5 }}>
+            <div style={{ background: '#333', width: '80px', height: '16px', borderRadius: '4px' }}></div>
+            <div style={{ background: '#333', width: '250px', height: '40px', borderRadius: '4px' }}></div>
+            <div style={{ background: '#222', width: '150px', height: '16px', borderRadius: '4px' }}></div>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   if (!nextRace) {
     return (
       <section className="race-hero">
         <div className="race-block" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <h2 className="race-name" style={{ color: '#666' }}>Fetching Next Race...</h2>
+          <h2 className="race-name" style={{ color: '#666' }}>Next Race Unavailable</h2>
         </div>
       </section>
     )

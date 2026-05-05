@@ -27,6 +27,10 @@ const useStore = create((set) => ({
     progress: "13.6%",
     rounds: []
   },
+  isLoadingStandings: true,
+  isLoadingRace: true,
+  isLoadingCalendar: true,
+  setLoading: (key, value) => set({ [key]: value }),
   podium: {
     title: "Japanese GP · Suzuka · Result",
     results: [

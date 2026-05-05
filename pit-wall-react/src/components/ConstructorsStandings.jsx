@@ -2,6 +2,7 @@ import useStore from '../store/useStore'
 
 const ConstructorsStandings = () => {
   const constructors = useStore((state) => state.standings.constructors)
+  const isLoading = useStore((state) => state.isLoadingStandings)
 
   return (
     <div className="col">
@@ -11,9 +12,25 @@ const ConstructorsStandings = () => {
         <div className="col-sub">All 11 teams · 2026</div>
       </div>
 
-      {constructors.length === 0 ? (
+      {isLoading ? (
+        Array(10).fill(0).map((_, i) => (
+          <div className="con-row skeleton" key={`skel-c-${i}`} style={{ opacity: 0.5, animationDelay: `${4.5 + i * 0.08}s` }}>
+            <div className="con-top">
+              <div className="con-pos">--</div>
+              <div>
+                <div className="con-name" style={{ background: '#333', width: '100px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
+                <div className="con-engine" style={{ background: '#222', width: '60px', height: '12px', display: 'block', borderRadius: '4px', marginTop: '4px' }}></div>
+              </div>
+              <div className="con-pts" style={{ background: '#333', width: '30px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
+            </div>
+            <div className="con-bar">
+              <div className="con-bar-fill" style={{ width: '0%' }}></div>
+            </div>
+          </div>
+        ))
+      ) : constructors.length === 0 ? (
         <div className="con-row" style={{ justifyContent: 'center', padding: '2rem 0' }}>
-          <div className="con-name" style={{ color: '#666' }}>Fetching Standings...</div>
+          <div className="con-name" style={{ color: '#666' }}>Standings Unavailable</div>
         </div>
       ) : (
         constructors.map((c, i) => (

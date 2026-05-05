@@ -8,20 +8,25 @@ function App() {
   const setStandings = useStore(state => state.setStandings)
   const setRace = useStore(state => state.setRace)
   const setCalendar = useStore(state => state.setCalendar)
+  const setLoading = useStore(state => state.setLoading)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', teamTheme)
   }, [teamTheme])
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const standings = await getStandings()
+    const loadData = () => {
+      getStandings().then(standings => {
         if (standings && standings.drivers && standings.drivers.length > 0) {
           setStandings(standings)
         }
+        setLoading('isLoadingStandings', false)
+      }).catch(err => {
+        console.error('Failed to load standings:', err)
+        setLoading('isLoadingStandings', false)
+      })
 
-        const nextRace = await getNextRace()
+      getNextRace().then(nextRace => {
         if (nextRace) {
           const currentRace = useStore.getState().race
           setRace({
@@ -33,8 +38,13 @@ function App() {
             countdown: { targetDate: nextRace.date }
           })
         }
+        setLoading('isLoadingRace', false)
+      }).catch(err => {
+        console.error('Failed to load next race:', err)
+        setLoading('isLoadingRace', false)
+      })
 
-        const calendar = await getCalendar()
+      getCalendar().then(calendar => {
         if (calendar && calendar.length > 0) {
           const currentCal = useStore.getState().calendar
           setCalendar({
@@ -42,13 +52,15 @@ function App() {
             rounds: calendar
           })
         }
-      } catch (err) {
-        console.error('Failed to load initial data:', err)
-      }
+        setLoading('isLoadingCalendar', false)
+      }).catch(err => {
+        console.error('Failed to load calendar:', err)
+        setLoading('isLoadingCalendar', false)
+      })
     }
 
     loadData()
-  }, [setStandings, setRace, setCalendar])
+  }, [setStandings, setRace, setCalendar, setLoading])
 
   return (
     <div className={`app theme-${teamTheme}`}>

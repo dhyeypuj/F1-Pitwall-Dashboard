@@ -2,6 +2,7 @@ import useStore from '../store/useStore'
 
 const DriversStandings = () => {
   const drivers = useStore((state) => state.standings.drivers)
+  const isLoading = useStore((state) => state.isLoadingStandings)
 
   return (
     <div className="col">
@@ -11,9 +12,22 @@ const DriversStandings = () => {
         <div className="col-sub">Top 10 · After 3 Rounds</div>
       </div>
 
-      {drivers.length === 0 ? (
+      {isLoading ? (
+        Array(10).fill(0).map((_, i) => (
+          <div className="driver-row skeleton" key={`skel-d-${i}`} style={{ opacity: 0.5, animationDelay: `${4.5 + i * 0.08}s` }}>
+            <div className="driver-pos">--</div>
+            <div className="driver-info">
+              <div className="driver-line"><span className="driver-name" style={{ background: '#333', width: '120px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></span></div>
+              <div className="driver-team" style={{ background: '#222', width: '80px', height: '12px', display: 'inline-block', borderRadius: '4px', marginTop: '4px' }}></div>
+            </div>
+            <div className="driver-pts-wrap">
+              <div className="driver-pts" style={{ background: '#333', width: '30px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
+            </div>
+          </div>
+        ))
+      ) : drivers.length === 0 ? (
         <div className="driver-row" style={{ justifyContent: 'center', padding: '2rem 0' }}>
-          <div className="driver-name" style={{ color: '#666' }}>Fetching Standings...</div>
+          <div className="driver-name" style={{ color: '#666' }}>Standings Unavailable</div>
         </div>
       ) : (
         drivers.map((d, i) => (

@@ -2,6 +2,7 @@ import useStore from '../store/useStore'
 
 const CalendarStrip = () => {
   const calendar = useStore((state) => state.calendar)
+  const isLoading = useStore((state) => state.isLoadingCalendar)
 
   return (
     <section className="cal-section">
@@ -15,9 +16,18 @@ const CalendarStrip = () => {
           <div className="cal-progress-fill" style={{ width: calendar.progress }}></div>
         </div>
         <div className="cal-strip" id="calStrip">
-          {calendar.rounds.length === 0 ? (
+          {isLoading ? (
+            Array(8).fill(0).map((_, i) => (
+              <div className="cal-round skeleton" key={`skel-cal-${i}`} style={{ opacity: 0.5 }}>
+                <div className="cal-rnum" style={{ background: '#333', width: '40px', height: '12px', borderRadius: '4px' }}></div>
+                <div className="cal-flag-emoji" style={{ opacity: 0.1 }}>🏁</div>
+                <div className="cal-country" style={{ background: '#222', width: '60px', height: '16px', borderRadius: '4px' }}></div>
+                <div className="cal-flag-name" style={{ background: '#222', width: '80px', height: '12px', borderRadius: '4px', marginTop: '4px' }}></div>
+              </div>
+            ))
+          ) : calendar.rounds.length === 0 ? (
             <div className="cal-round" style={{ flex: 1, justifyContent: 'center' }}>
-              <div className="cal-rnum" style={{ color: '#666' }}>Fetching Calendar...</div>
+              <div className="cal-rnum" style={{ color: '#666' }}>Calendar Unavailable</div>
             </div>
           ) : (
             calendar.rounds.map((r) => {
