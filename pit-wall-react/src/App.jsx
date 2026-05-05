@@ -16,7 +16,7 @@ function App() {
   }, [teamTheme])
 
   useEffect(() => {
-    const loadData = () => {
+    const fetchStandings = () => {
       getStandings().then(standings => {
         if (standings && standings.drivers && standings.drivers.length > 0) {
           setStandings(standings)
@@ -30,7 +30,9 @@ function App() {
         setError('errorStandings', err.message || 'Failed to connect to Jolpica API')
         setLoading('isLoadingStandings', false)
       })
+    }
 
+    const fetchNextRace = () => {
       getNextRace().then(nextRace => {
         if (nextRace) {
           const currentRace = useStore.getState().race
@@ -52,7 +54,9 @@ function App() {
         setError('errorRace', err.message || 'Failed to connect to Jolpica API')
         setLoading('isLoadingRace', false)
       })
+    }
 
+    const fetchCalendar = () => {
       getCalendar().then(calendar => {
         if (calendar && calendar.length > 0) {
           const currentCal = useStore.getState().calendar
@@ -72,7 +76,22 @@ function App() {
       })
     }
 
-    loadData()
+    // Initial load
+    fetchStandings()
+    fetchNextRace()
+    fetchCalendar()
+
+    // Background polling
+    const standingsInterval = setInterval(fetchStandings, 5 * 60 * 1000)
+    const raceInterval = setInterval(fetchNextRace, 10 * 60 * 1000)
+    const calendarInterval = setInterval(fetchCalendar, 30 * 60 * 1000)
+
+    // Cleanup to prevent duplicate intervals
+    return () => {
+      clearInterval(standingsInterval)
+      clearInterval(raceInterval)
+      clearInterval(calendarInterval)
+    }
   }, [setStandings, setRace, setCalendar, setLoading, setError])
 
   return (
