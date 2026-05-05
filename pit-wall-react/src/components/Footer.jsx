@@ -1,9 +1,13 @@
+import useStore from '../store/useStore'
+
 const Footer = () => {
+  const footerNote = useStore((state) => state.footerNote)
+
   return (
     <>
       <div className="footer-wrap">
         <footer className="footer">
-          <div className="f-note">For Shreya · eyes only<span className="f-dot"></span>Lights out and away we go</div>
+          <div className="f-note">{footerNote}<span className="f-dot"></span>Lights out and away we go</div>
           <div className="f-brand">The <em>Pit Wall</em></div>
         </footer>
         <div className="f-colophon-row">
