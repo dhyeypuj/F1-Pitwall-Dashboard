@@ -11,9 +11,14 @@ const DriversStandings = () => {
         <div className="col-sub">Top 10 · After 3 Rounds</div>
       </div>
 
-      {drivers.map((d, i) => (
-        <div 
-          className={`driver-row ${i === 0 ? 'leader' : ''}`} 
+      {drivers.length === 0 ? (
+        <div className="driver-row" style={{ justifyContent: 'center', padding: '2rem 0' }}>
+          <div className="driver-name" style={{ color: '#666' }}>Fetching Standings...</div>
+        </div>
+      ) : (
+        drivers.map((d, i) => (
+          <div 
+            className={`driver-row ${i === 0 ? 'leader' : ''}`} 
           style={{ '--team-color': d.color, animationDelay: `${4.5 + i * 0.08}s` }}
           key={d.code}
         >
@@ -37,7 +42,8 @@ const DriversStandings = () => {
             <div className="driver-pts-sub">pts</div>
           </div>
         </div>
-      ))}
+        ))
+      )}
     </div>
   )
 }

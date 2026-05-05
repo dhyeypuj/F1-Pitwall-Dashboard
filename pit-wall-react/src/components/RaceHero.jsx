@@ -5,7 +5,17 @@ import { formatNumber } from '../utils/format'
 const RaceHero = () => {
   const { nextRace } = useStore((state) => state.race)
   const nextRaceName = useStore(getNextRaceName)
-  const { days, hours, minutes, seconds } = useCountdown(nextRace.date)
+  const { days, hours, minutes, seconds } = useCountdown(nextRace?.date)
+
+  if (!nextRace) {
+    return (
+      <section className="race-hero">
+        <div className="race-block" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <h2 className="race-name" style={{ color: '#666' }}>Fetching Next Race...</h2>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="race-hero">
@@ -21,12 +31,19 @@ const RaceHero = () => {
             <div className="race-circuit">{nextRace.details}</div>
 
             <div className="race-stats">
-              {nextRace.stats.map((stat, idx) => (
-                <div className="race-stat" key={idx}>
-                  <div className="race-stat-label">{stat.label}</div>
-                  <div className="race-stat-val">{stat.value}</div>
+              {nextRace.stats && nextRace.stats.length > 0 ? (
+                nextRace.stats.map((stat, idx) => (
+                  <div className="race-stat" key={idx}>
+                    <div className="race-stat-label">{stat.label}</div>
+                    <div className="race-stat-val">{stat.value}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="race-stat">
+                  <div className="race-stat-label">Race Information</div>
+                  <div className="race-stat-val">Loading specifics...</div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

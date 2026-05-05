@@ -11,8 +11,13 @@ const ConstructorsStandings = () => {
         <div className="col-sub">All 11 teams · 2026</div>
       </div>
 
-      {constructors.map((c, i) => (
-        <div 
+      {constructors.length === 0 ? (
+        <div className="con-row" style={{ justifyContent: 'center', padding: '2rem 0' }}>
+          <div className="con-name" style={{ color: '#666' }}>Fetching Standings...</div>
+        </div>
+      ) : (
+        constructors.map((c, i) => (
+          <div 
           className="con-row" 
           style={{ '--team-color': c.color, animationDelay: `${4.5 + i * 0.08}s` }}
           key={c.name}
@@ -32,7 +37,8 @@ const ConstructorsStandings = () => {
             ></div>
           </div>
         </div>
-      ))}
+        ))
+      )}
     </div>
   )
 }

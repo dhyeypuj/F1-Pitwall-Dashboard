@@ -15,8 +15,13 @@ const CalendarStrip = () => {
           <div className="cal-progress-fill" style={{ width: calendar.progress }}></div>
         </div>
         <div className="cal-strip" id="calStrip">
-          {calendar.rounds.map((r) => {
-            const className = `cal-round ${r.done ? 'done' : ''} ${r.next ? 'next' : ''}`.trim()
+          {calendar.rounds.length === 0 ? (
+            <div className="cal-round" style={{ flex: 1, justifyContent: 'center' }}>
+              <div className="cal-rnum" style={{ color: '#666' }}>Fetching Calendar...</div>
+            </div>
+          ) : (
+            calendar.rounds.map((r) => {
+              const className = `cal-round ${r.done ? 'done' : ''} ${r.next ? 'next' : ''}`.trim()
             return (
               <div className={className} key={r.id}>
                 <div className="cal-rnum">{r.num}<span className="cal-status-dot"></span></div>
@@ -27,7 +32,8 @@ const CalendarStrip = () => {
                 {r.winner ? <div className="cal-winner">{r.winner}</div> : r.status ? <div className="cal-r-status">{r.status}</div> : null}
               </div>
             )
-          })}
+            })
+          )}
         </div>
       </div>
     </section>
