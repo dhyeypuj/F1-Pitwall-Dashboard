@@ -1,7 +1,7 @@
 const Ticker = () => {
   return (
-    <div>
-      Ticker Placeholder
+    <div className="ticker-wrap">
+      <div className="ticker-track" id="tkTrack"></div>
     </div>
   )
 }
