@@ -149,6 +149,7 @@ const useStore = create((set) => ({
   setRace: (race) => set({ race }),
   setStandings: (standings) => set({ standings }),
   setNews: (news) => set({ news }),
+  setCalendar: (calendar) => set({ calendar }),
 }))
 
 export const getTopDriver = (state) => state.standings.drivers[0]
