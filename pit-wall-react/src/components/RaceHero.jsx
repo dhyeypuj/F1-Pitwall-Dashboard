@@ -1,12 +1,11 @@
 import useStore, { getNextRaceName } from '../store/useStore'
 import { useCountdown } from '../hooks/useCountdown'
+import { formatNumber } from '../utils/format'
 
 const RaceHero = () => {
   const { nextRace } = useStore((state) => state.race)
   const nextRaceName = useStore(getNextRaceName)
   const { days, hours, minutes, seconds } = useCountdown(nextRace.date)
-
-  const pad = (num) => String(num).padStart(2, '0')
 
   return (
     <section className="race-hero">
@@ -34,10 +33,10 @@ const RaceHero = () => {
           <div className="race-right">
             <div className="countdown-label">Lights Out In</div>
             <div className="countdown">
-              <div className="cd-cell"><div className="cd-num" id="cd-d">{pad(days)}</div><div className="cd-label">Days</div></div>
-              <div className="cd-cell"><div className="cd-num" id="cd-h">{pad(hours)}</div><div className="cd-label">Hours</div></div>
-              <div className="cd-cell"><div className="cd-num" id="cd-m">{pad(minutes)}</div><div className="cd-label">Mins</div></div>
-              <div className="cd-cell"><div className="cd-num" id="cd-s">{pad(seconds)}</div><div className="cd-label">Secs</div></div>
+              <div className="cd-cell"><div className="cd-num" id="cd-d">{formatNumber(days)}</div><div className="cd-label">Days</div></div>
+              <div className="cd-cell"><div className="cd-num" id="cd-h">{formatNumber(hours)}</div><div className="cd-label">Hours</div></div>
+              <div className="cd-cell"><div className="cd-num" id="cd-m">{formatNumber(minutes)}</div><div className="cd-label">Mins</div></div>
+              <div className="cd-cell"><div className="cd-num" id="cd-s">{formatNumber(seconds)}</div><div className="cd-label">Secs</div></div>
             </div>
           </div>
         </div>
