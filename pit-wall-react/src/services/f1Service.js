@@ -42,7 +42,7 @@ export const getNextRace = async () => {
     }
   } catch (error) {
     console.error('Error fetching next race:', error)
-    return null
+    throw new Error('Failed to load race data')
   }
 }
 
@@ -84,7 +84,7 @@ export const getStandings = async () => {
     return { drivers, constructors }
   } catch (error) {
     console.error('Error fetching standings:', error)
-    return { drivers: [], constructors: [] }
+    throw new Error('Failed to load standings')
   }
 }
 
@@ -124,6 +124,6 @@ export const getCalendar = async () => {
     })
   } catch (error) {
     console.error('Error fetching calendar:', error)
-    return []
+    throw new Error('Failed to load calendar')
   }
 }

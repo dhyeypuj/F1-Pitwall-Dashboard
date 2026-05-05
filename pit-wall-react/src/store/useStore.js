@@ -30,7 +30,11 @@ const useStore = create((set) => ({
   isLoadingStandings: true,
   isLoadingRace: true,
   isLoadingCalendar: true,
+  errorStandings: null,
+  errorRace: null,
+  errorCalendar: null,
   setLoading: (key, value) => set({ [key]: value }),
+  setError: (key, value) => set({ [key]: value }),
   podium: {
     title: "Japanese GP · Suzuka · Result",
     results: [

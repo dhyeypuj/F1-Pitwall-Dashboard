@@ -7,6 +7,7 @@ const RaceHero = () => {
   const nextRaceName = useStore(getNextRaceName)
   const { days, hours, minutes, seconds } = useCountdown(nextRace?.date)
   const isLoading = useStore((state) => state.isLoadingRace)
+  const error = useStore((state) => state.errorRace)
 
   if (isLoading) {
     return (
@@ -22,11 +23,11 @@ const RaceHero = () => {
     )
   }
 
-  if (!nextRace) {
+  if (error || !nextRace) {
     return (
       <section className="race-hero">
         <div className="race-block" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <h2 className="race-name" style={{ color: '#666' }}>Next Race Unavailable</h2>
+          <h2 className="race-name" style={{ color: error ? 'var(--ferrari)' : '#666' }}>{error || 'Next Race Unavailable'}</h2>
         </div>
       </section>
     )

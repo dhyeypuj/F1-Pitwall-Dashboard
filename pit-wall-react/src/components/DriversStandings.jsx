@@ -3,6 +3,7 @@ import useStore from '../store/useStore'
 const DriversStandings = () => {
   const drivers = useStore((state) => state.standings.drivers)
   const isLoading = useStore((state) => state.isLoadingStandings)
+  const error = useStore((state) => state.errorStandings)
 
   return (
     <div className="col">
@@ -25,9 +26,9 @@ const DriversStandings = () => {
             </div>
           </div>
         ))
-      ) : drivers.length === 0 ? (
+      ) : error || drivers.length === 0 ? (
         <div className="driver-row" style={{ justifyContent: 'center', padding: '2rem 0' }}>
-          <div className="driver-name" style={{ color: '#666' }}>Standings Unavailable</div>
+          <div className="driver-name" style={{ color: error ? 'var(--ferrari)' : '#666' }}>{error || 'Standings Unavailable'}</div>
         </div>
       ) : (
         drivers.map((d, i) => (

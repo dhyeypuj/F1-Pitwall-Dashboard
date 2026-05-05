@@ -3,6 +3,7 @@ import useStore from '../store/useStore'
 const ConstructorsStandings = () => {
   const constructors = useStore((state) => state.standings.constructors)
   const isLoading = useStore((state) => state.isLoadingStandings)
+  const error = useStore((state) => state.errorStandings)
 
   return (
     <div className="col">
@@ -28,9 +29,9 @@ const ConstructorsStandings = () => {
             </div>
           </div>
         ))
-      ) : constructors.length === 0 ? (
+      ) : error || constructors.length === 0 ? (
         <div className="con-row" style={{ justifyContent: 'center', padding: '2rem 0' }}>
-          <div className="con-name" style={{ color: '#666' }}>Standings Unavailable</div>
+          <div className="con-name" style={{ color: error ? 'var(--ferrari)' : '#666' }}>{error || 'Standings Unavailable'}</div>
         </div>
       ) : (
         constructors.map((c, i) => (
