@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import Layout from './layout/Layout'
 import useStore, { getTeamTheme } from './store/useStore'
 import { getStandings, getNextRace, getCalendar, getLatestResults, getRaceStats } from './services/f1Service'
+import { getF1News } from './services/newsService'
 
 function App() {
   const teamTheme = useStore(getTeamTheme)
@@ -13,6 +14,7 @@ function App() {
   const setHeroStats = useStore(state => state.setHeroStats)
   const setTicker = useStore(state => state.setTicker)
   const setStats = useStore(state => state.setStats)
+  const setNews = useStore(state => state.setNews)
   const standings = useStore(state => state.standings)
   const calendar = useStore(state => state.calendar)
   const podium = useStore(state => state.podium)
@@ -180,6 +182,26 @@ function App() {
       ])
     }
   }, [standings, calendar, podium, race, raceStats, setHeroStats, setTicker, setStats])
+
+  useEffect(() => {
+    const fetchNews = () => {
+      getF1News()
+        .then(newsData => {
+          if (newsData && newsData.length > 0) {
+            setNews(newsData)
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch news:', err)
+        })
+    }
+
+    fetchNews()
+    
+    // Poll news every 60 minutes
+    const newsInterval = setInterval(fetchNews, 60 * 60 * 1000)
+    return () => clearInterval(newsInterval)
+  }, [setNews])
 
   return (
     <div className={`app theme-${teamTheme}`}>
