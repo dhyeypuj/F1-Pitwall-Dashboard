@@ -44,6 +44,11 @@ export const getRSSNews = async () => {
     }
   })
 
-  // Returns an array of arrays containing the unmerged feed items
-  return Promise.all(promises)
+  const unmerged = await Promise.all(promises)
+
+  // Combine, sort descending by date, and limit to top 15
+  return unmerged
+    .flat()
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .slice(0, 15)
 }
