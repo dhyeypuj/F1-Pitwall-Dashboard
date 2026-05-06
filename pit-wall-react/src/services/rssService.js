@@ -21,3 +21,29 @@ export const RSS_SOURCES = [
     url: 'https://www.formula1.com/content/fom-website/en/latest/all.xml'
   }
 ]
+
+export const getRSSNews = async () => {
+  // Using a public CORS proxy because browser-to-RSS fetches will be blocked by CORS
+  const CORS_PROXY = 'https://corsproxy.io/?'
+
+  const promises = RSS_SOURCES.map(async (source) => {
+    try {
+      const feed = await parser.parseURL(`${CORS_PROXY}${encodeURIComponent(source.url)}`)
+      
+      return feed.items.map((item, index) => ({
+        id: `rss-${source.id}-${index}-${Date.now()}`,
+        headline: item.title || 'Untitled',
+        body: item.contentSnippet || item.content || 'No description available.',
+        source: source.name,
+        timestamp: item.pubDate || item.isoDate || new Date().toISOString(),
+        link: item.link || '#'
+      }))
+    } catch (error) {
+      console.error(`Error fetching RSS from ${source.name}:`, error)
+      return [] // Fail safely
+    }
+  })
+
+  // Returns an array of arrays containing the unmerged feed items
+  return Promise.all(promises)
+}
