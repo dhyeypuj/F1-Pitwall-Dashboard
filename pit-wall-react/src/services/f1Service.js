@@ -2,6 +2,29 @@ import axios from 'axios'
 
 const BASE_URL = 'https://api.jolpi.ca/ergast/f1'
 
+// --- Simple Request Deduplication & Caching ---
+const cache = new Map()
+
+const fetchCached = async (url, ttl = 60000) => {
+  const now = Date.now()
+  if (cache.has(url)) {
+    const { promise, timestamp } = cache.get(url)
+    // Return existing promise if in-flight or if cache is still fresh
+    if (now - timestamp < ttl) {
+      return promise
+    }
+  }
+
+  const reqPromise = axios.get(url).catch(err => {
+    cache.delete(url) // Clear cache on failure so we can retry
+    throw err
+  })
+
+  cache.set(url, { promise: reqPromise, timestamp: now })
+  return reqPromise
+}
+// ----------------------------------------------
+
 // Helper for UI colors
 const getTeamColor = (id) => {
   const colors = {
@@ -21,8 +44,12 @@ const getTeamColor = (id) => {
 
 export const getNextRace = async () => {
   try {
-    const { data } = await axios.get(`${BASE_URL}/current/next.json`)
-    const race = data.MRData.RaceTable.Races[0]
+    // Batched with getCalendar: fetch entire schedule and extract next
+    const { data } = await fetchCached(`${BASE_URL}/current.json`)
+    const races = data.MRData.RaceTable.Races || []
+    
+    const now = new Date()
+    const race = races.find(r => new Date(`${r.date}T${r.time || '00:00:00Z'}`) > now)
     
     if (!race) return null
 
@@ -49,8 +76,8 @@ export const getNextRace = async () => {
 export const getStandings = async () => {
   try {
     const [driversRes, constructorsRes] = await Promise.all([
-      axios.get(`${BASE_URL}/current/driverStandings.json`),
-      axios.get(`${BASE_URL}/current/constructorStandings.json`)
+      fetchCached(`${BASE_URL}/current/driverStandings.json`),
+      fetchCached(`${BASE_URL}/current/constructorStandings.json`)
     ])
 
     const rawDrivers = driversRes.data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || []
@@ -90,7 +117,7 @@ export const getStandings = async () => {
 
 export const getCalendar = async () => {
   try {
-    const { data } = await axios.get(`${BASE_URL}/current.json`)
+    const { data } = await fetchCached(`${BASE_URL}/current.json`)
     const races = data.MRData.RaceTable.Races || []
 
     // Find the next race to flag it
