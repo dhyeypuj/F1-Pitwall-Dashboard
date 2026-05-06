@@ -10,14 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-oauth/google": "^0.13.5",
     "axios": "^1.16.0",
-    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "firebase": "^12.12.1",
-    "google-auth-library": "^10.6.2",
-    "jsonwebtoken": "^9.0.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "rss-parser": "^3.13.0",

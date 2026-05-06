@@ -1,23 +1,17 @@
 import express from 'express'
 import cors from 'cors'
-import cookieParser from 'cookie-parser'
-import { OAuth2Client } from 'google-auth-library'
 import Parser from 'rss-parser'
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// 1. CORS — must come first so preflight requests are handled
+// CORS — allow frontend requests with credentials
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
 }))
 
-// 2. Body parsing
 app.use(express.json())
-
-// 3. Cookie parsing — after body, before routes
-app.use(cookieParser())
 
 const parser = new Parser()
 
@@ -104,39 +98,6 @@ app.get('/api/news', async (req, res) => {
     console.error('Error in /api/news:', error)
     cache.promise = null
     return res.status(500).json({ error: 'Failed to fetch F1 news' })
-  }
-})
-
-// ── Google Auth ─────────────────────────────────────────
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
-
-app.post('/api/auth/google', async (req, res) => {
-  const { credential } = req.body
-
-  if (!credential) {
-    return res.status(400).json({ error: 'Missing credential token' })
-  }
-
-  try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: GOOGLE_CLIENT_ID
-    })
-
-    const payload = ticket.getPayload()
-
-    const user = {
-      googleId: payload.sub,
-      name: payload.name,
-      email: payload.email,
-      picture: payload.picture
-    }
-
-    return res.json({ user })
-  } catch (error) {
-    console.error('Google token verification failed:', error)
-    return res.status(401).json({ error: 'Invalid or expired Google token' })
   }
 })
 
