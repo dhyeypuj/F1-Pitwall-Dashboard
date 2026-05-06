@@ -1,12 +1,22 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import Parser from 'rss-parser'
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
-app.use(cors())
+// 1. CORS — must come first so preflight requests are handled
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}))
+
+// 2. Body parsing
 app.use(express.json())
+
+// 3. Cookie parsing — after body, before routes
+app.use(cookieParser())
 
 const parser = new Parser()
 
