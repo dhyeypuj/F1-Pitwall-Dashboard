@@ -1,4 +1,4 @@
-﻿*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 
 :root {
   --carbon:     #0a0a0a;
@@ -1522,3 +1522,263 @@ body.colo-open { overflow: hidden; }
   .colo-p-val { font-size: 18px; }
 }
 /* ================ END COLOPHON STYLES ====================== */
+
+/* ================ AUTH PAGE STYLES ========================== */
+.auth-page {
+  min-height: 100vh;
+  background: var(--carbon);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 40px 24px;
+}
+
+.auth-speed-line {
+  position: absolute;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--racing) 50%, transparent 100%);
+  animation: speedLineSlow 5.5s ease-out infinite;
+  pointer-events: none;
+  opacity: 0.4;
+}
+.auth-speed-line:nth-child(1) { top: 22%; width: 180px; animation-delay: 1.2s; }
+.auth-speed-line:nth-child(2) { top: 55%; width: 240px; animation-delay: 3.0s; }
+.auth-speed-line:nth-child(3) { top: 78%; width: 140px; animation-delay: 2.0s; }
+
+.auth-card {
+  background: var(--paper);
+  max-width: 460px;
+  width: 100%;
+  padding: 52px 44px 44px;
+  position: relative;
+  z-index: 1;
+  animation: fadeUpSlow 1s ease both 0.2s;
+}
+
+.auth-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--racing);
+  animation: underlineDraw 1s cubic-bezier(.3,.9,.3,1) both 0.5s;
+}
+
+.auth-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 32px;
+  animation: checkerFadeIn 0.9s cubic-bezier(.2,.8,.2,1) both 0.8s;
+}
+
+.auth-eyebrow .checker-flag {
+  width: 34px;
+  height: 22px;
+}
+
+.auth-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 0;
+}
+
+.auth-line1 {
+  display: block;
+  font-size: clamp(42px, 7vw, 72px);
+  line-height: 1.1;
+  overflow: hidden;
+  padding-bottom: 0.05em;
+}
+.auth-line1 span {
+  display: inline-block;
+  animation: maskRevealUp 1.1s cubic-bezier(.2,.9,.25,1) both 1.0s;
+}
+
+.auth-line2 {
+  display: block;
+  font-size: clamp(42px, 7vw, 72px);
+  font-style: italic;
+  color: var(--racing);
+  line-height: 1.1;
+  overflow: hidden;
+  margin-top: -0.05em;
+  padding-bottom: 0.05em;
+}
+.auth-line2 span {
+  display: inline-block;
+  animation: maskRevealUp 1.1s cubic-bezier(.2,.9,.25,1) both 1.4s;
+}
+
+.auth-underline {
+  height: 4px;
+  width: 100%;
+  background: var(--racing);
+  margin: 20px 0 28px;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: underlineDraw 1.2s cubic-bezier(.3,.9,.3,1) both 2.0s;
+}
+
+.auth-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  letter-spacing: 0.01em;
+  margin-bottom: 32px;
+  animation: fadeUpSlow 1s ease both 2.4s;
+}
+
+.auth-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(225, 6, 0, 0.08);
+  border: 1px solid rgba(225, 6, 0, 0.25);
+  margin-bottom: 20px;
+  animation: fadeUpSlow 0.5s ease both;
+}
+
+.auth-error-icon {
+  font-size: 16px;
+  color: var(--racing);
+  flex-shrink: 0;
+}
+
+.auth-error span:last-child {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--racing-deep);
+  line-height: 1.4;
+}
+
+.auth-google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--carbon);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background 0.25s, transform 0.15s;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUpSlow 1s ease both 2.8s;
+}
+
+.auth-google-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--racing);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(.3,.9,.3,1);
+}
+
+.auth-google-btn:hover {
+  background: var(--carbon-2);
+  transform: translateY(-1px);
+}
+.auth-google-btn:hover::before {
+  transform: scaleX(1);
+}
+
+.auth-google-btn:active {
+  transform: translateY(0);
+}
+
+.auth-google-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-google-icon {
+  flex-shrink: 0;
+}
+
+.auth-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes authSpin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: var(--racing-hot);
+  border-radius: 50%;
+  animation: authSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.auth-footer-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  animation: fadeUpSlow 1s ease both 3.2s;
+}
+
+.auth-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--racing);
+  border-radius: 50%;
+  animation: pulseDot 1.8s ease infinite;
+}
+
+.auth-attribution {
+  position: absolute;
+  bottom: 28px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  animation: fadeSlow 1s ease both 3.5s;
+}
+
+@media (max-width: 520px) {
+  .auth-card { padding: 40px 28px 36px; }
+  .auth-line1, .auth-line2 { font-size: 38px; }
+}
+/* ================ END AUTH PAGE STYLES ====================== */
