@@ -22,9 +22,22 @@ export const RSS_SOURCES = [
   }
 ]
 
+let cache = {
+  promise: null,
+  timestamp: 0
+}
+const CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+
 export const getRSSNews = async () => {
-  // Using a public CORS proxy because browser-to-RSS fetches will be blocked by CORS
-  const CORS_PROXY = 'https://corsproxy.io/?'
+  const now = Date.now()
+
+  if (cache.promise && (now - cache.timestamp < CACHE_TTL)) {
+    return cache.promise
+  }
+
+  const fetchLogic = async () => {
+    // Using a public CORS proxy because browser-to-RSS fetches will be blocked by CORS
+    const CORS_PROXY = 'https://corsproxy.io/?'
 
   const promises = RSS_SOURCES.map(async (source) => {
     try {
@@ -44,11 +57,20 @@ export const getRSSNews = async () => {
     }
   })
 
-  const unmerged = await Promise.all(promises)
+    const unmerged = await Promise.all(promises)
 
-  // Combine, sort descending by date, and limit to top 15
-  return unmerged
-    .flat()
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-    .slice(0, 15)
+    // Combine, sort descending by date, and limit to top 15
+    return unmerged
+      .flat()
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 15)
+  }
+
+  cache.promise = fetchLogic().catch(err => {
+    cache.promise = null // Clear cache on failure
+    throw err
+  })
+  cache.timestamp = now
+
+  return cache.promise
 }
