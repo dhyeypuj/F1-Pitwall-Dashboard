@@ -5,6 +5,7 @@ import useStore, { getTeamTheme, getIsAuthenticated } from './store/useStore'
 import { getStandings, getNextRace, getCalendar, getLatestResults, getRaceStats } from './services/f1Service'
 import { getF1News } from './services/newsService'
 import { onAuthChange } from './services/authService'
+import { saveUserToFirestore, getUserPreferences } from './services/userService'
 
 function App() {
   const teamTheme = useStore(getTeamTheme)
@@ -12,6 +13,7 @@ function App() {
   const authReady = useStore(state => state.authReady)
   const setUser = useStore(state => state.setUser)
   const setAuthReady = useStore(state => state.setAuthReady)
+  const setPreferences = useStore(state => state.setPreferences)
   const setStandings = useStore(state => state.setStandings)
   const setRace = useStore(state => state.setRace)
   const setCalendar = useStore(state => state.setCalendar)
@@ -31,7 +33,7 @@ function App() {
 
   // ── Auth initialization ──────────────────────────────
   useEffect(() => {
-    const unsubscribe = onAuthChange((firebaseUser) => {
+    const unsubscribe = onAuthChange(async (firebaseUser) => {
       if (firebaseUser) {
         const hour = new Date().getHours()
         const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
@@ -45,14 +47,23 @@ function App() {
           year: 'numeric'
         }).toUpperCase().replace(/,/g, ' ·')
 
-        setUser({
+        const normalizedUser = {
           uid: firebaseUser.uid,
           name: firstName,
           email: firebaseUser.email,
           picture: firebaseUser.picture,
           greeting: `${timeGreeting}, ${firstName}`,
           date: dateStr
-        })
+        }
+
+        setUser(normalizedUser)
+
+        // Persist user to Firestore (create or update)
+        await saveUserToFirestore(normalizedUser)
+
+        // Load saved preferences from Firestore
+        const prefs = await getUserPreferences(firebaseUser.uid)
+        setPreferences({ team: prefs.favoriteTeam, theme: prefs.theme })
       } else {
         setUser(null)
       }
@@ -61,7 +72,7 @@ function App() {
     })
 
     return () => unsubscribe()
-  }, [setUser, setAuthReady])
+  }, [setUser, setAuthReady, setPreferences])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', teamTheme)
