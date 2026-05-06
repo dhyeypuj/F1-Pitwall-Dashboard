@@ -1796,6 +1796,116 @@ body.colo-open { overflow: hidden; }
   animation: fadeSlow 1s ease both 3.5s;
 }
 
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.auth-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-input-group label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  letter-spacing: 0.1em;
+}
+
+.auth-input-group input {
+  background: var(--carbon);
+  border: 1px solid var(--rule-light);
+  color: var(--paper);
+  padding: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-input-group input:focus {
+  outline: none;
+  border-color: var(--racing);
+  box-shadow: 0 0 0 2px rgba(225, 6, 0, 0.1);
+}
+
+.auth-main-btn {
+  background: var(--racing);
+  color: white;
+  border: none;
+  padding: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: filter 0.2s, transform 0.1s;
+}
+
+.auth-main-btn:hover {
+  filter: brightness(1.1);
+}
+
+.auth-main-btn:active {
+  transform: translateY(1px);
+}
+
+.auth-main-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: var(--ink-3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--rule-light);
+}
+
+.auth-divider span {
+  padding: 0 10px;
+}
+
+.auth-mode-toggle {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-mode-toggle button {
+  background: none;
+  border: none;
+  color: var(--racing);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.auth-mode-toggle button:hover {
+  filter: brightness(1.2);
+}
+
 @media (max-width: 520px) {
   .auth-card { padding: 40px 28px 36px; }
   .auth-line1, .auth-line2 { font-size: 38px; }
