@@ -23,16 +23,28 @@ const NewsFeed = () => {
           <h3 className="news-headline" style={{ color: error ? 'var(--ferrari)' : '#666', textAlign: 'center' }}>{error || 'No News Available'}</h3>
         </article>
       ) : (
-        news.map((item, i) => (
-          <article className={`news-item ${i === 0 ? 'lead' : 'neutral'}`} key={item.id}>
-            <div className="news-meta">
-              {item.source && <span className="news-kicker">{item.source}</span>}
-              <span className="news-num">{new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-            </div>
-            <h3 className="news-headline">{item.headline}</h3>
-            <p className="news-body">{item.body}</p>
-          </article>
-        ))
+        news.map((item, i) => {
+          // Safe date parsing
+          let formattedDate = 'Recent'
+          if (item?.timestamp) {
+            try {
+              formattedDate = new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            } catch (e) {
+              formattedDate = 'Recent'
+            }
+          }
+
+          return (
+            <article className={`news-item ${i === 0 ? 'lead' : 'neutral'}`} key={item?.id || `fallback-id-${i}`}>
+              <div className="news-meta">
+                <span className="news-kicker">{item?.source || 'F1 News'}</span>
+                <span className="news-num">{formattedDate}</span>
+              </div>
+              <h3 className="news-headline">{item?.headline || 'Latest Formula 1 Update'}</h3>
+              <p className="news-body">{item?.body || 'No description available for this update.'}</p>
+            </article>
+          )
+        })
       )}
     </div>
   )
