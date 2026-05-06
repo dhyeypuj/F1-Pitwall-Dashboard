@@ -36,12 +36,14 @@ const NewsFeed = () => {
 
           return (
             <article className={`news-item ${i === 0 ? 'lead' : 'neutral'}`} key={item?.id || `fallback-id-${i}`}>
-              <div className="news-meta">
-                <span className="news-kicker">{item?.source || 'F1 News'}</span>
-                <span className="news-num">{formattedDate}</span>
-              </div>
-              <h3 className="news-headline">{item?.headline || 'Latest Formula 1 Update'}</h3>
-              <p className="news-body">{item?.body || 'No description available for this update.'}</p>
+              <a href={item?.link} target="_blank" rel="noopener noreferrer" className="news-article-link">
+                <div className="news-meta">
+                  <span className="news-kicker">{item?.source || 'F1 News'}</span>
+                  <span className="news-num">{formattedDate}</span>
+                </div>
+                <h3 className="news-headline">{item?.headline || 'Latest Formula 1 Update'}</h3>
+                <p className="news-body">{item?.body || 'No description available for this update.'}</p>
+              </a>
             </article>
           )
         })

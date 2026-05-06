@@ -2104,3 +2104,4 @@ body.colo-open { overflow: hidden; }
 }
 
 .cal-flag-img { width: 22px; height: 14px; object-fit: cover; border-radius: 1px; filter: saturate(0.8); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.news-article-link { text-decoration: none; color: inherit; display: block; height: 100%; transition: all 0.2s ease; } .news-article-link:hover .news-headline { text-decoration: underline; color: var(--racing); } .news-item { cursor: pointer; transition: background 0.2s ease; } .news-item:hover { background: rgba(0,0,0,0.02); }
