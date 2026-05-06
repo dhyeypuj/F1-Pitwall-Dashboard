@@ -11,25 +11,81 @@
   --ink-2:      #4a4438;
   --ink-3:      #8a8172;
 
-  --racing:     #e10600;
-  --racing-hot: #ff2010;
-  --racing-deep:#b30400;
-  --gold:       #d4a017;
-
-  --mercedes:   #27F4D2;
-  --ferrari:    #E8002D;
-  --mclaren:    #FF8000;
-  --redbull:    #3671C6;
-  --williams:   #64C4FF;
-  --haas:       #B6BABD;
-  --alpine:     #0093CC;
-  --audi:       #00877C;
-  --racingbulls:#6692FF;
-  --aston:      #229971;
-  --cadillac:   #8A9099;
-
-  --rule-light: #d4cec4;
+  /* Global UI Tokens */
+  --rule-light: rgba(255, 255, 255, 0.1);
+  --rule-dark: rgba(13, 13, 13, 0.1);
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
+
+/* ── F1 2026 Team Theme Definitions ───────────────────────── */
+
+[data-team="ferrari"], :root {
+  --racing: #E10600;
+  --racing-secondary: #FFFFFF;
+  --racing-glow: rgba(225, 6, 0, 0.2);
+}
+
+[data-team="mercedes"] {
+  --racing: #00A19B;
+  --racing-secondary: #C0C0C0;
+  --racing-glow: rgba(0, 161, 155, 0.2);
+}
+
+[data-team="redbull"] {
+  --racing: #3671C6;
+  --racing-secondary: #FFEC00;
+  --racing-glow: rgba(54, 113, 198, 0.2);
+}
+
+[data-team="mclaren"] {
+  --racing: #FF8700;
+  --racing-secondary: #47C7FC;
+  --racing-glow: rgba(255, 135, 0, 0.2);
+}
+
+[data-team="astonmartin"] {
+  --racing: #006F62;
+  --racing-secondary: #CEDC00;
+  --racing-glow: rgba(0, 111, 98, 0.2);
+}
+
+[data-team="alpine"] {
+  --racing: #0090FF;
+  --racing-secondary: #FF85B1;
+  --racing-glow: rgba(0, 144, 255, 0.2);
+}
+
+[data-team="williams"] {
+  --racing: #005AFF;
+  --racing-secondary: #FFFFFF;
+  --racing-glow: rgba(0, 90, 255, 0.2);
+}
+
+[data-team="haas"] {
+  --racing: #E6002B;
+  --racing-secondary: #000000;
+  --racing-glow: rgba(230, 0, 43, 0.2);
+}
+
+[data-team="racingbulls"] {
+  --racing: #6692FF;
+  --racing-secondary: #FFFFFF;
+  --racing-glow: rgba(102, 146, 255, 0.2);
+}
+
+[data-team="audi"] {
+  --racing: #F50537;
+  --racing-secondary: #000000;
+  --racing-glow: rgba(245, 5, 55, 0.2);
+}
+
+[data-team="cadillac"] {
+  --racing: #FFD700;
+  --racing-secondary: #000000;
+  --racing-glow: rgba(255, 215, 0, 0.2);
+}
+
 
 @keyframes maskRevealUp {
   0%   { clip-path: inset(100% 0 0 0); transform: translateY(20px); }

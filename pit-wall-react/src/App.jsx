@@ -37,7 +37,7 @@ function App() {
       if (firebaseUser) {
         const hour = new Date().getHours()
         const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-        const firstName = (firebaseUser.name || 'Fan').split(' ')[0]
+        const firstName = (firebaseUser.displayName || 'Fan').split(' ')[0]
 
         const now = new Date()
         const dateStr = now.toLocaleDateString('en-US', {
@@ -51,7 +51,7 @@ function App() {
           uid: firebaseUser.uid,
           name: firstName,
           email: firebaseUser.email,
-          picture: firebaseUser.picture,
+          picture: firebaseUser.photoURL,
           greeting: `${timeGreeting}, ${firstName}`,
           date: dateStr
         }
@@ -79,7 +79,7 @@ function App() {
   }, [setUser, setAuthReady, setPreferences])
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', teamTheme)
+    document.documentElement.setAttribute('data-team', teamTheme)
   }, [teamTheme])
 
   useEffect(() => {
