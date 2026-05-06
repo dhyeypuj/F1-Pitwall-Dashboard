@@ -63,7 +63,11 @@ function App() {
 
         // Load saved preferences from Firestore
         const prefs = await getUserPreferences(firebaseUser.uid)
-        setPreferences({ team: prefs.favoriteTeam, theme: prefs.theme })
+        setPreferences({ 
+          team: prefs.favoriteTeam, 
+          theme: prefs.theme,
+          widgets: prefs.widgets
+        })
       } else {
         setUser(null)
       }

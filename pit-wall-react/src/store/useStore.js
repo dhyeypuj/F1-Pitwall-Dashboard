@@ -3,7 +3,17 @@ import { create } from 'zustand'
 const useStore = create((set) => ({
   authReady: false,
   user: null,
-  preferences: { team: "ferrari", theme: "dark" },
+  preferences: { 
+    team: "ferrari", 
+    theme: "dark",
+    widgets: {
+      news: true,
+      standings: true,
+      podium: true,
+      stats: true,
+      calendar: true
+    }
+  },
   heroStats: [],
   ticker: [],
   calendar: {

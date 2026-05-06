@@ -27,22 +27,39 @@ export const saveUserToFirestore = async (user) => {
  * Returns stored preferences or defaults if document doesn't exist.
  */
 export const getUserPreferences = async (uid) => {
+  const defaults = {
+    favoriteTeam: 'ferrari',
+    theme: 'dark',
+    widgets: {
+      news: true,
+      standings: true,
+      podium: true,
+      stats: true,
+      calendar: true
+    }
+  }
+
   try {
     const userRef = doc(db, USERS_COLLECTION, uid)
     const snapshot = await getDoc(userRef)
 
     if (snapshot.exists()) {
       const data = snapshot.data()
+      // Merge data with defaults for backward compatibility (new fields like widgets)
       return {
-        favoriteTeam: data.favoriteTeam || 'ferrari',
-        theme: data.theme || 'dark'
+        favoriteTeam: data.favoriteTeam || defaults.favoriteTeam,
+        theme: data.theme || defaults.theme,
+        widgets: {
+          ...defaults.widgets,
+          ...(data.widgets || {})
+        }
       }
     }
 
-    return { favoriteTeam: 'ferrari', theme: 'dark' }
+    return defaults
   } catch (error) {
     console.error('Failed to fetch user preferences:', error)
-    return { favoriteTeam: 'ferrari', theme: 'dark' }
+    return defaults
   }
 }
 
