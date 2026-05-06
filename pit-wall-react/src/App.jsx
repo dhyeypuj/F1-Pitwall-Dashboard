@@ -189,10 +189,16 @@ function App() {
         .then(newsData => {
           if (newsData && newsData.length > 0) {
             setNews(newsData)
+            setError('errorNews', null)
+          } else {
+            setError('errorNews', 'No recent F1 news available')
           }
+          setLoading('isLoadingNews', false)
         })
         .catch(err => {
           console.error('Failed to fetch news:', err)
+          setError('errorNews', err.message || 'Failed to connect to News API')
+          setLoading('isLoadingNews', false)
         })
     }
 
@@ -201,7 +207,7 @@ function App() {
     // Poll news every 60 minutes
     const newsInterval = setInterval(fetchNews, 60 * 60 * 1000)
     return () => clearInterval(newsInterval)
-  }, [setNews])
+  }, [setNews, setLoading, setError])
 
   return (
     <div className={`app theme-${teamTheme}`}>

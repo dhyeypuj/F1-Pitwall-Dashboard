@@ -2,10 +2,12 @@ import useStore from '../store/useStore'
 
 const NewsFeed = () => {
   const news = useStore((state) => state.news)
+  const isLoading = useStore((state) => state.isLoadingNews)
+  const error = useStore((state) => state.errorNews)
 
   return (
     <div className="news-block">
-      {news.length === 0 ? (
+      {isLoading ? (
         Array(4).fill(0).map((_, i) => (
           <article className="news-item skeleton" key={`skel-news-${i}`} style={{ opacity: 0.5 }}>
             <div className="news-meta">
@@ -16,6 +18,10 @@ const NewsFeed = () => {
             <p className="news-body" style={{ background: '#222', width: '80%', height: '16px', borderRadius: '4px', marginTop: '8px' }}></p>
           </article>
         ))
+      ) : error || news.length === 0 ? (
+        <article className="news-item" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <h3 className="news-headline" style={{ color: error ? 'var(--ferrari)' : '#666', textAlign: 'center' }}>{error || 'No News Available'}</h3>
+        </article>
       ) : (
         news.map((item, i) => (
           <article className={`news-item ${i === 0 ? 'lead' : 'neutral'}`} key={item.id}>

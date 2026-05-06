@@ -19,11 +19,13 @@ const useStore = create((set) => ({
   isLoadingCalendar: true,
   isLoadingResults: true,
   isLoadingStats: true,
+  isLoadingNews: true,
   errorStandings: null,
   errorRace: null,
   errorCalendar: null,
   errorResults: null,
   errorStats: null,
+  errorNews: null,
   setLoading: (key, value) => set({ [key]: value }),
   setError: (key, value) => set({ [key]: value }),
   podium: {
