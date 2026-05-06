@@ -1,11 +1,17 @@
 import { useEffect } from 'react'
 import Layout from './layout/Layout'
-import useStore, { getTeamTheme } from './store/useStore'
+import AuthPage from './pages/AuthPage'
+import useStore, { getTeamTheme, getIsAuthenticated } from './store/useStore'
 import { getStandings, getNextRace, getCalendar, getLatestResults, getRaceStats } from './services/f1Service'
 import { getF1News } from './services/newsService'
+import { onAuthChange } from './services/authService'
 
 function App() {
   const teamTheme = useStore(getTeamTheme)
+  const isAuthenticated = useStore(getIsAuthenticated)
+  const authReady = useStore(state => state.authReady)
+  const setUser = useStore(state => state.setUser)
+  const setAuthReady = useStore(state => state.setAuthReady)
   const setStandings = useStore(state => state.setStandings)
   const setRace = useStore(state => state.setRace)
   const setCalendar = useStore(state => state.setCalendar)
@@ -23,11 +29,48 @@ function App() {
   const setLoading = useStore(state => state.setLoading)
   const setError = useStore(state => state.setError)
 
+  // ── Auth initialization ──────────────────────────────
+  useEffect(() => {
+    const unsubscribe = onAuthChange((firebaseUser) => {
+      if (firebaseUser) {
+        const hour = new Date().getHours()
+        const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+        const firstName = (firebaseUser.name || 'Fan').split(' ')[0]
+
+        const now = new Date()
+        const dateStr = now.toLocaleDateString('en-US', {
+          weekday: 'short',
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }).toUpperCase().replace(/,/g, ' ·')
+
+        setUser({
+          uid: firebaseUser.uid,
+          name: firstName,
+          email: firebaseUser.email,
+          picture: firebaseUser.picture,
+          greeting: `${timeGreeting}, ${firstName}`,
+          date: dateStr
+        })
+      } else {
+        setUser(null)
+      }
+
+      setAuthReady(true)
+    })
+
+    return () => unsubscribe()
+  }, [setUser, setAuthReady])
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', teamTheme)
   }, [teamTheme])
 
   useEffect(() => {
+    // Only fetch data after auth resolves and user is authenticated
+    if (!isAuthenticated) return
+
     const fetchStandings = () => {
       getStandings().then(standings => {
         if (standings && standings.drivers && standings.drivers.length > 0) {
@@ -137,7 +180,7 @@ function App() {
       clearInterval(calendarInterval)
       clearInterval(resultsInterval)
     }
-  }, [setStandings, setRace, setCalendar, setPodium, setRaceStats, setLoading, setError])
+  }, [isAuthenticated, setStandings, setRace, setCalendar, setPodium, setRaceStats, setLoading, setError])
 
   useEffect(() => {
     // Derive heroStats
@@ -184,6 +227,8 @@ function App() {
   }, [standings, calendar, podium, race, raceStats, setHeroStats, setTicker, setStats])
 
   useEffect(() => {
+    if (!isAuthenticated) return
+
     const fetchNews = () => {
       setLoading('isLoadingNews', true)
       getF1News(teamTheme)
@@ -208,7 +253,28 @@ function App() {
     // Poll news every 10 minutes
     const newsInterval = setInterval(fetchNews, 10 * 60 * 1000)
     return () => clearInterval(newsInterval)
-  }, [teamTheme, setNews, setLoading, setError])
+  }, [isAuthenticated, teamTheme, setNews, setLoading, setError])
+
+  // ── Auth loading gate ────────────────────────────────
+  if (!authReady) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card" style={{ textAlign: 'center' }}>
+          <div className="auth-accent"></div>
+          <div className="auth-eyebrow" style={{ justifyContent: 'center', marginBottom: '24px' }}>
+            <span className="checker-flag"></span>
+            <span>Loading</span>
+          </div>
+          <span className="auth-spinner" style={{ borderTopColor: 'var(--racing)', borderColor: 'var(--rule-light)', width: '32px', height: '32px', display: 'inline-block' }}></span>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Render auth gate or dashboard ────────────────────
+  if (!isAuthenticated) {
+    return <AuthPage />
+  }
 
   return (
     <div className={`app theme-${teamTheme}`}>

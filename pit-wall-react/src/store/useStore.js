@@ -1,11 +1,8 @@
 import { create } from 'zustand'
 
 const useStore = create((set) => ({
-  user: {
-    name: "Shreya",
-    greeting: "Good morning, Shreya",
-    date: "SUN · 03 MAY · 2026"
-  },
+  authReady: false,
+  user: null,
   preferences: { team: "ferrari", theme: "dark" },
   heroStats: [],
   ticker: [],
@@ -33,7 +30,7 @@ const useStore = create((set) => ({
     results: []
   },
   raceStats: null,
-  footerNote: "For Shreya · eyes only",
+  footerNote: "For you · eyes only",
   race: {
     nextRace: null,
     countdown: { targetDate: null }
@@ -45,6 +42,7 @@ const useStore = create((set) => ({
   news: [],
   stats: [],
 
+  setAuthReady: (authReady) => set({ authReady }),
   setUser: (user) => set({ user }),
   setPreferences: (preferences) => set({ preferences }),
   setRace: (race) => set({ race }),
@@ -61,5 +59,6 @@ const useStore = create((set) => ({
 export const getTopDriver = (state) => state.standings.drivers?.[0]
 export const getNextRaceName = (state) => state.race.nextRace ? `${state.race.nextRace.city || ''} ${state.race.nextRace.title || ''}`.trim() : 'TBD'
 export const getTeamTheme = (state) => state.preferences.team
+export const getIsAuthenticated = (state) => !!state.user
 
 export default useStore
