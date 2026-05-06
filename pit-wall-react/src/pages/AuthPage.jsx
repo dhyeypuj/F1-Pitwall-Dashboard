@@ -1,21 +1,52 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { signInWithGoogle } from '../services/authService'
+import useStore from '../store/useStore'
 
-const AuthPage = ({ onAuthSuccess }) => {
+const AuthPage = () => {
+  const setUser = useStore((state) => state.setUser)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const isSigningIn = useRef(false)
 
   const handleGoogleSignIn = async () => {
+    // Prevent duplicate requests
+    if (isSigningIn.current) return
+    isSigningIn.current = true
+
     setIsLoading(true)
     setError(null)
 
     try {
-      const user = await signInWithGoogle()
-      if (onAuthSuccess) onAuthSuccess(user)
+      const firebaseUser = await signInWithGoogle()
+
+      // Build greeting based on time of day
+      const hour = new Date().getHours()
+      const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+      const firstName = (firebaseUser.name || 'Fan').split(' ')[0]
+
+      // Format date string to match dashboard style
+      const now = new Date()
+      const dateStr = now.toLocaleDateString('en-US', {
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }).toUpperCase().replace(/,/g, ' ·')
+
+      // Normalize and store user
+      setUser({
+        uid: firebaseUser.uid,
+        name: firstName,
+        email: firebaseUser.email,
+        picture: firebaseUser.picture,
+        greeting: `${timeGreeting}, ${firstName}`,
+        date: dateStr
+      })
     } catch (err) {
       setError(err.message || 'Authentication failed. Please try again.')
     } finally {
       setIsLoading(false)
+      isSigningIn.current = false
     }
   }
 
