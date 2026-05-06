@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import { OAuth2Client } from 'google-auth-library'
 import Parser from 'rss-parser'
 
 const app = express()
@@ -103,6 +104,39 @@ app.get('/api/news', async (req, res) => {
     console.error('Error in /api/news:', error)
     cache.promise = null
     return res.status(500).json({ error: 'Failed to fetch F1 news' })
+  }
+})
+
+// ── Google Auth ─────────────────────────────────────────
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
+
+app.post('/api/auth/google', async (req, res) => {
+  const { credential } = req.body
+
+  if (!credential) {
+    return res.status(400).json({ error: 'Missing credential token' })
+  }
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID
+    })
+
+    const payload = ticket.getPayload()
+
+    const user = {
+      googleId: payload.sub,
+      name: payload.name,
+      email: payload.email,
+      picture: payload.picture
+    }
+
+    return res.json({ user })
+  } catch (error) {
+    console.error('Google token verification failed:', error)
+    return res.status(401).json({ error: 'Invalid or expired Google token' })
   }
 })
 
