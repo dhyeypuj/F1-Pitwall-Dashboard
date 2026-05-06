@@ -2,7 +2,7 @@ import useStore, { getTopDriver } from '../store/useStore'
 
 const Hero = () => {
   const user = useStore((state) => state.user)
-  const topDriver = useStore(getTopDriver)
+  const heroStats = useStore((state) => state.heroStats)
 
 
   return (
@@ -36,18 +36,20 @@ const Hero = () => {
       </div>
 
       <div className="h-status-grid">
-        <div className="h-stat-box">
-          <div className="h-stat-val">{topDriver?.name.split('. ')[1] || topDriver?.name || 'Antonelli'}</div>
-          <div className="h-stat-lbl">Championship Lead</div>
-        </div>
-        <div className="h-stat-box">
-          <div className="h-stat-val">Mercedes</div>
-          <div className="h-stat-lbl">Constructors' Cup</div>
-        </div>
-        <div className="h-stat-box">
-          <div className="h-stat-val">23</div>
-          <div className="h-stat-lbl">Rounds</div>
-        </div>
+        {heroStats.length === 0 ? (
+          <>
+            <div className="h-stat-box skeleton" style={{ opacity: 0.5 }}><div className="h-stat-val">--</div><div className="h-stat-lbl">Loading...</div></div>
+            <div className="h-stat-box skeleton" style={{ opacity: 0.5 }}><div className="h-stat-val">--</div><div className="h-stat-lbl">Loading...</div></div>
+            <div className="h-stat-box skeleton" style={{ opacity: 0.5 }}><div className="h-stat-val">--</div><div className="h-stat-lbl">Loading...</div></div>
+          </>
+        ) : (
+          heroStats.map((stat, i) => (
+            <div className="h-stat-box" key={`hs-${i}`}>
+              <div className="h-stat-val">{stat.val}</div>
+              <div className="h-stat-lbl">{stat.lbl}</div>
+            </div>
+          ))
+        )}
       </div>
     </section>
   )

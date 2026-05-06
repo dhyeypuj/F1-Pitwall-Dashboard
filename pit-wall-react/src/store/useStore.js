@@ -7,21 +7,8 @@ const useStore = create((set) => ({
     date: "SUN · 03 MAY · 2026"
   },
   preferences: { team: "ferrari", theme: "dark" },
-  heroStats: [
-    { val: "Antonelli", lbl: "Championship Lead" },
-    { val: "Mercedes", lbl: "Constructors' Cup" },
-    { val: "23", lbl: "Rounds" }
-  ],
-  ticker: [
-    { sym: 'WDC', val: 'ANTONELLI', pts: '72 pts' },
-    { sym: 'WCC', val: 'MERCEDES', pts: '135 pts' },
-    { sym: 'NEXT', val: 'MIAMI GP', pts: 'MAY 3' },
-    { sym: 'WINNER', val: 'ANTONELLI', pts: 'JAPAN' },
-    { sym: 'FL', val: 'RUSSELL', pts: '1:28.411' },
-    { sym: 'FAST PIT', val: 'MCLAREN', pts: '1.94s' },
-    { sym: 'VER', val: '−60', pts: 'P9' },
-    { sym: 'ROOKIE', val: 'LINDBLAD', pts: '4 pts' }
-  ],
+  heroStats: [],
+  ticker: [],
   calendar: {
     meta: "23 Rounds · Mar → Dec 2026",
     progress: "13.6%",
@@ -30,19 +17,20 @@ const useStore = create((set) => ({
   isLoadingStandings: true,
   isLoadingRace: true,
   isLoadingCalendar: true,
+  isLoadingResults: true,
+  isLoadingStats: true,
   errorStandings: null,
   errorRace: null,
   errorCalendar: null,
+  errorResults: null,
+  errorStats: null,
   setLoading: (key, value) => set({ [key]: value }),
   setError: (key, value) => set({ [key]: value }),
   podium: {
-    title: "Japanese GP · Suzuka · Result",
-    results: [
-      { id: "p1", cls: "p1", badge: "P1", name: "Kimi Antonelli", team: "Mercedes · #12", time: "1:28:14.802" },
-      { id: "p2", cls: "p2", badge: "P2", name: "George Russell", team: "Mercedes · #63", time: "+3.441" },
-      { id: "p3", cls: "p3", badge: "P3", name: "Charles Leclerc", team: "Ferrari · #16", time: "+9.127" }
-    ]
+    title: "",
+    results: []
   },
+  raceStats: null,
   footerNote: "For Shreya · eyes only",
   race: {
     nextRace: null,
@@ -82,12 +70,7 @@ const useStore = create((set) => ({
       body: "Iran war fallout leaves the season at 23 rounds, Australia to Abu Dhabi. Feeder series affected too."
     }
   ],
-  stats: [
-    { id: 1, label: "Championship Lead", bigHtml: "<em>+9</em> pts", sub: "Antonelli over Russell" },
-    { id: 2, label: "Fastest Lap 2026", bigHtml: "1:28.411", sub: "Russell · Japan Q3" },
-    { id: 3, label: "Fastest Pit Stop", bigHtml: "1.94<em>s</em>", sub: "McLaren · Japanese GP" },
-    { id: 4, label: "Verstappen Gap", bigHtml: "P9 <em>·</em> −60", sub: "Worst start since 2017" }
-  ],
+  stats: [],
 
   setUser: (user) => set({ user }),
   setPreferences: (preferences) => set({ preferences }),
@@ -95,6 +78,11 @@ const useStore = create((set) => ({
   setStandings: (standings) => set({ standings }),
   setNews: (news) => set({ news }),
   setCalendar: (calendar) => set({ calendar }),
+  setHeroStats: (heroStats) => set({ heroStats }),
+  setTicker: (ticker) => set({ ticker }),
+  setPodium: (podium) => set({ podium }),
+  setStats: (stats) => set({ stats }),
+  setRaceStats: (raceStats) => set({ raceStats }),
 }))
 
 export const getTopDriver = (state) => state.standings.drivers?.[0]

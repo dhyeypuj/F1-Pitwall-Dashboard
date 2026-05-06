@@ -154,3 +154,53 @@ export const getCalendar = async () => {
     throw new Error('Failed to load calendar')
   }
 }
+
+export const getLatestResults = async () => {
+  try {
+    const { data } = await fetchCached(`${BASE_URL}/current/last/results.json`)
+    const race = data.MRData.RaceTable.Races[0]
+    
+    if (!race || !race.Results) return { title: '', results: [] }
+
+    const top3 = race.Results.slice(0, 3).map((r, i) => ({
+      id: `p${i + 1}`,
+      cls: `p${i + 1}`,
+      badge: `P${i + 1}`,
+      name: `${r.Driver.givenName} ${r.Driver.familyName}`,
+      team: `${r.Constructor.name} · #${r.number}`,
+      time: i === 0 ? r.Time?.time || 'Winner' : r.Time?.time || `+${r.Time?.millis}ms`
+    }))
+
+    return {
+      title: `${race.raceName} · ${race.Circuit.Location.locality} · Result`,
+      results: top3,
+      winner: race.Results[0]
+    }
+  } catch (error) {
+    console.error('Error fetching latest results:', error)
+    throw new Error('Failed to load recent results')
+  }
+}
+
+export const getRaceStats = async () => {
+  try {
+    const { data } = await fetchCached(`${BASE_URL}/current/last/results.json`)
+    const race = data.MRData.RaceTable.Races[0]
+    
+    if (!race || !race.Results) return null
+
+    const fastestLapResult = race.Results.find(r => r.FastestLap?.rank === '1')
+    
+    return {
+      latestRaceName: race.raceName,
+      fastestLap: fastestLapResult ? {
+        time: fastestLapResult.FastestLap.Time.time,
+        driver: fastestLapResult.Driver.familyName,
+        team: fastestLapResult.Constructor.name
+      } : null
+    }
+  } catch (error) {
+    console.error('Error fetching race stats:', error)
+    throw new Error('Failed to load race stats')
+  }
+}
