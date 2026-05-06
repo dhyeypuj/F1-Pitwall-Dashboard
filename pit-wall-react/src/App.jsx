@@ -185,7 +185,8 @@ function App() {
 
   useEffect(() => {
     const fetchNews = () => {
-      getF1News()
+      setLoading('isLoadingNews', true)
+      getF1News(teamTheme)
         .then(newsData => {
           if (newsData && newsData.length > 0) {
             setNews(newsData)
@@ -207,7 +208,7 @@ function App() {
     // Poll news every 10 minutes
     const newsInterval = setInterval(fetchNews, 10 * 60 * 1000)
     return () => clearInterval(newsInterval)
-  }, [setNews, setLoading, setError])
+  }, [teamTheme, setNews, setLoading, setError])
 
   return (
     <div className={`app theme-${teamTheme}`}>

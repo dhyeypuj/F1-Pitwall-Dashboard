@@ -5,11 +5,16 @@ import axios from 'axios'
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY || 'demo'
 const BASE_URL = 'https://gnews.io/api/v4'
 
-export const getF1News = async () => {
+export const getF1News = async (keyword = '') => {
   try {
+    const formattedKeyword = keyword === 'redbull' ? 'Red Bull' : keyword
+    const searchQuery = formattedKeyword && formattedKeyword !== 'all' 
+      ? `("Formula 1" OR F1) AND "${formattedKeyword}"`
+      : '"Formula 1" OR F1'
+
     const { data } = await axios.get(`${BASE_URL}/search`, {
       params: {
-        q: '"Formula 1" OR F1',
+        q: searchQuery,
         lang: 'en',
         max: 5,
         apikey: API_KEY,
