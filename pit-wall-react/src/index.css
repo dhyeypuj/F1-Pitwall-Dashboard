@@ -205,6 +205,25 @@ body {
   text-transform: uppercase;
   color: var(--ink-3);
 }
+.logout-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: none;
+  border: 1px solid var(--rule-light);
+  padding: 5px 12px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.logout-btn:hover {
+  color: var(--racing);
+  border-color: var(--racing);
+  background: rgba(225, 6, 0, 0.06);
+}
 
 .title-wrap {
   position: relative;

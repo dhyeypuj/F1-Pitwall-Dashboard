@@ -1,9 +1,17 @@
 import useStore, { getTopDriver } from '../store/useStore'
+import { logout } from '../services/authService'
 
 const Hero = () => {
   const user = useStore((state) => state.user)
   const heroStats = useStore((state) => state.heroStats)
 
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (err) {
+      console.error('Logout failed:', err)
+    }
+  }
 
   return (
     <section className="hero">
@@ -19,6 +27,7 @@ const Hero = () => {
         <div className="brand-right">
           <div className="greeting" id="greeting">{user?.greeting}</div>
           <div className="dateline" id="dateline">{user?.date}</div>
+          <button className="logout-btn" onClick={handleLogout} id="sign-out-btn">Sign Out</button>
         </div>
       </div>
 
