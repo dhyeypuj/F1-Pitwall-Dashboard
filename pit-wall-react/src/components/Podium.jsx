@@ -23,7 +23,24 @@ const Podium = () => {
             <div className={`pod-row ${res.cls}`} key={res.id}>
               <div className="pod-badge">{res.badge}</div>
               <div>
-                <div className="pod-driver-name">{res.name}</div>
+                <div className="pod-driver-name">
+                  <img 
+                    src={res.flagUrl} 
+                    alt={res.nationality} 
+                    className="driver-flag" 
+                    onError={(e) => e.target.style.display = 'none'} 
+                    style={{ marginRight: '8px' }}
+                  />
+                  {res.name}
+                  {res.logoUrl && (
+                    <img 
+                      src={res.logoUrl} 
+                      alt={res.team} 
+                      className="driver-team-logo" 
+                      onError={(e) => e.target.style.display = 'none'} 
+                    />
+                  )}
+                </div>
                 <div className="pod-driver-team">{res.team}</div>
               </div>
               <div className="pod-time">{res.time}</div>

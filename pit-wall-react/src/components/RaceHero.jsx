@@ -39,27 +39,37 @@ const RaceHero = () => {
         <div className="race-grid">
           <div className="race-left">
             <div className="race-meta-row">
-              <span className="race-round">◆ {nextRace.round} · {nextRace.status}</span>
-              <span className="race-flag-big">{nextRace.flag}</span>
+              <span className="race-round">◆ {nextRace.round.toUpperCase()} · {nextRace.status.toUpperCase()}</span>
+              <span className="race-flag-big" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, letterSpacing: '-1px', color: '#fff', fontSize: '28px' }}>{nextRace.countryCode}</span>
             </div>
-            <h2 className="race-name">{nextRaceName}</h2>
-            <div className="race-circuit"><strong>{nextRace.circuit}</strong> · {nextRace.location}</div>
-            <div className="race-circuit">{nextRace.details}</div>
+            
+            <h2 className="race-name">
+              {nextRace.title.replace('Grand Prix', '')}
+              <em style={{ color: 'var(--ferrari)', fontStyle: 'italic' }}>Grand Prix</em>
+            </h2>
 
-            <div className="race-stats">
-              {nextRace.stats && nextRace.stats.length > 0 ? (
-                nextRace.stats.map((stat, idx) => (
-                  <div className="race-stat" key={idx}>
-                    <div className="race-stat-label">{stat.label}</div>
-                    <div className="race-stat-val">{stat.value}</div>
-                  </div>
-                ))
-              ) : (
-                <div className="race-stat">
-                  <div className="race-stat-label">Race Information</div>
-                  <div className="race-stat-val">Loading specifics...</div>
-                </div>
-              )}
+            <div className="race-circuit">
+              <strong>{nextRace.circuit}</strong> 
+              {nextRace.venue ? ` · ${nextRace.venue}` : ` · ${nextRace.location}`}
+            </div>
+            
+            <div className="race-circuit" style={{ opacity: 0.9, fontSize: '1rem', marginTop: '8px', color: '#fff' }}>
+              Round {nextRace.roundNumber} of 22 · {nextRace.laps} laps · {nextRace.distance} km
+            </div>
+
+            <div className="race-stats" style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
+              <div className="race-stat">
+                <div className="race-stat-label">Lap Record</div>
+                <div className="race-stat-val">{nextRace.lapRecord}</div>
+              </div>
+              <div className="race-stat">
+                <div className="race-stat-label">Prev. Pole</div>
+                <div className="race-stat-val">{nextRace.previousPole}</div>
+              </div>
+              <div className="race-stat">
+                <div className="race-stat-label">Dates</div>
+                <div className="race-stat-val">{nextRace.dates}</div>
+              </div>
             </div>
           </div>
 

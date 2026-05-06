@@ -38,20 +38,31 @@ const DriversStandings = () => {
           key={d.code}
         >
           <div className="driver-pos">{d.pos}</div>
-          <div className="driver-info">
-            <div className="driver-line">
-              <span className="driver-name">{d.name}</span>
-              <span 
-                className="driver-code" 
-                style={{ background: d.codeBg || d.color, color: d.codeColor || '#fff' }}
-              >
-                {d.code}
-              </span>
+            <div className="driver-info">
+              <div className="driver-line">
+                <span className="driver-name">{d.name}</span>
+                <span className="driver-code-badge" style={{ backgroundColor: d.color }}>
+                  {d.code}
+                </span>
+                {d.logoUrl && (
+                  <img 
+                    src={d.logoUrl} 
+                    alt={d.team} 
+                    className="driver-team-logo" 
+                    onError={(e) => e.target.style.display = 'none'}
+                  />
+                )}
+              </div>
+              <div className="driver-team">
+                <img 
+                  src={d.flagUrl} 
+                  alt={d.nationality} 
+                  className="driver-flag" 
+                  onError={(e) => e.target.style.display = 'none'}
+                />
+                {d.team} · {d.nationality}{d.gap && <> · <span className="gap">{d.gap}</span></>}
+              </div>
             </div>
-            <div className="driver-team">
-              {d.team} · {d.nationality}{d.gap && <> · <span className="gap">{d.gap}</span></>}
-            </div>
-          </div>
           <div className="driver-pts-wrap">
             <div className="driver-pts">{d.points}</div>
             <div className="driver-pts-sub">pts</div>

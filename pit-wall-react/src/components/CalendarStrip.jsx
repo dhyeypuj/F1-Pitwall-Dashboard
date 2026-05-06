@@ -36,7 +36,13 @@ const CalendarStrip = () => {
             return (
               <div className={className} key={r.id}>
                 <div className="cal-rnum">{r.num}<span className="cal-status-dot"></span></div>
-                <div className="cal-flag-emoji">{r.emoji}</div>
+                <div className="cal-flag">
+                  {r.flagUrl ? (
+                    <img src={r.flagUrl} alt={r.country} className="cal-flag-img" />
+                  ) : (
+                    r.emoji
+                  )}
+                </div>
                 <div className="cal-country">{r.country}</div>
                 <div className="cal-flag-name">{r.name}</div>
                 <div className="cal-date">{r.date}</div>

@@ -8,5 +8,8 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:3001'
     }
+  },
+  optimizeDeps: {
+    exclude: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/firestore/lite']
   }
 })

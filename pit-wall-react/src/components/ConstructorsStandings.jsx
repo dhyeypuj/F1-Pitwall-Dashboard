@@ -43,8 +43,26 @@ const ConstructorsStandings = () => {
           <div className="con-top">
             <div className="con-pos">{c.pos}</div>
             <div>
-              <div className="con-name">{c.name}</div>
-              <div className="con-engine">{c.engine}</div>
+              <div className="con-name">
+                {c.logoUrl && (
+                  <img 
+                    src={c.logoUrl} 
+                    alt={c.name} 
+                    className="con-team-logo" 
+                    onError={(e) => e.target.style.display = 'none'}
+                  />
+                )}
+                {c.name}
+              </div>
+              <div className="con-engine">
+                <img 
+                  src={c.flagUrl} 
+                  alt={c.nationality} 
+                  className="con-flag" 
+                  onError={(e) => e.target.style.display = 'none'}
+                />
+                {c.engine}
+              </div>
             </div>
             <div className="con-pts">{c.points}</div>
           </div>

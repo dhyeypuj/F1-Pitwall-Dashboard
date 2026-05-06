@@ -17,7 +17,7 @@ const useStore = create((set) => ({
   heroStats: [],
   ticker: [],
   calendar: {
-    meta: "23 Rounds · Mar → Dec 2026",
+    meta: "22 Rounds · Mar → Dec 2026",
     progress: "13.6%",
     rounds: []
   },

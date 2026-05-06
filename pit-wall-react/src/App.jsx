@@ -1,14 +1,16 @@
 import { useEffect } from 'react'
 import Layout from './layout/Layout'
 import AuthPage from './pages/AuthPage'
-import useStore, { getTeamTheme, getIsAuthenticated } from './store/useStore'
+import useStore, { getIsAuthenticated } from './store/useStore'
 import { getStandings, getNextRace, getCalendar, getLatestResults, getRaceStats } from './services/f1Service'
 import { getF1News } from './services/newsService'
 import { onAuthChange } from './services/authService'
 import { saveUserToFirestore, getUserPreferences } from './services/userService'
 
+import { useTeamTheme } from './hooks/useTeamTheme'
+
 function App() {
-  const teamTheme = useStore(getTeamTheme)
+  const { activeTeam } = useTeamTheme()
   const isAuthenticated = useStore(getIsAuthenticated)
   const authReady = useStore(state => state.authReady)
   const setUser = useStore(state => state.setUser)
@@ -23,13 +25,13 @@ function App() {
   const setTicker = useStore(state => state.setTicker)
   const setStats = useStore(state => state.setStats)
   const setNews = useStore(state => state.setNews)
+  const setLoading = useStore(state => state.setLoading)
+  const setError = useStore(state => state.setError)
   const standings = useStore(state => state.standings)
   const calendar = useStore(state => state.calendar)
   const podium = useStore(state => state.podium)
   const race = useStore(state => state.race)
   const raceStats = useStore(state => state.raceStats)
-  const setLoading = useStore(state => state.setLoading)
-  const setError = useStore(state => state.setError)
 
   // ── Auth initialization ──────────────────────────────
   useEffect(() => {
@@ -77,10 +79,6 @@ function App() {
 
     return () => unsubscribe()
   }, [setUser, setAuthReady, setPreferences])
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-team', teamTheme)
-  }, [teamTheme])
 
   useEffect(() => {
     // Only fetch data after auth resolves and user is authenticated
@@ -201,8 +199,8 @@ function App() {
     // Derive heroStats
     if (standings.drivers.length > 0 && calendar.rounds.length > 0) {
       setHeroStats([
-        { val: standings.drivers[0].name.split(' ').pop(), lbl: "Championship Lead" },
-        { val: standings.constructors[0].name, lbl: "Constructors' Cup" },
+        { val: standings.drivers[0].name, lbl: "World Driver's Championship Leader" },
+        { val: standings.constructors[0].name, lbl: "World Constructor's Championship Leader" },
         { val: String(calendar.rounds.length), lbl: "Rounds" }
       ])
     }
@@ -217,7 +215,7 @@ function App() {
       setTicker([
         { sym: 'WDC', val: topDriver.name.toUpperCase(), pts: `${topDriver.points} pts` },
         { sym: 'WCC', val: topConstructor.name.toUpperCase(), pts: `${topConstructor.points} pts` },
-        { sym: 'NEXT', val: nextRace.city.toUpperCase(), pts: new Date(nextRace.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase() },
+        { sym: 'NEXT', val: nextRace.title.replace('Grand Prix', 'GP').toUpperCase(), pts: `${nextRace.dates.split(' ')[0]} ${nextRace.dates.split(' – ').pop()}`.toUpperCase() },
         { sym: 'WINNER', val: winner.Driver.familyName.toUpperCase(), pts: raceStats.latestRaceName.toUpperCase() },
         { sym: 'FL', val: raceStats.fastestLap?.driver.toUpperCase() || '--', pts: raceStats.fastestLap?.time || '--' },
         { sym: 'P2', val: standings.drivers[1]?.name.toUpperCase() || '--', pts: `${standings.drivers[1]?.points || 0} pts` },
@@ -236,7 +234,7 @@ function App() {
         { id: 1, label: "Championship Lead", bigHtml: `<em>+${gap}</em> pts`, sub: `${p1.name.split(' ').pop()} over ${p2.name.split(' ').pop()}` },
         { id: 2, label: `Fastest Lap ${new Date().getFullYear()}`, bigHtml: raceStats.fastestLap?.time || '--', sub: `${raceStats.fastestLap?.driver || '--'} · ${raceStats.latestRaceName}` },
         { id: 3, label: "Recent Winner", bigHtml: podium.winner.Driver.familyName, sub: `${podium.winner.Constructor.name} · ${raceStats.latestRaceName}` },
-        { id: 4, label: "Next Race", bigHtml: race.nextRace ? race.nextRace.city : '--', sub: race.nextRace ? new Date(race.nextRace.date).toLocaleDateString() : '--' }
+        { id: 4, label: "Next Race", bigHtml: race.nextRace ? race.nextRace.title.replace('Grand Prix', 'GP') : '--', sub: race.nextRace ? race.nextRace.dates.split(' – ').pop() : '--' }
       ])
     }
   }, [standings, calendar, podium, race, raceStats, setHeroStats, setTicker, setStats])
@@ -246,7 +244,7 @@ function App() {
 
     const fetchNews = () => {
       setLoading('isLoadingNews', true)
-      getF1News(teamTheme)
+      getF1News(activeTeam)
         .then(newsData => {
           if (newsData && newsData.length > 0) {
             setNews(newsData)
@@ -268,7 +266,7 @@ function App() {
     // Poll news every 10 minutes
     const newsInterval = setInterval(fetchNews, 10 * 60 * 1000)
     return () => clearInterval(newsInterval)
-  }, [isAuthenticated, teamTheme, setNews, setLoading, setError])
+  }, [isAuthenticated, activeTeam, setNews, setLoading, setError])
 
   // ── Auth loading gate ────────────────────────────────
   if (!authReady) {
@@ -292,7 +290,7 @@ function App() {
   }
 
   return (
-    <div className={`app theme-${teamTheme}`}>
+    <div className={`app team-${activeTeam}`}>
       <Layout />
     </div>
   )
