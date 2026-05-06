@@ -204,8 +204,8 @@ function App() {
 
     fetchNews()
     
-    // Poll news every 60 minutes
-    const newsInterval = setInterval(fetchNews, 60 * 60 * 1000)
+    // Poll news every 10 minutes
+    const newsInterval = setInterval(fetchNews, 10 * 60 * 1000)
     return () => clearInterval(newsInterval)
   }, [setNews, setLoading, setError])
 
