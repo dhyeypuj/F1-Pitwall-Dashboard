@@ -1,6 +1,7 @@
 import axios from 'axios'
+import { OPENF1_API_BASE } from '../config/api'
 
-const OPENF1_BASE_URL = 'https://api.openf1.org/v1'
+const OPENF1_BASE_URL = OPENF1_API_BASE
 
 /**
  * Manual session overrides for the 2026 Concept season.

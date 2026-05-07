@@ -1,6 +1,8 @@
+import { NEWS_ENDPOINT } from '../config/api'
+
 export const getF1News = async (keyword = '') => {
   try {
-    const response = await fetch('/api/news')
+    const response = await fetch(NEWS_ENDPOINT)
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)

@@ -1,6 +1,7 @@
 import axios from 'axios'
+import { ERGAST_API_BASE } from '../config/api'
 
-const BASE_URL = 'https://api.jolpi.ca/ergast/f1'
+const BASE_URL = ERGAST_API_BASE
 
 export const RACE_METADATA_2026 = {
   australia: { round: 1, countryCode: "AU", title: "Australian Grand Prix", circuit: "Albert Park Circuit", location: "Melbourne, Australia", laps: 58, distanceKm: 306.124, lapRecord: "1:19.813", lapRecordHolder: "Charles Leclerc", previousPole: "Max Verstappen", dates: "Mar 6 – 8" },

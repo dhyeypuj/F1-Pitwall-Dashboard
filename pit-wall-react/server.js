@@ -5,9 +5,11 @@ import Parser from 'rss-parser'
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// CORS — allow frontend requests with credentials
+// CORS — allow frontend requests
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: FRONTEND_URL,
   credentials: true
 }))
 
