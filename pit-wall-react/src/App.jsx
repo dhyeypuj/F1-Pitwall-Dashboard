@@ -221,21 +221,25 @@ function App() {
         {widgets.stats && <StatsRibbon />}
         <RaceHero />
         
-        <div className="dashboard-grid">
-          <div className="grid-left">
-            {widgets.podium && <Podium />}
-            <div className="standings-row">
-              {widgets.standings && (
-                <>
-                  <DriversStandings />
-                  <ConstructorsStandings />
-                </>
+        <div className="dashboard-grid-container">
+          {(widgets.podium || widgets.standings || widgets.news) && (
+            <div className={`dashboard-grid ${!widgets.news ? 'no-news' : ''}`}>
+              <div className="grid-left">
+                {widgets.podium && <Podium />}
+                {widgets.standings && (
+                  <div className="standings-row">
+                    <DriversStandings />
+                    <ConstructorsStandings />
+                  </div>
+                )}
+              </div>
+              {widgets.news && (
+                <div className="grid-right">
+                  <NewsFeed />
+                </div>
               )}
             </div>
-          </div>
-          <div className="grid-right">
-            {widgets.news && <NewsFeed />}
-          </div>
+          )}
         </div>
 
         {widgets.calendar && <CalendarStrip />}

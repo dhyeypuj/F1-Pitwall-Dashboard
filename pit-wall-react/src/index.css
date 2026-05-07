@@ -1085,6 +1085,55 @@ body {
 .stat-big em { font-style: italic; color: var(--racing); font-weight: 500; }
 .stat-sub { font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(255,255,255,0.58); font-weight: 400; }
 
+/* ── Dashboard Grid Layout ──────────────────────────────────── */
+.dashboard-grid-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 36px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 48px;
+  margin-top: 48px;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-grid.no-news {
+  grid-template-columns: 1fr;
+}
+
+.grid-left {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  min-width: 0;
+}
+
+.grid-right {
+  min-width: 0;
+  animation: fadeSlow 0.8s ease both;
+}
+
+.standings-row {
+  display: flex;
+  gap: 32px;
+  width: 100%;
+}
+
+.standings-row > div {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+  }
+}
+
 .footer-wrap { max-width: 1440px; margin: 0 auto; padding: 32px 36px 40px; }
 .footer { border-top: 1px solid var(--ink); padding-top: 22px; display: flex; justify-content: space-between; align-items: center; }
 .f-note { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-3); letter-spacing: .18em; text-transform: uppercase; }
@@ -2158,6 +2207,7 @@ body.colo-open { overflow: hidden; }
 .theme-switcher { padding: 40px 36px 0; max-width: 1440px; margin: 0 auto; } .ts-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--ink-3); margin-bottom: 16px; } .ts-grid { display: flex; flex-wrap: wrap; gap: 12px; } .ts-item { background: none; border: 1px solid var(--rule-light); padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; border-radius: 4px; } .ts-item:hover { border-color: var(--ink-2); background: rgba(0,0,0,0.02); } .ts-item.active { border-color: var(--racing); background: rgba(var(--racing-rgb), 0.05); } .ts-color { width: 10px; height: 10px; border-radius: 50%; display: block; } .ts-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--ink-2); } .ts-item.active .ts-name { color: var(--racing); }
 .settings-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(8px); display: flex; justify-content: flex-end; } .settings-panel { width: 420px; max-width: 100%; background: var(--paper); height: 100%; padding: 48px 36px; display: flex; flex-direction: column; box-shadow: -10px 0 50px rgba(0,0,0,0.3); animation: slideInRight 0.4s cubic-bezier(.2,.8,.2,1); overflow-y: auto; } .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; } .settings-title { display: flex; align-items: center; gap: 16px; } .settings-title h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; } .settings-close { background: none; border: none; font-size: 32px; cursor: pointer; color: var(--ink-3); } .settings-section { margin-bottom: 40px; } .section-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: var(--ink-3); margin-bottom: 24px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; } .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .team-btn { display: flex; align-items: center; gap: 10px; padding: 12px; background: #fff; border: 1px solid var(--rule-light); cursor: pointer; text-align: left; transition: all 0.2s; } .team-btn:hover { border-color: var(--racing); background: rgba(var(--racing-rgb), 0.02); } .team-btn.active { border-color: var(--racing); background: rgba(var(--racing-rgb), 0.06); outline: 2px solid var(--racing); } .team-swatch { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; } .team-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; text-transform: uppercase; } .widget-toggles { display: flex; flex-direction: column; gap: 16px; } .toggle-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; padding: 4px 0; }
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .standings-row { display: flex; gap: 32px; margin-top: 32px; width: 100%; }
 .standings-row > div { flex: 1; min-width: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--rule); transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ''; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; } input:checked + .slider { background-color: var(--racing); } input:checked + .slider:before { transform: translateX(20px); }
