@@ -68,68 +68,82 @@
 
 [data-team="ferrari"], :root {
   --racing: #E10600;
+  --racing-rgb: 225, 6, 0;
   --racing-secondary: #FFFFFF;
-  --racing-glow: rgba(225, 6, 0, 0.2);
+}
+
+/* Base highlight variants derived from primary racing color */
+:root {
+  --racing-glow: rgba(var(--racing-rgb), 0.2);
+  --racing-hot: var(--racing);
+  --racing-deep: rgba(var(--racing-rgb), 0.8);
 }
 
 [data-team="mercedes"] {
   --racing: #00A19B;
+  --racing-rgb: 0, 161, 155;
   --racing-secondary: #C0C0C0;
-  --racing-glow: rgba(0, 161, 155, 0.2);
 }
 
 [data-team="redbull"] {
   --racing: #3671C6;
+  --racing-rgb: 54, 113, 198;
   --racing-secondary: #FFEC00;
-  --racing-glow: rgba(54, 113, 198, 0.2);
 }
 
 [data-team="mclaren"] {
   --racing: #FF8700;
+  --racing-rgb: 255, 135, 0;
   --racing-secondary: #47C7FC;
-  --racing-glow: rgba(255, 135, 0, 0.2);
 }
 
 [data-team="astonmartin"] {
   --racing: #006F62;
+  --racing-rgb: 0, 111, 98;
   --racing-secondary: #CEDC00;
-  --racing-glow: rgba(0, 111, 98, 0.2);
 }
 
 [data-team="alpine"] {
   --racing: #0090FF;
+  --racing-rgb: 0, 144, 255;
   --racing-secondary: #FF85B1;
-  --racing-glow: rgba(0, 144, 255, 0.2);
 }
 
 [data-team="williams"] {
   --racing: #005AFF;
+  --racing-rgb: 0, 90, 255;
   --racing-secondary: #FFFFFF;
-  --racing-glow: rgba(0, 90, 255, 0.2);
 }
 
 [data-team="haas"] {
   --racing: #E6002B;
+  --racing-rgb: 230, 0, 43;
   --racing-secondary: #000000;
-  --racing-glow: rgba(230, 0, 43, 0.2);
 }
 
 [data-team="racingbulls"] {
   --racing: #6692FF;
+  --racing-rgb: 102, 146, 255;
   --racing-secondary: #FFFFFF;
-  --racing-glow: rgba(102, 146, 255, 0.2);
 }
 
 [data-team="audi"] {
   --racing: #F50537;
+  --racing-rgb: 245, 5, 55;
   --racing-secondary: #000000;
-  --racing-glow: rgba(245, 5, 55, 0.2);
 }
 
 [data-team="cadillac"] {
   --racing: #FFD700;
+  --racing-rgb: 255, 215, 0;
   --racing-secondary: #000000;
-  --racing-glow: rgba(255, 215, 0, 0.2);
+}
+
+/* Base highlight variants derived from primary racing color */
+:root {
+  --racing-glow: rgba(var(--racing-rgb), 0.2);
+  --racing-hot: var(--racing); /* Use filter to brighten if needed */
+  --racing-deep: rgba(var(--racing-rgb), 0.8);
 }
 
 
@@ -231,7 +245,7 @@ body {
   color:rgba(255,255,255,0.55);
   text-transform:uppercase;
 }
-.tick .sym { color:var(--racing-hot); font-weight:600; letter-spacing:.14em; }
+.tick .sym { color:var(--racing); font-weight:600; letter-spacing:.14em; }
 .tick .val { color:#fff; font-weight:600; }
 .tick .pts { color:var(--gold); font-weight:500; }
 .tick-dot { color:rgba(255,255,255,.2); padding:0 4px; font-size:9px; }
@@ -327,7 +341,7 @@ body {
 .logout-btn:hover {
   color: var(--racing);
   border-color: var(--racing);
-  background: rgba(225, 6, 0, 0.06);
+  background: rgba(var(--racing-rgb), 0.06);
 }
 
 .title-wrap {
@@ -357,7 +371,7 @@ body {
   display: block;
   font-size: clamp(56px, 9vw, 126px);
   font-style: italic;
-  color: var(--theme-primary, var(--racing));
+  color: var(--racing);
   line-height: 1.1;
   overflow: hidden;
   margin-top: -0.05em;
@@ -373,7 +387,7 @@ body {
   bottom: 0;
   height: 5px;
   width: 100%;
-  background: var(--theme-primary, var(--racing));
+  background: var(--racing);
   transform: scaleX(0);
   transform-origin: left;
   animation: underlineDraw 1.2s cubic-bezier(.3,.9,.3,1) both 2.2s;
@@ -524,10 +538,10 @@ body {
   font-weight: 600;
   letter-spacing: .22em;
   text-transform: uppercase;
-  color: var(--racing-hot);
+  color: var(--racing);
   padding: 7px 13px;
   border: 1px solid var(--racing);
-  background: rgba(225,6,0,0.12);
+  background: rgba(var(--racing-rgb), 0.12);
 }
 .race-dates {
   font-family: 'JetBrains Mono', monospace;
@@ -720,7 +734,7 @@ body {
 .cal-round.done .cal-flag-name { color: var(--ink-2); }
 
 .cal-round.next { background: var(--carbon); color: #fff; }
-.cal-round.next .cal-rnum { color: var(--racing-hot); font-weight:700; }
+.cal-round.next .cal-rnum { color: var(--racing); font-weight:700; }
 .cal-round.next .cal-country { color: rgba(255,255,255,0.55); }
 .cal-round.next .cal-flag-name { color: #fff; }
 .cal-round.next .cal-date { color: rgba(255,255,255,0.75); }
@@ -851,16 +865,21 @@ body {
 }
 
 .driver-row {
-  display: grid;
-  grid-template-columns: 32px 1fr auto;
-  align-items: center;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
   padding: 14px 24px;
+  gap: 4px;
   border-bottom: 1px solid var(--rule-light);
   position: relative;
   transition: background 0.2s, transform 0.2s;
   opacity: 0;
   animation: rowSlide 0.6s cubic-bezier(.25,.9,.3,1) both;
+}
+.driver-top {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: 12px;
 }
 .driver-row::before {
   content: '';
@@ -963,12 +982,19 @@ body {
 .con-engine { font-size: 10px; color: var(--ink-3); margin-top: 2px; }
 .con-pts { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 .con-bar { height: 4px; background: var(--paper-3); margin-top: 6px; position: relative; overflow: hidden; }
-.con-bar-fill {
+.con-bar-fill, .driver-bar-fill {
   height: 100%;
   background: var(--team-color);
   transform-origin: left;
   transform: scaleX(0);
   animation: barGrowSlow 1.4s cubic-bezier(.3,.9,.3,1) both;
+}
+
+.con-bar, .driver-bar {
+  height: 3px;
+  background: rgba(var(--racing-rgb), 0.05);
+  margin-top: 10px;
+  overflow: hidden;
 }
 
 .podium-block { padding: 22px 24px; border-bottom: 1px solid var(--rule-light); }
@@ -1034,7 +1060,7 @@ body {
   color: #fff;
   font-weight: 600;
 }
-.news-item.neutral .news-kicker { background: var(--ink); }
+/* All news kickers follow theme */
 .news-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-3); font-weight: 500; }
 .news-headline { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; line-height: 1.35; color: var(--ink); letter-spacing: -0.01em; margin-bottom: 7px; }
 .news-item.lead .news-headline { font-size: 17px; font-weight: 700; }
@@ -1056,7 +1082,7 @@ body {
 .stat:hover::after { width: 100%; }
 .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 13px; }
 .stat-big { font-family: 'Playfair Display', serif; font-size: clamp(28px, 3vw, 38px); font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.02em; margin-bottom: 9px; }
-.stat-big em { font-style: italic; color: var(--racing-hot); font-weight: 500; }
+.stat-big em { font-style: italic; color: var(--racing); font-weight: 500; }
 .stat-sub { font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(255,255,255,0.58); font-weight: 400; }
 
 .footer-wrap { max-width: 1440px; margin: 0 auto; padding: 32px 36px 40px; }
@@ -1825,16 +1851,6 @@ body.colo-open { overflow: hidden; }
   animation: fadeUpSlow 1s ease both 2.4s;
 }
 
-.auth-error {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: rgba(225, 6, 0, 0.08);
-  border: 1px solid rgba(225, 6, 0, 0.25);
-  margin-bottom: 20px;
-  animation: fadeUpSlow 0.5s ease both;
-}
 
 .auth-error-icon {
   font-size: 16px;
@@ -1993,7 +2009,7 @@ body.colo-open { overflow: hidden; }
 .auth-input-group input:focus {
   outline: none;
   border-color: var(--racing);
-  box-shadow: 0 0 0 2px rgba(225, 6, 0, 0.1);
+  box-shadow: 0 0 0 2px rgba(var(--racing-rgb), 0.1);
 }
 
 .auth-main-btn {
@@ -2139,5 +2155,158 @@ body.colo-open { overflow: hidden; }
 
 .cal-flag-img { width: 22px; height: 14px; object-fit: cover; border-radius: 1px; filter: saturate(0.8); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .news-article-link { text-decoration: none; color: inherit; display: block; height: 100%; transition: all 0.2s ease; } .news-article-link:hover .news-headline { text-decoration: underline; color: var(--racing); } .news-item { cursor: pointer; transition: background 0.2s ease; } .news-item:hover { background: rgba(0,0,0,0.02); }
-.theme-switcher { padding: 40px 36px 0; max-width: 1440px; margin: 0 auto; } .ts-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--ink-3); margin-bottom: 16px; } .ts-grid { display: flex; flex-wrap: wrap; gap: 12px; } .ts-item { background: none; border: 1px solid var(--rule-light); padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; border-radius: 4px; } .ts-item:hover { border-color: var(--ink-2); background: rgba(0,0,0,0.02); } .ts-item.active { border-color: var(--racing); background: rgba(225, 6, 0, 0.05); } .ts-color { width: 10px; height: 10px; border-radius: 50%; display: block; } .ts-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--ink-2); } .ts-item.active .ts-name { color: var(--racing); }
-.settings-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(8px); display: flex; justify-content: flex-end; } .settings-panel { width: 420px; max-width: 100%; background: var(--paper); height: 100%; padding: 48px 36px; display: flex; flex-direction: column; box-shadow: -10px 0 50px rgba(0,0,0,0.3); animation: slideInRight 0.4s cubic-bezier(.2,.8,.2,1); } .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; } .settings-title { display: flex; align-items: center; gap: 16px; } .settings-title h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; } .settings-close { background: none; border: none; font-size: 32px; cursor: pointer; color: var(--ink-3); } .settings-section { margin-bottom: 40px; } .section-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: var(--ink-3); margin-bottom: 24px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; } .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .team-btn { display: flex; align-items: center; gap: 10px; padding: 12px; background: #fff; border: 1px solid var(--rule-light); cursor: pointer; text-align: left; transition: all 0.2s; } .team-btn:hover { border-color: var(--racing); background: rgba(225,6,0,0.02); } .team-btn.active { border-color: var(--racing); background: rgba(225,6,0,0.06); outline: 2px solid var(--racing); } .team-swatch { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; } .team-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; text-transform: uppercase; } .widget-toggles { display: flex; flex-direction: column; gap: 16px; } .toggle-row { display: flex; justify-content: space-between; align-items: center; } .toggle-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; } .switch { position: relative; display: inline-block; width: 44px; height: 24px; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--rule); transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ''; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; } input:checked + .slider { background-color: var(--racing); } input:checked + .slider:before { transform: translateX(20px); } @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.theme-switcher { padding: 40px 36px 0; max-width: 1440px; margin: 0 auto; } .ts-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--ink-3); margin-bottom: 16px; } .ts-grid { display: flex; flex-wrap: wrap; gap: 12px; } .ts-item { background: none; border: 1px solid var(--rule-light); padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; border-radius: 4px; } .ts-item:hover { border-color: var(--ink-2); background: rgba(0,0,0,0.02); } .ts-item.active { border-color: var(--racing); background: rgba(var(--racing-rgb), 0.05); } .ts-color { width: 10px; height: 10px; border-radius: 50%; display: block; } .ts-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--ink-2); } .ts-item.active .ts-name { color: var(--racing); }
+.settings-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(8px); display: flex; justify-content: flex-end; } .settings-panel { width: 420px; max-width: 100%; background: var(--paper); height: 100%; padding: 48px 36px; display: flex; flex-direction: column; box-shadow: -10px 0 50px rgba(0,0,0,0.3); animation: slideInRight 0.4s cubic-bezier(.2,.8,.2,1); overflow-y: auto; } .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; } .settings-title { display: flex; align-items: center; gap: 16px; } .settings-title h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; } .settings-close { background: none; border: none; font-size: 32px; cursor: pointer; color: var(--ink-3); } .settings-section { margin-bottom: 40px; } .section-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: var(--ink-3); margin-bottom: 24px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; } .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .team-btn { display: flex; align-items: center; gap: 10px; padding: 12px; background: #fff; border: 1px solid var(--rule-light); cursor: pointer; text-align: left; transition: all 0.2s; } .team-btn:hover { border-color: var(--racing); background: rgba(var(--racing-rgb), 0.02); } .team-btn.active { border-color: var(--racing); background: rgba(var(--racing-rgb), 0.06); outline: 2px solid var(--racing); } .team-swatch { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; } .team-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; text-transform: uppercase; } .widget-toggles { display: flex; flex-direction: column; gap: 16px; } .toggle-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; padding: 4px 0; }
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.standings-row { display: flex; gap: 32px; margin-top: 32px; width: 100%; }
+.standings-row > div { flex: 1; min-width: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--rule); transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ''; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; } input:checked + .slider { background-color: var(--racing); } input:checked + .slider:before { transform: translateX(20px); }
+@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.settings-footer { margin-top: auto; padding-top: 32px; border-top: 1px solid var(--rule-light); display: flex; justify-content: space-between; align-items: center; } .settings-footer p { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.15em; color: var(--ink-3); text-transform: uppercase; } .theme-preview { display: flex; gap: 8px; } .preview-swatch { width: 24px; height: 4px; background: var(--rule); } .preview-swatch.primary { background: var(--racing); }
+
+/* ================================================================
+   ONBOARDING MODAL STYLES
+   ================================================================ */
+.onboarding-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--carbon);
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(var(--racing-rgb), 0.08) 0%, transparent 70%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.01) 0 1px, transparent 1px 12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeSlow 0.6s ease both;
+}
+
+.onboarding-card {
+  width: 100%;
+  max-width: 900px;
+  background: var(--paper);
+  padding: 64px 48px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+  border: 1px solid var(--glass-border);
+  animation: fadeUpSlow 0.8s cubic-bezier(.2,.8,.2,1) both 0.2s;
+}
+
+.onboarding-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 8px;
+  background: var(--racing);
+}
+
+.onboarding-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.onboarding-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin: 24px 0 16px;
+  line-height: 1;
+}
+
+.onboarding-header p {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--ink-2);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.selection-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.onboarding-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.onboarding-team-btn {
+  background: #fff;
+  border: 1px solid var(--rule-light);
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.2,.8,.2,1);
+  position: relative;
+  text-align: left;
+}
+
+.onboarding-team-btn:hover {
+  transform: translateY(-4px);
+  border-color: var(--ink);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+}
+
+.team-card-inner {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.team-color-strip {
+  height: 4px;
+  width: 40px;
+}
+
+.onboarding-team-btn .team-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.onboarding-footer {
+  text-align: center;
+  border-top: 1px solid var(--rule-light);
+  padding-top: 32px;
+}
+
+.onboarding-footer p {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+
+.checker-flag.large {
+  width: 80px;
+  height: 40px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .onboarding-card { padding: 48px 24px; }
+  .onboarding-team-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .onboarding-team-grid { grid-template-columns: 1fr; }
+}

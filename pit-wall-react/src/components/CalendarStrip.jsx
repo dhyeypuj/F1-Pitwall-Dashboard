@@ -28,7 +28,7 @@ const CalendarStrip = () => {
             ))
           ) : error || !calendar?.rounds?.length ? (
             <div className="cal-round" style={{ flex: 1, justifyContent: 'center' }}>
-              <div className="cal-rnum" style={{ color: error ? 'var(--ferrari)' : '#666' }}>{error || 'Calendar Unavailable'}</div>
+              <div className="cal-rnum" style={{ color: error ? 'var(--racing)' : '#666' }}>{error || 'Calendar Unavailable'}</div>
             </div>
           ) : (
             calendar.rounds.map((r) => {

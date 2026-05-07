@@ -45,10 +45,12 @@ export const getUserPreferences = async (uid) => {
 
     if (snapshot.exists()) {
       const data = snapshot.data()
+      const hasSelectedTeam = !!(data.team || data.favoriteTeam)
       // Merge data with defaults for backward compatibility (new fields like widgets)
       return {
         team: data.team || data.favoriteTeam || defaults.team,
         theme: data.theme || defaults.theme,
+        hasSelectedTeam,
         widgets: {
           ...defaults.widgets,
           ...(data.widgets || {})
@@ -56,7 +58,7 @@ export const getUserPreferences = async (uid) => {
       }
     }
 
-    return defaults
+    return { ...defaults, hasSelectedTeam: false }
   } catch (error) {
     console.error('Failed to fetch user preferences:', error)
     return defaults

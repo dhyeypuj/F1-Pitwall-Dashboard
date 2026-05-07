@@ -20,7 +20,7 @@ const NewsFeed = () => {
         ))
       ) : error || news.length === 0 ? (
         <article className="news-item" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <h3 className="news-headline" style={{ color: error ? 'var(--ferrari)' : '#666', textAlign: 'center' }}>{error || 'No News Available'}</h3>
+          <h3 className="news-headline" style={{ color: error ? 'var(--racing)' : '#666', textAlign: 'center' }}>{error || 'No News Available'}</h3>
         </article>
       ) : (
         news.map((item, i) => {

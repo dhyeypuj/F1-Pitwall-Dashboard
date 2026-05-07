@@ -123,10 +123,24 @@ export const getNextRace = async () => {
 
 export const getStandings = async () => {
   try {
-    const [driversRes, constructorsRes] = await Promise.all([fetchCached(`${BASE_URL}/current/driverStandings.json`), fetchCached(`${BASE_URL}/current/constructorStandings.json`)])
+    const [driversRes, constructorsRes] = await Promise.all([fetchCached(`${BASE_URL}/2026/driverStandings.json`), fetchCached(`${BASE_URL}/2026/constructorStandings.json`)])
     const rawDrivers = driversRes.data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || []
     const rawConstructors = constructorsRes.data.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || []
-    const drivers = rawDrivers.map((d, i) => ({ pos: String(d.position).padStart(2, '0'), name: `${d.Driver.givenName[0]}. ${d.Driver.familyName}`, code: d.Driver.code || d.Driver.familyName.substring(0, 3).toUpperCase(), team: getTeamDisplayName(d.Constructors[0]?.constructorId) || 'Unknown', nationality: d.Driver.nationality, flagUrl: getFlagUrl(d.Driver.nationality), logoUrl: getTeamLogo(d.Constructors[0]?.constructorId), points: Number(d.points), gap: i === 0 ? null : `−${rawDrivers[0].points - d.points}`, color: getTeamColor(d.Constructors[0]?.constructorId), codeBg: getTeamColor(d.Constructors[0]?.constructorId), codeColor: '#fff' }))
+    const drivers = rawDrivers.map((d, i) => ({ 
+      pos: String(d.position).padStart(2, '0'), 
+      name: `${d.Driver.givenName[0]}. ${d.Driver.familyName}`, 
+      code: d.Driver.code || d.Driver.familyName.substring(0, 3).toUpperCase(), 
+      team: getTeamDisplayName(d.Constructors[0]?.constructorId) || 'Unknown', 
+      nationality: d.Driver.nationality, 
+      flagUrl: getFlagUrl(d.Driver.nationality), 
+      logoUrl: getTeamLogo(d.Constructors[0]?.constructorId), 
+      points: Number(d.points), 
+      gap: i === 0 ? null : `−${rawDrivers[0].points - d.points}`, 
+      width: rawDrivers.length > 0 ? `${Math.round((Number(d.points) / Number(rawDrivers[0].points)) * 100)}%` : '0%',
+      color: getTeamColor(d.Constructors[0]?.constructorId), 
+      codeBg: getTeamColor(d.Constructors[0]?.constructorId), 
+      codeColor: '#fff' 
+    }))
     const maxPts = rawConstructors.length > 0 ? Number(rawConstructors[0].points) : 100
     const constructors = rawConstructors.map(c => ({ pos: String(c.position).padStart(2, '0'), name: getTeamDisplayName(c.Constructor.constructorId), engine: getTeamPU(c.Constructor.constructorId), nationality: c.Constructor.nationality, flagUrl: getFlagUrl(c.Constructor.nationality), logoUrl: getTeamLogo(c.Constructor.constructorId), points: Number(c.points), width: maxPts > 0 ? `${Math.round((Number(c.points) / maxPts) * 100)}%` : '0%', color: getTeamColor(c.Constructor.constructorId) }))
     return { drivers, constructors }
@@ -135,7 +149,7 @@ export const getStandings = async () => {
 
 export const getCalendar = async () => {
   try {
-    const { data } = await fetchCached(`${BASE_URL}/current.json`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
+    const { data } = await fetchCached(`${BASE_URL}/2026.json`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
     const apiRaces = data.MRData.RaceTable.Races || []
     const now = new Date('2026-05-07T00:00:00Z')
     
@@ -182,7 +196,7 @@ export const getCalendar = async () => {
 
 export const getLatestResults = async () => {
   try {
-    const { data } = await fetchCached(`${BASE_URL}/current/last/results.json`)
+    const { data } = await fetchCached(`${BASE_URL}/2026/last/results.json`)
     const race = data.MRData.RaceTable.Races[0]
     if (!race || !race.Results) return { title: '', results: [], winner: null }
     const top3 = race.Results.slice(0, 3).map((r, i) => { const cid = r.Constructor.constructorId; return { id: `p${i + 1}`, cls: `p${i + 1}`, badge: `P${i + 1}`, name: `${r.Driver.givenName} ${r.Driver.familyName}`, team: `${getTeamDisplayName(cid)} · #${r.number}`, nationality: r.Driver.nationality, flagUrl: getFlagUrl(r.Driver.nationality), logoUrl: getTeamLogo(cid), color: getTeamColor(cid), time: i === 0 ? r.Time?.time || 'Winner' : r.Time?.time || `+${r.Time?.millis}ms` } })
@@ -192,7 +206,7 @@ export const getLatestResults = async () => {
 
 export const getRaceStats = async () => {
   try {
-    const { data } = await fetchCached(`${BASE_URL}/current/last/results.json`)
+    const { data } = await fetchCached(`${BASE_URL}/2026/last/results.json`)
     const race = data.MRData.RaceTable.Races[0]
     if (!race || !race.Results) return null
     const fl = race.Results.find(r => r.FastestLap?.rank === '1')

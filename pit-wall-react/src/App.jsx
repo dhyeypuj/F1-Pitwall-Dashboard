@@ -11,6 +11,7 @@ import StatsRibbon from './components/StatsRibbon'
 import Footer from './components/Footer'
 import SettingsPanel from './components/SettingsPanel'
 import AuthPage from './pages/AuthPage'
+import OnboardingModal from './components/OnboardingModal'
 import useStore from './store/useStore'
 import { getStandings, getNextRace, getCalendar, getLatestResults, getRaceStats } from './services/f1Service'
 import { getF1News } from './services/newsService'
@@ -20,7 +21,8 @@ import { saveUserToFirestore, getUserPreferences } from './services/userService'
 
 function App() {
   const activeTeam = useStore((state) => state.preferences?.team || 'ferrari')
-  const widgets = useStore((state) => state.preferences?.widgets || { news: true, standings: true, podium: true, stats: true, calendar: true })
+  const defaultWidgets = { news: true, standings: true, podium: true, stats: true, calendar: true }
+  const widgets = { ...defaultWidgets, ...(useStore((state) => state.preferences?.widgets) || {}) }
   const authReady = useStore((state) => state.authReady)
   const user = useStore((state) => state.user)
   const isAuthenticated = !!user
@@ -182,7 +184,7 @@ function App() {
   }
 
   return (
-    <div className={`app team-${activeTeam}`}>
+    <div className="pit-wall-app" data-team={activeTeam}>
       <Ticker />
       
       <main className="main-content">
@@ -212,6 +214,7 @@ function App() {
 
       <Footer />
       <SettingsPanel />
+      <OnboardingModal />
     </div>
   )
 }

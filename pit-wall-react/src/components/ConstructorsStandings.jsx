@@ -9,8 +9,7 @@ const ConstructorsStandings = () => {
     <div className="col">
       <div className="col-head">
         <div className="col-num">§ 02</div>
-        <div className="col-name">Constructors' <em>Cup</em></div>
-        <div className="col-sub">All 11 teams · 2026</div>
+        <div className="col-name">World Constructors' Championship <em>Standings</em></div>
       </div>
 
       {isLoading ? (
@@ -31,7 +30,7 @@ const ConstructorsStandings = () => {
         ))
       ) : error || constructors.length === 0 ? (
         <div className="con-row" style={{ justifyContent: 'center', padding: '2rem 0' }}>
-          <div className="con-name" style={{ color: error ? 'var(--ferrari)' : '#666' }}>{error || 'Standings Unavailable'}</div>
+          <div className="con-name" style={{ color: error ? 'var(--racing)' : '#666' }}>{error || 'Standings Unavailable'}</div>
         </div>
       ) : (
         constructors.map((c, i) => (

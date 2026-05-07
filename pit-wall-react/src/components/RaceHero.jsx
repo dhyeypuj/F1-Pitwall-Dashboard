@@ -40,7 +40,7 @@ const RaceHero = () => {
     return (
       <section className="race-hero">
         <div className="race-block" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <h2 className="race-name" style={{ color: error ? 'var(--ferrari)' : '#666' }}>{error || 'Next Race Unavailable'}</h2>
+          <h2 className="race-name" style={{ color: error ? 'var(--racing)' : '#666' }}>{error || 'Next Race Unavailable'}</h2>
         </div>
       </section>
     )
@@ -65,13 +65,13 @@ const RaceHero = () => {
           <div className="race-left">
             <div className="race-meta-row">
               <span className="race-round">◆ {nextRace.round.toUpperCase()} · {nextRace.status.toUpperCase()}</span>
-              {isSprintWeekend && <span className="race-round" style={{ background: 'var(--mclaren)', color: '#000', padding: '2px 8px', borderRadius: '4px', marginLeft: '8px' }}>SPRINT WEEKEND</span>}
+              {isSprintWeekend && <span className="race-round" style={{ background: 'var(--racing)', color: '#000', padding: '2px 8px', borderRadius: '4px', marginLeft: '8px' }}>SPRINT WEEKEND</span>}
               <span className="race-flag-big" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, letterSpacing: '-1px', color: '#fff', fontSize: '28px' }}>{nextRace.countryCode}</span>
             </div>
             
             <h2 className="race-name">
               {nextRace.title.replace('Grand Prix', '')}
-              <em style={{ color: 'var(--ferrari)', fontStyle: 'italic' }}>Grand Prix</em>
+              <em style={{ color: 'var(--racing)', fontStyle: 'italic' }}>Grand Prix</em>
             </h2>
 
             <div className="race-circuit">
@@ -86,7 +86,7 @@ const RaceHero = () => {
             <div className="race-stats" style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
               <div className="race-stat">
                 <div className="race-stat-label">{activeSession ? activeSession.name : 'Race Day'}</div>
-                <div className="race-stat-val" style={{ color: 'var(--ferrari)' }}>{activeSession ? formatLocalTime(activeSession.start) : nextRace.dates}</div>
+                <div className="race-stat-val" style={{ color: 'var(--racing)' }}>{activeSession ? formatLocalTime(activeSession.start) : nextRace.dates}</div>
               </div>
               <div className="race-stat">
                 <div className="race-stat-label">Lap Record</div>
