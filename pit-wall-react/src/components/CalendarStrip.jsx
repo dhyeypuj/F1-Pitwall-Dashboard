@@ -26,7 +26,7 @@ const CalendarStrip = () => {
                 <div className="cal-flag-name" style={{ background: '#222', width: '80px', height: '12px', borderRadius: '4px', marginTop: '4px' }}></div>
               </div>
             ))
-          ) : error || calendar.rounds.length === 0 ? (
+          ) : error || !calendar?.rounds?.length ? (
             <div className="cal-round" style={{ flex: 1, justifyContent: 'center' }}>
               <div className="cal-rnum" style={{ color: error ? 'var(--ferrari)' : '#666' }}>{error || 'Calendar Unavailable'}</div>
             </div>

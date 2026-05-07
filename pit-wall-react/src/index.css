@@ -285,27 +285,30 @@ body {
   background-position: 0 0, 5px 5px;
   background-color: #000;
   animation: flagWave 3s ease-in-out infinite;
-  .brand-right {
+}
+
+.brand-right {
   text-align: right;
   animation: fadeUpSlow 1s ease both 0.7s;
 }
 .greeting {
-  font-family:'Playfair Display', serif;
-  font-style:italic;
-  font-size:15px;
-  letter-spacing:0;
-  color:var(--ink-2);
-  margin-bottom:4px;
+  font-family: 'Playfair Display', serif !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  letter-spacing: -0.01em !important;
+  color: var(--ink) !important;
+  margin-bottom: 2px !important;
+  text-align: right !important;
 }
 .dateline {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-ext-transform: uppercase;
-  color: var(--ink-3);
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  color: var(--ink-2) !important;
+  text-align: right !important;
+  opacity: 0.8 !important;
 }
 .logout-btn {
   font-family: 'JetBrains Mono', monospace;
@@ -434,6 +437,24 @@ ext-transform: uppercase;
   width: 7px; height: 7px;
   background:#fff; border-radius:50%;
   animation: blink 1.6s ease infinite;
+}
+
+.settings-trigger-btn {
+  background: transparent;
+  border: 1px solid var(--rule-light);
+  color: var(--ink-2);
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.settings-trigger-btn:hover {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
 }
 
 .race-hero {
@@ -2119,3 +2140,4 @@ body.colo-open { overflow: hidden; }
 .cal-flag-img { width: 22px; height: 14px; object-fit: cover; border-radius: 1px; filter: saturate(0.8); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .news-article-link { text-decoration: none; color: inherit; display: block; height: 100%; transition: all 0.2s ease; } .news-article-link:hover .news-headline { text-decoration: underline; color: var(--racing); } .news-item { cursor: pointer; transition: background 0.2s ease; } .news-item:hover { background: rgba(0,0,0,0.02); }
 .theme-switcher { padding: 40px 36px 0; max-width: 1440px; margin: 0 auto; } .ts-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--ink-3); margin-bottom: 16px; } .ts-grid { display: flex; flex-wrap: wrap; gap: 12px; } .ts-item { background: none; border: 1px solid var(--rule-light); padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; border-radius: 4px; } .ts-item:hover { border-color: var(--ink-2); background: rgba(0,0,0,0.02); } .ts-item.active { border-color: var(--racing); background: rgba(225, 6, 0, 0.05); } .ts-color { width: 10px; height: 10px; border-radius: 50%; display: block; } .ts-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--ink-2); } .ts-item.active .ts-name { color: var(--racing); }
+.settings-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(8px); display: flex; justify-content: flex-end; } .settings-panel { width: 420px; max-width: 100%; background: var(--paper); height: 100%; padding: 48px 36px; display: flex; flex-direction: column; box-shadow: -10px 0 50px rgba(0,0,0,0.3); animation: slideInRight 0.4s cubic-bezier(.2,.8,.2,1); } .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; } .settings-title { display: flex; align-items: center; gap: 16px; } .settings-title h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; } .settings-close { background: none; border: none; font-size: 32px; cursor: pointer; color: var(--ink-3); } .settings-section { margin-bottom: 40px; } .section-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: var(--ink-3); margin-bottom: 24px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; } .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .team-btn { display: flex; align-items: center; gap: 10px; padding: 12px; background: #fff; border: 1px solid var(--rule-light); cursor: pointer; text-align: left; transition: all 0.2s; } .team-btn:hover { border-color: var(--racing); background: rgba(225,6,0,0.02); } .team-btn.active { border-color: var(--racing); background: rgba(225,6,0,0.06); outline: 2px solid var(--racing); } .team-swatch { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; } .team-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; text-transform: uppercase; } .widget-toggles { display: flex; flex-direction: column; gap: 16px; } .toggle-row { display: flex; justify-content: space-between; align-items: center; } .toggle-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; } .switch { position: relative; display: inline-block; width: 44px; height: 24px; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--rule); transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ''; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; } input:checked + .slider { background-color: var(--racing); } input:checked + .slider:before { transform: translateX(20px); } @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }

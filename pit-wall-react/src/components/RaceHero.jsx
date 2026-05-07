@@ -4,10 +4,23 @@ import { formatNumber } from '../utils/format'
 
 const RaceHero = () => {
   const { nextRace } = useStore((state) => state.race)
-  const nextRaceName = useStore(getNextRaceName)
-  const { days, hours, minutes, seconds } = useCountdown(nextRace?.date)
+  const sessions = useStore((state) => state.sessions)
   const isLoading = useStore((state) => state.isLoadingRace)
   const error = useStore((state) => state.errorRace)
+
+  // Find dynamic session data for this round
+  const currentRoundSessions = sessions.find(s => s.round === nextRace?.roundNumber)?.sessions || {}
+  
+  const now = new Date()
+  const upcomingSessions = Object.entries(currentRoundSessions)
+    .map(([key, data]) => ({ key, ...data }))
+    .filter(s => new Date(s.start) > now)
+    .sort((a, b) => new Date(a.start) - new Date(b.start))
+
+  const activeSession = upcomingSessions[0] || null
+  const targetDate = activeSession ? activeSession.start : nextRace?.date
+  
+  const { days, hours, minutes, seconds } = useCountdown(targetDate)
 
   if (isLoading) {
     return (
@@ -33,6 +46,18 @@ const RaceHero = () => {
     )
   }
 
+  const formatLocalTime = (isoStr) => {
+    if (!isoStr) return ''
+    return new Intl.DateTimeFormat(navigator.language, {
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    }).format(new Date(isoStr))
+  }
+
+  const isSprintWeekend = !!currentRoundSessions.sprint
+
   return (
     <section className="race-hero">
       <div className="race-block">
@@ -40,6 +65,7 @@ const RaceHero = () => {
           <div className="race-left">
             <div className="race-meta-row">
               <span className="race-round">◆ {nextRace.round.toUpperCase()} · {nextRace.status.toUpperCase()}</span>
+              {isSprintWeekend && <span className="race-round" style={{ background: 'var(--mclaren)', color: '#000', padding: '2px 8px', borderRadius: '4px', marginLeft: '8px' }}>SPRINT WEEKEND</span>}
               <span className="race-flag-big" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, letterSpacing: '-1px', color: '#fff', fontSize: '28px' }}>{nextRace.countryCode}</span>
             </div>
             
@@ -59,6 +85,10 @@ const RaceHero = () => {
 
             <div className="race-stats" style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
               <div className="race-stat">
+                <div className="race-stat-label">{activeSession ? activeSession.name : 'Race Day'}</div>
+                <div className="race-stat-val" style={{ color: 'var(--ferrari)' }}>{activeSession ? formatLocalTime(activeSession.start) : nextRace.dates}</div>
+              </div>
+              <div className="race-stat">
                 <div className="race-stat-label">Lap Record</div>
                 <div className="race-stat-val">{nextRace.lapRecord}</div>
               </div>
@@ -66,15 +96,11 @@ const RaceHero = () => {
                 <div className="race-stat-label">Prev. Pole</div>
                 <div className="race-stat-val">{nextRace.previousPole}</div>
               </div>
-              <div className="race-stat">
-                <div className="race-stat-label">Dates</div>
-                <div className="race-stat-val">{nextRace.dates}</div>
-              </div>
             </div>
           </div>
 
           <div className="race-right">
-            <div className="countdown-label">Lights Out In</div>
+            <div className="countdown-label">{activeSession ? `${activeSession.name.toUpperCase()} STARTS IN` : 'LIGHTS OUT IN'}</div>
             <div className="countdown">
               <div className="cd-cell"><div className="cd-num" id="cd-d">{formatNumber(days)}</div><div className="cd-label">Days</div></div>
               <div className="cd-cell"><div className="cd-num" id="cd-h">{formatNumber(hours)}</div><div className="cd-label">Hours</div></div>

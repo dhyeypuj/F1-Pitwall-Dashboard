@@ -28,7 +28,7 @@ export const saveUserToFirestore = async (user) => {
  */
 export const getUserPreferences = async (uid) => {
   const defaults = {
-    favoriteTeam: 'ferrari',
+    team: 'ferrari',
     theme: 'dark',
     widgets: {
       news: true,
@@ -47,7 +47,7 @@ export const getUserPreferences = async (uid) => {
       const data = snapshot.data()
       // Merge data with defaults for backward compatibility (new fields like widgets)
       return {
-        favoriteTeam: data.favoriteTeam || defaults.favoriteTeam,
+        team: data.team || data.favoriteTeam || defaults.team,
         theme: data.theme || defaults.theme,
         widgets: {
           ...defaults.widgets,

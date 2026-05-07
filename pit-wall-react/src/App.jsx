@@ -1,32 +1,46 @@
 import { useEffect } from 'react'
-import Layout from './layout/Layout'
+import Hero from './components/Hero'
+import NewsFeed from './components/NewsFeed'
+import DriversStandings from './components/DriversStandings'
+import ConstructorsStandings from './components/ConstructorsStandings'
+import RaceHero from './components/RaceHero'
+import CalendarStrip from './components/CalendarStrip'
+import Podium from './components/Podium'
+import Ticker from './components/Ticker'
+import StatsRibbon from './components/StatsRibbon'
+import Footer from './components/Footer'
+import SettingsPanel from './components/SettingsPanel'
 import AuthPage from './pages/AuthPage'
-import useStore, { getIsAuthenticated } from './store/useStore'
+import useStore from './store/useStore'
 import { getStandings, getNextRace, getCalendar, getLatestResults, getRaceStats } from './services/f1Service'
 import { getF1News } from './services/newsService'
+import { getSeasonSessions } from './services/sessionService'
 import { onAuthChange } from './services/authService'
 import { saveUserToFirestore, getUserPreferences } from './services/userService'
 
-import { useTeamTheme } from './hooks/useTeamTheme'
-
 function App() {
-  const { activeTeam } = useTeamTheme()
-  const isAuthenticated = useStore(getIsAuthenticated)
-  const authReady = useStore(state => state.authReady)
+  const activeTeam = useStore((state) => state.preferences?.team || 'ferrari')
+  const widgets = useStore((state) => state.preferences?.widgets || { news: true, standings: true, podium: true, stats: true, calendar: true })
+  const authReady = useStore((state) => state.authReady)
+  const user = useStore((state) => state.user)
+  const isAuthenticated = !!user
+
   const setUser = useStore(state => state.setUser)
   const setAuthReady = useStore(state => state.setAuthReady)
   const setPreferences = useStore(state => state.setPreferences)
+  const setSessions = useStore(state => state.setSessions)
   const setStandings = useStore(state => state.setStandings)
   const setRace = useStore(state => state.setRace)
   const setCalendar = useStore(state => state.setCalendar)
   const setPodium = useStore(state => state.setPodium)
-  const setRaceStats = useStore(state => state.setRaceStats)
+  const setNews = useStore(state => state.setNews)
   const setHeroStats = useStore(state => state.setHeroStats)
   const setTicker = useStore(state => state.setTicker)
   const setStats = useStore(state => state.setStats)
-  const setNews = useStore(state => state.setNews)
+  const setRaceStats = useStore(state => state.setRaceStats)
   const setLoading = useStore(state => state.setLoading)
   const setError = useStore(state => state.setError)
+
   const standings = useStore(state => state.standings)
   const calendar = useStore(state => state.calendar)
   const podium = useStore(state => state.podium)
@@ -37,167 +51,78 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthChange(async (firebaseUser) => {
       if (firebaseUser) {
+        // Enrich user with dashboard-specific data
         const hour = new Date().getHours()
-        const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-        const firstName = (firebaseUser.displayName || 'Fan').split(' ')[0]
-
-        const now = new Date()
-        const dateStr = now.toLocaleDateString('en-US', {
+        const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+        const date = new Date().toLocaleDateString('en-US', {
           weekday: 'short',
-          day: '2-digit',
           month: 'short',
+          day: '2-digit',
           year: 'numeric'
         }).toUpperCase().replace(/,/g, ' ·')
 
-        const normalizedUser = {
-          uid: firebaseUser.uid,
-          name: firstName,
-          email: firebaseUser.email,
-          picture: firebaseUser.photoURL,
-          greeting: `${timeGreeting}, ${firstName}`,
-          date: dateStr
-        }
-
-        setUser(normalizedUser)
-
-        // Persist user to Firestore (create or update)
-        await saveUserToFirestore(normalizedUser)
-
-        // Load saved preferences from Firestore
-        const prefs = await getUserPreferences(firebaseUser.uid)
-        setPreferences({ 
-          team: prefs.favoriteTeam, 
-          theme: prefs.theme,
-          widgets: prefs.widgets
+        setUser({
+          ...firebaseUser,
+          name: firebaseUser.displayName?.split(' ')[0] || 'Driver',
+          greeting: `${greeting}, ${firebaseUser.displayName?.split(' ')[0] || 'Driver'}`,
+          date
         })
+        const prefs = await getUserPreferences(firebaseUser.uid)
+        if (prefs) setPreferences(prefs)
       } else {
         setUser(null)
       }
-
       setAuthReady(true)
     })
-
     return () => unsubscribe()
   }, [setUser, setAuthReady, setPreferences])
 
+  // ── Data Hydration ───────────────────────────────────
   useEffect(() => {
-    // Only fetch data after auth resolves and user is authenticated
     if (!isAuthenticated) return
 
-    const fetchStandings = () => {
-      getStandings().then(standings => {
-        if (standings && standings.drivers && standings.drivers.length > 0) {
-          setStandings(standings)
-          setError('errorStandings', null)
-        } else {
-          setError('errorStandings', 'No standings available')
-        }
-        setLoading('isLoadingStandings', false)
-      }).catch(err => {
-        console.error('Failed to load standings:', err)
-        setError('errorStandings', err.message || 'Failed to connect to Jolpica API')
-        setLoading('isLoadingStandings', false)
-      })
+    setLoading('isLoadingStandings', true)
+    getStandings().then(data => setStandings(data)).catch(err => setError('errorStandings', err.message)).finally(() => setLoading('isLoadingStandings', false))
+
+    setLoading('isLoadingRace', true)
+    getNextRace().then(data => setRace(data)).catch(err => setError('errorRace', err.message)).finally(() => setLoading('isLoadingRace', false))
+
+    setLoading('isLoadingCalendar', true)
+    getCalendar().then(data => setCalendar(data)).catch(err => setError('errorCalendar', err.message)).finally(() => setLoading('isLoadingCalendar', false))
+
+    setLoading('isLoadingResults', true)
+    getLatestResults().then(data => setPodium(data)).catch(err => setError('errorResults', err.message)).finally(() => setLoading('isLoadingResults', false))
+
+    setLoading('isLoadingStats', true)
+    getRaceStats().then(data => setRaceStats(data)).catch(err => setError('errorStats', err.message)).finally(() => setLoading('isLoadingStats', false))
+
+    setLoading('isLoadingNews', true)
+    getF1News(activeTeam).then(data => setNews(data)).catch(err => setError('errorNews', err.message)).finally(() => setLoading('isLoadingNews', false))
+
+    // ── Dynamic Sessions ──────────────────────────────
+    const fetchSessions = async () => {
+      setLoading('isLoadingSessions', true)
+      try {
+        const data = await getSeasonSessions(2024) // Using 2024 as proxy for 2026 engine
+        setSessions(data)
+      } catch (err) {
+        console.error('Failed to fetch sessions:', err)
+      } finally {
+        setLoading('isLoadingSessions', false)
+      }
     }
 
-    const fetchNextRace = () => {
-      getNextRace().then(nextRace => {
-        if (nextRace) {
-          const currentRace = useStore.getState().race
-          setRace({
-            ...currentRace,
-            nextRace: {
-              ...currentRace.nextRace,
-              ...nextRace
-            },
-            countdown: { targetDate: nextRace.date }
-          })
-          setError('errorRace', null)
-        } else {
-          setError('errorRace', 'No upcoming race data')
-        }
-        setLoading('isLoadingRace', false)
-      }).catch(err => {
-        console.error('Failed to load next race:', err)
-        setError('errorRace', err.message || 'Failed to connect to Jolpica API')
-        setLoading('isLoadingRace', false)
-      })
-    }
+    fetchSessions()
+    const sessionInterval = setInterval(fetchSessions, 300000) // Poll every 5 mins
 
-    const fetchCalendar = () => {
-      getCalendar().then(calendar => {
-        if (calendar && calendar.length > 0) {
-          const currentCal = useStore.getState().calendar
-          setCalendar({
-            ...currentCal,
-            rounds: calendar
-          })
-          setError('errorCalendar', null)
-        } else {
-          setError('errorCalendar', 'No calendar available')
-        }
-        setLoading('isLoadingCalendar', false)
-      }).catch(err => {
-        console.error('Failed to load calendar:', err)
-        setError('errorCalendar', err.message || 'Failed to connect to Jolpica API')
-        setLoading('isLoadingCalendar', false)
-      })
-    }
+    return () => clearInterval(sessionInterval)
+  }, [isAuthenticated, activeTeam, setLoading, setStandings, setRace, setCalendar, setPodium, setRaceStats, setNews, setError, setSessions])
 
-    const fetchResultsAndStats = () => {
-      getLatestResults().then(podiumData => {
-        if (podiumData && podiumData.results.length > 0) {
-          setPodium(podiumData)
-          setError('errorResults', null)
-        } else {
-          setError('errorResults', 'No recent results available')
-        }
-        setLoading('isLoadingResults', false)
-      }).catch(err => {
-        console.error('Failed to load results:', err)
-        setError('errorResults', err.message || 'Failed to connect to Jolpica API')
-        setLoading('isLoadingResults', false)
-      })
-
-      getRaceStats().then(statsData => {
-        if (statsData) {
-          setRaceStats(statsData)
-          setError('errorStats', null)
-        } else {
-          setError('errorStats', 'No race stats available')
-        }
-        setLoading('isLoadingStats', false)
-      }).catch(err => {
-        console.error('Failed to load race stats:', err)
-        setError('errorStats', err.message || 'Failed to connect to Jolpica API')
-        setLoading('isLoadingStats', false)
-      })
-    }
-
-    // Initial load
-    fetchStandings()
-    fetchNextRace()
-    fetchCalendar()
-    fetchResultsAndStats()
-
-    // Background polling
-    const standingsInterval = setInterval(fetchStandings, 5 * 60 * 1000)
-    const raceInterval = setInterval(fetchNextRace, 10 * 60 * 1000)
-    const calendarInterval = setInterval(fetchCalendar, 30 * 60 * 1000)
-    const resultsInterval = setInterval(fetchResultsAndStats, 30 * 60 * 1000)
-
-    // Cleanup to prevent duplicate intervals
-    return () => {
-      clearInterval(standingsInterval)
-      clearInterval(raceInterval)
-      clearInterval(calendarInterval)
-      clearInterval(resultsInterval)
-    }
-  }, [isAuthenticated, setStandings, setRace, setCalendar, setPodium, setRaceStats, setLoading, setError])
-
+  // ── Stats derivation ────────────────────────────────
   useEffect(() => {
-    // Derive heroStats
-    if (standings.drivers.length > 0 && calendar.rounds.length > 0) {
+    if (!isAuthenticated) return
+
+    if (standings.drivers.length > 0 && calendar?.rounds?.length > 0) {
       setHeroStats([
         { val: standings.drivers[0].name, lbl: "World Driver's Championship Leader" },
         { val: standings.constructors[0].name, lbl: "World Constructor's Championship Leader" },
@@ -205,7 +130,6 @@ function App() {
       ])
     }
 
-    // Derive ticker
     if (standings.drivers.length > 0 && standings.constructors.length > 0 && race.nextRace && podium.winner && raceStats) {
       const topDriver = standings.drivers[0]
       const topConstructor = standings.constructors[0]
@@ -224,7 +148,6 @@ function App() {
       ])
     }
 
-    // Derive stats
     if (standings.drivers.length > 1 && raceStats && podium.winner) {
       const p1 = standings.drivers[0]
       const p2 = standings.drivers[1]
@@ -232,43 +155,13 @@ function App() {
 
       setStats([
         { id: 1, label: "Championship Lead", bigHtml: `<em>+${gap}</em> pts`, sub: `${p1.name.split(' ').pop()} over ${p2.name.split(' ').pop()}` },
-        { id: 2, label: `Fastest Lap ${new Date().getFullYear()}`, bigHtml: raceStats.fastestLap?.time || '--', sub: `${raceStats.fastestLap?.driver || '--'} · ${raceStats.latestRaceName}` },
+        { id: 2, label: `Fastest Lap 2026`, bigHtml: raceStats.fastestLap?.time || '--', sub: `${raceStats.fastestLap?.driver || '--'} · ${raceStats.latestRaceName}` },
         { id: 3, label: "Recent Winner", bigHtml: podium.winner.Driver.familyName, sub: `${podium.winner.Constructor.name} · ${raceStats.latestRaceName}` },
-        { id: 4, label: "Next Race", bigHtml: race.nextRace ? race.nextRace.title.replace('Grand Prix', 'GP') : '--', sub: race.nextRace ? race.nextRace.dates.split(' – ').pop() : '--' }
+        { id: 4, label: "Next Race", bigHtml: race.nextRace ? race.nextRace.title.replace('Grand Prix', 'GP') : '--', sub: race.nextRace ? `${race.nextRace.dates.split(' ')[0]} ${race.nextRace.dates.split(' – ').pop()}` : '--' }
       ])
     }
-  }, [standings, calendar, podium, race, raceStats, setHeroStats, setTicker, setStats])
+  }, [isAuthenticated, standings, calendar, podium, race, raceStats, setHeroStats, setTicker, setStats])
 
-  useEffect(() => {
-    if (!isAuthenticated) return
-
-    const fetchNews = () => {
-      setLoading('isLoadingNews', true)
-      getF1News(activeTeam)
-        .then(newsData => {
-          if (newsData && newsData.length > 0) {
-            setNews(newsData)
-            setError('errorNews', null)
-          } else {
-            setError('errorNews', 'No recent F1 news available')
-          }
-          setLoading('isLoadingNews', false)
-        })
-        .catch(err => {
-          console.error('Failed to fetch news:', err)
-          setError('errorNews', err.message || 'Failed to connect to News API')
-          setLoading('isLoadingNews', false)
-        })
-    }
-
-    fetchNews()
-    
-    // Poll news every 10 minutes
-    const newsInterval = setInterval(fetchNews, 10 * 60 * 1000)
-    return () => clearInterval(newsInterval)
-  }, [isAuthenticated, activeTeam, setNews, setLoading, setError])
-
-  // ── Auth loading gate ────────────────────────────────
   if (!authReady) {
     return (
       <div className="auth-page">
@@ -284,14 +177,41 @@ function App() {
     )
   }
 
-  // ── Render auth gate or dashboard ────────────────────
   if (!isAuthenticated) {
     return <AuthPage />
   }
 
   return (
     <div className={`app team-${activeTeam}`}>
-      <Layout />
+      <Ticker />
+      
+      <main className="main-content">
+        <Hero />
+        {widgets.stats && <StatsRibbon />}
+        <RaceHero />
+        
+        <div className="dashboard-grid">
+          <div className="grid-left">
+            {widgets.podium && <Podium />}
+            <div className="standings-row">
+              {widgets.standings && (
+                <>
+                  <DriversStandings />
+                  <ConstructorsStandings />
+                </>
+              )}
+            </div>
+          </div>
+          <div className="grid-right">
+            {widgets.news && <NewsFeed />}
+          </div>
+        </div>
+
+        {widgets.calendar && <CalendarStrip />}
+      </main>
+
+      <Footer />
+      <SettingsPanel />
     </div>
   )
 }

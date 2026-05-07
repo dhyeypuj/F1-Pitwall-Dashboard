@@ -3,8 +3,8 @@ import { create } from 'zustand'
 const useStore = create((set) => ({
   authReady: false,
   user: null,
-  preferences: { 
-    team: "ferrari", 
+  preferences: {
+    team: "ferrari",
     theme: "dark",
     widgets: {
       news: true,
@@ -14,6 +14,14 @@ const useStore = create((set) => ({
       calendar: true
     }
   },
+  isSettingsOpen: false,
+  toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
+  updatePreference: (key, value) => set((state) => ({
+    preferences: {
+      ...state.preferences,
+      [key]: value
+    }
+  })),
   heroStats: [],
   ticker: [],
   calendar: {
@@ -21,6 +29,8 @@ const useStore = create((set) => ({
     progress: "13.6%",
     rounds: []
   },
+  sessions: [],
+  isLoadingSessions: false,
   isLoadingStandings: true,
   isLoadingRace: true,
   isLoadingCalendar: true,
@@ -33,6 +43,7 @@ const useStore = create((set) => ({
   errorResults: null,
   errorStats: null,
   errorNews: null,
+  setSessions: (sessions) => set({ sessions }),
   setLoading: (key, value) => set({ [key]: value }),
   setError: (key, value) => set({ [key]: value }),
   podium: {
@@ -55,7 +66,7 @@ const useStore = create((set) => ({
   setAuthReady: (authReady) => set({ authReady }),
   setUser: (user) => set({ user }),
   setPreferences: (preferences) => set({ preferences }),
-  setRace: (race) => set({ race }),
+  setRace: (nextRace) => set((state) => ({ race: { ...state.race, nextRace } })),
   setStandings: (standings) => set({ standings }),
   setNews: (news) => set({ news }),
   setCalendar: (calendar) => set({ calendar }),

@@ -27,7 +27,10 @@ const Hero = () => {
         <div className="brand-right">
           <div className="greeting" id="greeting">{user?.greeting}</div>
           <div className="dateline" id="dateline">{user?.date}</div>
-          <button className="logout-btn" onClick={handleLogout} id="sign-out-btn">Sign Out</button>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '12px', justifyContent: 'flex-end' }}>
+            <button className="settings-trigger-btn" onClick={() => useStore.getState().toggleSettings()}>Dashboard Settings</button>
+            <button className="logout-btn" onClick={handleLogout} id="sign-out-btn">Sign Out</button>
+          </div>
         </div>
       </div>
 
