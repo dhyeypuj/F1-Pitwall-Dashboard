@@ -99,7 +99,6 @@ function App() {
 
     // Set new timer
     debounceTimer.current = setTimeout(() => {
-      console.log('--- Syncing preferences to Firestore ---')
       updateUserPreferences(user.uid, useStore.getState().preferences)
     }, 1000) // 1 second debounce
 
