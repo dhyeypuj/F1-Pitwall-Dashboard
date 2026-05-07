@@ -7,13 +7,27 @@ const PORT = process.env.PORT || 3001
 
 // CORS — allow frontend requests
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
+const allowedOrigins = FRONTEND_URL.split(',').map(url => url.trim())
 
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost')) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true
 }))
 
 app.use(express.json())
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() })
+})
 
 const parser = new Parser()
 
@@ -103,6 +117,6 @@ app.get('/api/news', async (req, res) => {
   }
 })
 
-app.listen(PORT, () => {
-  console.log(`Express backend running on http://localhost:${PORT}`)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Express backend running on port ${PORT}`)
 })
