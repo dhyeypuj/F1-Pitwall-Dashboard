@@ -20,8 +20,7 @@ const useStore = create((set) => ({
   updatePreference: (key, value) => set((state) => ({
     preferences: {
       ...state.preferences,
-      [key]: value,
-      hasSelectedTeam: key === 'team' ? true : state.preferences.hasSelectedTeam
+      [key]: value
     }
   })),
   heroStats: [],

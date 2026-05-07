@@ -2310,3 +2310,124 @@ body.colo-open { overflow: hidden; }
 @media (max-width: 480px) {
   .onboarding-team-grid { grid-template-columns: 1fr; }
 }
+.onboarding-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+.step-dot {
+  width: 10px; height: 10px;
+  border: 2px solid var(--paper-3);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+.step-dot.active {
+  background: var(--racing);
+  border-color: var(--racing);
+  box-shadow: 0 0 12px var(--racing-glow);
+}
+.step-line {
+  width: 40px; height: 2px;
+  background: var(--paper-3);
+}
+
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.onboarding-team-btn.selected {
+  border-color: var(--racing);
+  background: rgba(var(--racing-rgb), 0.04);
+}
+
+.onboarding-widget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 32px 0;
+}
+
+.onboarding-widget-card {
+  cursor: pointer;
+  position: relative;
+}
+.onboarding-widget-card input { display: none; }
+.widget-card-content {
+  background: #fff;
+  border: 1px solid var(--paper-3);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.25s ease;
+}
+.onboarding-widget-card input:checked + .widget-card-content {
+  border-color: var(--racing);
+  background: rgba(var(--racing-rgb), 0.02);
+}
+
+.widget-check {
+  width: 20px; height: 20px;
+  border: 2px solid var(--paper-3);
+  position: relative;
+}
+.onboarding-widget-card input:checked + .widget-card-content .widget-check {
+  background: var(--racing);
+  border-color: var(--racing);
+}
+.onboarding-widget-card input:checked + .widget-card-content .widget-check::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 12px;
+}
+
+.widget-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.onboarding-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule-light);
+}
+
+.onboarding-back-btn {
+  background: none;
+  border: 1px solid var(--paper-3);
+  color: var(--ink-3);
+  padding: 12px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.onboarding-finish-btn {
+  background: var(--carbon);
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.onboarding-finish-btn:hover {
+  background: var(--racing);
+}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Hero from './components/Hero'
 import NewsFeed from './components/NewsFeed'
 import DriversStandings from './components/DriversStandings'
@@ -17,7 +17,7 @@ import { getStandings, getNextRace, getCalendar, getLatestResults, getRaceStats 
 import { getF1News } from './services/newsService'
 import { getSeasonSessions } from './services/sessionService'
 import { onAuthChange } from './services/authService'
-import { saveUserToFirestore, getUserPreferences } from './services/userService'
+import { saveUserToFirestore, getUserPreferences, updateUserPreferences } from './services/userService'
 
 function App() {
   const activeTeam = useStore((state) => state.preferences?.team || 'ferrari')
@@ -49,11 +49,18 @@ function App() {
   const race = useStore(state => state.race)
   const raceStats = useStore(state => state.raceStats)
 
+  const debounceTimer = useRef(null)
+  const isInitialMount = useRef(true)
+
   // ── Auth initialization ──────────────────────────────
   useEffect(() => {
     const unsubscribe = onAuthChange(async (firebaseUser) => {
       if (firebaseUser) {
-        // Enrich user with dashboard-specific data
+        // 1. Fetch preferences first
+        const prefs = await getUserPreferences(firebaseUser.uid)
+        if (prefs) setPreferences(prefs)
+
+        // 2. Set user (App.jsx split logic uses firebaseUser.displayName)
         const hour = new Date().getHours()
         const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
         const date = new Date().toLocaleDateString('en-US', {
@@ -65,12 +72,10 @@ function App() {
 
         setUser({
           ...firebaseUser,
-          name: firebaseUser.displayName?.split(' ')[0] || 'Driver',
-          greeting: `${greeting}, ${firebaseUser.displayName?.split(' ')[0] || 'Driver'}`,
+          name: firebaseUser.name?.split(' ')[0] || 'Driver',
+          greeting: `${greeting}, ${firebaseUser.name?.split(' ')[0] || 'Driver'}`,
           date
         })
-        const prefs = await getUserPreferences(firebaseUser.uid)
-        if (prefs) setPreferences(prefs)
       } else {
         setUser(null)
       }
@@ -78,6 +83,30 @@ function App() {
     })
     return () => unsubscribe()
   }, [setUser, setAuthReady, setPreferences])
+
+  // ── Auto-Sync Preferences to Firestore ───────────────
+  useEffect(() => {
+    // Skip the very first run to avoid overwriting DB with defaults on load
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+
+    if (!isAuthenticated) return
+
+    // Clear previous timer
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+
+    // Set new timer
+    debounceTimer.current = setTimeout(() => {
+      console.log('--- Syncing preferences to Firestore ---')
+      updateUserPreferences(user.uid, useStore.getState().preferences)
+    }, 1000) // 1 second debounce
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  }, [useStore.getState().preferences, isAuthenticated, user?.uid])
 
   // ── Data Hydration ───────────────────────────────────
   useEffect(() => {

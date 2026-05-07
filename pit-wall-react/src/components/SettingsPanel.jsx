@@ -35,14 +35,7 @@ const SettingsPanel = () => {
   const widgets = { ...defaultWidgets, ...(preferences?.widgets || {}) }
 
   const handleTeamSelect = (teamId) => {
-    // 1. Update store immediately for instant UI feedback
     updatePreference('team', teamId)
-    
-    // 2. Sync with Firestore in the background
-    if (user?.uid) {
-      updateUserPreferences(user.uid, { ...preferences, team: teamId })
-        .catch(err => console.error('Failed to sync team preference:', err))
-    }
   }
 
   const handleWidgetToggle = (widgetKey) => {
@@ -50,15 +43,7 @@ const SettingsPanel = () => {
       ...widgets,
       [widgetKey]: !widgets[widgetKey]
     }
-    
-    // 1. Update store immediately for instant UI feedback
     updatePreference('widgets', newWidgets)
-    
-    // 2. Sync with Firestore in the background
-    if (user?.uid) {
-      updateUserPreferences(user.uid, { ...preferences, widgets: newWidgets })
-        .catch(err => console.error('Failed to sync widget preference:', err))
-    }
   }
 
   return (
