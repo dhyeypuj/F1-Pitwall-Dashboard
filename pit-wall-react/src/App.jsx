@@ -49,6 +49,7 @@ function App() {
   const race = useStore(state => state.race)
   const raceStats = useStore(state => state.raceStats)
 
+  const preferences = useStore(state => state.preferences)
   const debounceTimer = useRef(null)
   const isInitialMount = useRef(true)
 
@@ -60,7 +61,7 @@ function App() {
         const prefs = await getUserPreferences(firebaseUser.uid)
         if (prefs) setPreferences(prefs)
 
-        // 2. Set user (App.jsx split logic uses firebaseUser.displayName)
+        // 2. Set user
         const hour = new Date().getHours()
         const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
         const date = new Date().toLocaleDateString('en-US', {
@@ -92,20 +93,20 @@ function App() {
       return
     }
 
-    if (!isAuthenticated) return
+    if (!isAuthenticated || !user?.uid) return
 
     // Clear previous timer
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
 
     // Set new timer
     debounceTimer.current = setTimeout(() => {
-      updateUserPreferences(user.uid, useStore.getState().preferences)
+      updateUserPreferences(user.uid, preferences)
     }, 1000) // 1 second debounce
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current)
     }
-  }, [useStore.getState().preferences, isAuthenticated, user?.uid])
+  }, [preferences, isAuthenticated, user?.uid])
 
   // ── Data Hydration ───────────────────────────────────
   useEffect(() => {
