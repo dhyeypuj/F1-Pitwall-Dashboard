@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Hero from './components/Hero'
 import NewsFeed from './components/NewsFeed'
 import DriversStandings from './components/DriversStandings'
@@ -49,17 +49,36 @@ function App() {
   const race = useStore(state => state.race)
   const raceStats = useStore(state => state.raceStats)
 
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
   const preferences = useStore(state => state.preferences)
   const debounceTimer = useRef(null)
   const isInitialMount = useRef(true)
+
+  // ── Network Awareness ────────────────────────────────
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
 
   // ── Auth initialization ──────────────────────────────
   useEffect(() => {
     const unsubscribe = onAuthChange(async (firebaseUser) => {
       if (firebaseUser) {
         // 1. Fetch preferences first
-        const prefs = await getUserPreferences(firebaseUser.uid)
-        if (prefs) setPreferences(prefs)
+        try {
+          const prefs = await getUserPreferences(firebaseUser.uid)
+          if (prefs) setPreferences(prefs)
+        } catch (err) {
+          console.error('Error fetching preferences:', err)
+        }
 
         // 2. Set user
         const hour = new Date().getHours()
@@ -93,7 +112,7 @@ function App() {
       return
     }
 
-    if (!isAuthenticated || !user?.uid) return
+    if (!isAuthenticated || !user?.uid || !isOnline) return
 
     // Clear previous timer
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
@@ -101,53 +120,45 @@ function App() {
     // Set new timer
     debounceTimer.current = setTimeout(() => {
       updateUserPreferences(user.uid, preferences)
-    }, 1000) // 1 second debounce
+    }, 1500) // Slightly longer debounce for production stability
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current)
     }
-  }, [preferences, isAuthenticated, user?.uid])
+  }, [preferences, isAuthenticated, user?.uid, isOnline])
 
   // ── Data Hydration ───────────────────────────────────
   useEffect(() => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated || !isOnline) return
 
-    setLoading('isLoadingStandings', true)
-    getStandings().then(data => setStandings(data)).catch(err => setError('errorStandings', err.message)).finally(() => setLoading('isLoadingStandings', false))
+    const fetchData = async () => {
+      setLoading('isLoadingStandings', true)
+      getStandings().then(data => setStandings(data)).catch(err => setError('errorStandings', err.message)).finally(() => setLoading('isLoadingStandings', false))
 
-    setLoading('isLoadingRace', true)
-    getNextRace().then(data => setRace(data)).catch(err => setError('errorRace', err.message)).finally(() => setLoading('isLoadingRace', false))
+      setLoading('isLoadingRace', true)
+      getNextRace().then(data => setRace(data)).catch(err => setError('errorRace', err.message)).finally(() => setLoading('isLoadingRace', false))
 
-    setLoading('isLoadingCalendar', true)
-    getCalendar().then(data => setCalendar(data)).catch(err => setError('errorCalendar', err.message)).finally(() => setLoading('isLoadingCalendar', false))
+      setLoading('isLoadingCalendar', true)
+      getCalendar().then(data => setCalendar(data)).catch(err => setError('errorCalendar', err.message)).finally(() => setLoading('isLoadingCalendar', false))
 
-    setLoading('isLoadingResults', true)
-    getLatestResults().then(data => setPodium(data)).catch(err => setError('errorResults', err.message)).finally(() => setLoading('isLoadingResults', false))
+      setLoading('isLoadingResults', true)
+      getLatestResults().then(data => setPodium(data)).catch(err => setError('errorResults', err.message)).finally(() => setLoading('isLoadingResults', false))
 
-    setLoading('isLoadingStats', true)
-    getRaceStats().then(data => setRaceStats(data)).catch(err => setError('errorStats', err.message)).finally(() => setLoading('isLoadingStats', false))
+      setLoading('isLoadingStats', true)
+      getRaceStats().then(data => setRaceStats(data)).catch(err => setError('errorStats', err.message)).finally(() => setLoading('isLoadingStats', false))
 
-    setLoading('isLoadingNews', true)
-    getF1News(activeTeam).then(data => setNews(data)).catch(err => setError('errorNews', err.message)).finally(() => setLoading('isLoadingNews', false))
+      setLoading('isLoadingNews', true)
+      getF1News(activeTeam).then(data => setNews(data)).catch(err => setError('errorNews', err.message)).finally(() => setLoading('isLoadingNews', false))
 
-    // ── Dynamic Sessions ──────────────────────────────
-    const fetchSessions = async () => {
       setLoading('isLoadingSessions', true)
-      try {
-        const data = await getSeasonSessions(2024) // Using 2024 as proxy for 2026 engine
-        setSessions(data)
-      } catch (err) {
-        console.error('Failed to fetch sessions:', err)
-      } finally {
-        setLoading('isLoadingSessions', false)
-      }
+      getSeasonSessions(2024).then(data => setSessions(data)).catch(err => console.error('Failed to fetch sessions:', err)).finally(() => setLoading('isLoadingSessions', false))
     }
 
-    fetchSessions()
-    const sessionInterval = setInterval(fetchSessions, 300000) // Poll every 5 mins
+    fetchData()
+    const pollInterval = setInterval(fetchData, 600000) // 10 min polling for all data in production
 
-    return () => clearInterval(sessionInterval)
-  }, [isAuthenticated, activeTeam, setLoading, setStandings, setRace, setCalendar, setPodium, setRaceStats, setNews, setError, setSessions])
+    return () => clearInterval(pollInterval)
+  }, [isAuthenticated, activeTeam, isOnline, setLoading, setStandings, setRace, setCalendar, setPodium, setRaceStats, setNews, setError, setSessions])
 
   // ── Stats derivation ────────────────────────────────
   useEffect(() => {
@@ -196,13 +207,25 @@ function App() {
   if (!authReady) {
     return (
       <div className="auth-page">
-        <div className="auth-card" style={{ textAlign: 'center' }}>
+        <div className="auth-card" style={{ textAlign: 'center', border: '1px solid var(--paper-3)', background: '#fff' }}>
           <div className="auth-accent"></div>
-          <div className="auth-eyebrow" style={{ justifyContent: 'center', marginBottom: '24px' }}>
+          <div className="auth-eyebrow" style={{ justifyContent: 'center', marginBottom: '32px' }}>
             <span className="checker-flag"></span>
-            <span>Loading</span>
+            <span style={{ color: 'var(--carbon)', letterSpacing: '0.2em' }}>AUTHENTICATING SYSTEMS</span>
           </div>
-          <span className="auth-spinner" style={{ borderTopColor: 'var(--racing)', borderColor: 'var(--rule-light)', width: '32px', height: '32px', display: 'inline-block' }}></span>
+          <div style={{ padding: '40px 0' }}>
+            <span className="auth-spinner" style={{ 
+              borderTopColor: 'var(--racing)', 
+              borderColor: 'var(--rule-light)', 
+              width: '40px', 
+              height: '40px', 
+              display: 'inline-block',
+              borderWidth: '3px'
+            }}></span>
+          </div>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', color: 'var(--ink-3)', opacity: 0.6, marginTop: '24px' }}>
+            PIT WALL SECURE HANDSHAKE IN PROGRESS...
+          </p>
         </div>
       </div>
     )
@@ -248,6 +271,13 @@ function App() {
       <Footer />
       <SettingsPanel />
       <OnboardingModal />
+
+      {!isOnline && (
+        <div className="offline-banner">
+          <div className="offline-dot"></div>
+          OFFLINE · LIMITED FUNCTIONALITY
+        </div>
+      )}
     </div>
   )
 }

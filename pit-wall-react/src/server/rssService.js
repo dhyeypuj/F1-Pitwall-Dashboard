@@ -1,6 +1,10 @@
 import Parser from 'rss-parser'
 
-const parser = new Parser()
+// Use native timeout support in rss-parser
+const parser = new Parser({
+  timeout: 10000,
+  headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) F1-Dashboard/1.0' }
+})
 
 const RSS_SOURCES = [
   {
@@ -29,8 +33,10 @@ export const fetchRSSNews = async () => {
     try {
       const feed = await parser.parseURL(source.url)
       
+      if (!feed || !feed.items) return []
+
       return feed.items.map((item, index) => ({
-        id: `rss-${source.id}-${index}-${Date.now()}`,
+        id: item.guid || item.id || `rss-${source.id}-${index}-${Date.now()}`,
         headline: item.title || 'Untitled',
         body: item.contentSnippet || item.content || 'No description available.',
         source: source.name,
@@ -38,15 +44,16 @@ export const fetchRSSNews = async () => {
         link: item.link || '#'
       }))
     } catch (error) {
-      console.error(`Error fetching RSS from ${source.name}:`, error)
+      console.error(`Error fetching RSS from ${source.name}:`, error.message)
       return []
     }
   })
 
-  const unmerged = await Promise.all(promises)
+  const results = await Promise.all(promises)
 
-  return unmerged
+  return results
     .flat()
+    .filter(item => item.headline && item.headline !== 'Untitled')
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
     .slice(0, 15)
 }
