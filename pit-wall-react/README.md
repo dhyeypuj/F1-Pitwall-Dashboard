@@ -2,7 +2,9 @@
 
 > A high-performance, immersive racing dashboard designed for the future of Formula 1.
 
-![Full Dashboard Preview](file:///C:/Users/Dhyey%20Pujara/.gemini/antigravity/brain/b139919e-4682-48ee-8791-ecc92d864146/dashboard_dark_mode_full_1778374297912.png)
+<p align="center">
+  <img src="screenshots/dashboard_full.png" alt="Full Dashboard Preview" width="100%">
+</p>
 
 ## 🏎️ Overview
 
@@ -16,21 +18,30 @@ Stay updated with a dynamic top ticker providing the latest WDC/WCC standings, r
 ### 🌓 Dual-Mode Aesthetics
 Experience the dashboard in sleek **Dark Mode** or high-contrast **Light Mode**, with a full theme engine that adapts to your favorite F1 team's identity.
 
-````carousel
-![Dark Mode Hero](file:///C:/Users/Dhyey%20Pujara/.gemini/antigravity/brain/b139919e-4682-48ee-8791-ecc92d864146/hero_section_dark_1778374315388.png)
-<!-- slide -->
-![Light Mode Hero](file:///C:/Users/Dhyey%20Pujara/.gemini/antigravity/brain/b139919e-4682-48ee-8791-ecc92d864146/hero_section_light_1778374570418.png)
-````
+<table align="center">
+  <tr>
+    <td align="center"><b>Dark Mode</b></td>
+    <td align="center"><b>Light Mode</b></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/hero_dark.png" alt="Dark Mode Hero" width="100%"></td>
+    <td><img src="screenshots/hero_light.png" alt="Light Mode Hero" width="100%"></td>
+  </tr>
+</table>
 
 ### 📅 Smart Calendar & Sessions
 Never miss a session. The dashboard automatically calculates local times and countdowns for every FP1, Qualifying, Sprint, and Race day, shifting focus as the weekend progresses.
 
-![Season Calendar](file:///C:/Users/Dhyey%20Pujara/.gemini/antigravity/brain/b139919e-4682-48ee-8791-ecc92d864146/season_calendar_light_1778374614599.png)
+<p align="center">
+  <img src="screenshots/calendar.png" alt="Season Calendar" width="100%">
+</p>
 
 ### 🛠️ Personalization Command Center
 Tailor your experience. Choose your favorite team, toggle dashboard widgets (News, Standings, Podium), and persist your preferences across sessions.
 
-![Settings Panel](file:///C:/Users/Dhyey%20Pujara/.gemini/antigravity/brain/b139919e-4682-48ee-8791-ecc92d864146/settings_panel_dark_1778374508254.png)
+<p align="center">
+  <img src="screenshots/settings.png" alt="Settings Panel" width="80%">
+</p>
 
 ## 🛠️ Tech Stack
 
