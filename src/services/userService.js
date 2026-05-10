@@ -30,6 +30,7 @@ export const getUserPreferences = async (uid) => {
   const defaults = {
     team: 'ferrari',
     theme: 'dark',
+    appearance: 'light',
     widgets: {
       news: true,
       standings: true,
@@ -49,6 +50,7 @@ export const getUserPreferences = async (uid) => {
       return {
         team: data.team || data.favoriteTeam || defaults.team,
         theme: data.theme || defaults.theme,
+        appearance: data.appearance || defaults.appearance,
         hasSelectedTeam: !!data.hasSelectedTeam,
         widgets: {
           ...defaults.widgets,

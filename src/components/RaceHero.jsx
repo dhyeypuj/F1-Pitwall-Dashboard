@@ -66,7 +66,7 @@ const RaceHero = () => {
             <div className="race-meta-row">
               <span className="race-round">◆ {nextRace.round.toUpperCase()} · {nextRace.status.toUpperCase()}</span>
               {isSprintWeekend && <span className="race-round" style={{ background: 'var(--racing)', color: '#000', padding: '2px 8px', borderRadius: '4px', marginLeft: '8px' }}>SPRINT WEEKEND</span>}
-              <span className="race-flag-big" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, letterSpacing: '-1px', color: '#fff', fontSize: '28px' }}>{nextRace.countryCode}</span>
+              <span className="race-flag-big" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, letterSpacing: '-1px', fontSize: '28px' }}>{nextRace.countryCode}</span>
             </div>
             
             <h2 className="race-name">
@@ -79,7 +79,7 @@ const RaceHero = () => {
               {nextRace.venue ? ` · ${nextRace.venue}` : ` · ${nextRace.location}`}
             </div>
             
-            <div className="race-circuit" style={{ opacity: 0.9, fontSize: '1rem', marginTop: '8px', color: '#fff' }}>
+            <div className="race-circuit" style={{ opacity: 0.9, fontSize: '1rem', marginTop: '8px' }}>
               Round {nextRace.roundNumber} of 22 · {nextRace.laps} laps · {nextRace.distance} km
             </div>
 

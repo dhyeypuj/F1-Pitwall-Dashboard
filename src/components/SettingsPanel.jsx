@@ -75,6 +75,21 @@ const SettingsPanel = () => {
         </div>
 
         <div className="settings-section">
+          <label className="section-label">APPEARANCE</label>
+          <div className="toggle-row">
+            <span className="toggle-label">Dark Mode</span>
+            <label className="switch">
+              <input 
+                type="checkbox" 
+                checked={preferences?.appearance === 'dark'} 
+                onChange={(e) => updatePreference('appearance', e.target.checked ? 'dark' : 'light')}
+              />
+              <span className="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div className="settings-section">
           <label className="section-label">DASHBOARD WIDGETS</label>
           <div className="widget-toggles">
             {Object.entries(defaultWidgets).map(([key]) => {

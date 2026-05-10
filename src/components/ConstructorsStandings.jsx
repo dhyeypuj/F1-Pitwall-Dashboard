@@ -18,10 +18,10 @@ const ConstructorsStandings = () => {
             <div className="con-top">
               <div className="con-pos">--</div>
               <div>
-                <div className="con-name" style={{ background: '#333', width: '100px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
-                <div className="con-engine" style={{ background: '#222', width: '60px', height: '12px', display: 'block', borderRadius: '4px', marginTop: '4px' }}></div>
+                <div className="con-name" style={{ background: 'var(--surface-3)', width: '100px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
+                <div className="con-engine" style={{ background: 'var(--surface-2)', width: '60px', height: '12px', display: 'block', borderRadius: '4px', marginTop: '4px' }}></div>
               </div>
-              <div className="con-pts" style={{ background: '#333', width: '30px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
+              <div className="con-pts" style={{ background: 'var(--surface-3)', width: '30px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
             </div>
             <div className="con-bar">
               <div className="con-bar-fill" style={{ width: '0%' }}></div>

@@ -6,6 +6,7 @@ const useStore = create((set) => ({
   preferences: {
     team: "ferrari",
     theme: "dark",
+    appearance: "light",
     hasSelectedTeam: true, // Default to true so it doesn't flash for guests, but will be set by App.jsx from Firebase
     widgets: {
       news: true,
