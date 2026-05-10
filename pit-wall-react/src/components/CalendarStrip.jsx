@@ -20,10 +20,10 @@ const CalendarStrip = () => {
           {isLoading ? (
             Array(8).fill(0).map((_, i) => (
               <div className="cal-round skeleton" key={`skel-cal-${i}`} style={{ opacity: 0.5 }}>
-                <div className="cal-rnum" style={{ background: '#333', width: '40px', height: '12px', borderRadius: '4px' }}></div>
+                <div className="cal-rnum" style={{ background: 'var(--surface-3)', width: '40px', height: '12px', borderRadius: '4px' }}></div>
                 <div className="cal-flag-emoji" style={{ opacity: 0.1 }}>🏁</div>
-                <div className="cal-country" style={{ background: '#222', width: '60px', height: '16px', borderRadius: '4px' }}></div>
-                <div className="cal-flag-name" style={{ background: '#222', width: '80px', height: '12px', borderRadius: '4px', marginTop: '4px' }}></div>
+                <div className="cal-country" style={{ background: 'var(--surface-2)', width: '60px', height: '16px', borderRadius: '4px' }}></div>
+                <div className="cal-flag-name" style={{ background: 'var(--surface-2)', width: '80px', height: '12px', borderRadius: '4px', marginTop: '4px' }}></div>
               </div>
             ))
           ) : error || !calendar?.rounds?.length ? (

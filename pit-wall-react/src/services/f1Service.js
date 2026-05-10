@@ -4,10 +4,10 @@ import { ERGAST_API_BASE } from '../config/api'
 const BASE_URL = ERGAST_API_BASE
 
 export const RACE_METADATA_2026 = {
-  australia: { round: 1, countryCode: "AU", title: "Australian Grand Prix", circuit: "Albert Park Circuit", location: "Melbourne, Australia", laps: 58, distanceKm: 306.124, lapRecord: "1:19.813", lapRecordHolder: "Charles Leclerc", previousPole: "Max Verstappen", dates: "Mar 6 – 8" },
-  china: { round: 2, countryCode: "CN", title: "Chinese Grand Prix", circuit: "Shanghai International Circuit", location: "Shanghai, China", laps: 56, distanceKm: 305.066, lapRecord: "1:32.238", lapRecordHolder: "Michael Schumacher", previousPole: "Lando Norris", dates: "Mar 13 – 15" },
-  japan: { round: 3, countryCode: "JP", title: "Japanese Grand Prix", circuit: "Suzuka Circuit", location: "Suzuka, Japan", laps: 53, distanceKm: 307.471, lapRecord: "1:30.983", lapRecordHolder: "Lewis Hamilton", previousPole: "Max Verstappen", dates: "Apr 3 – 5" },
-  miami: { round: 4, countryCode: "US", title: "Miami Grand Prix", circuit: "Miami International Autodrome", location: "Miami, United States", venue: "Hard Rock Stadium", laps: 57, distanceKm: 308.326, lapRecord: "1:29.708", lapRecordHolder: "Max Verstappen", previousPole: "Max Verstappen", dates: "May 1 – 3" },
+  australia: { round: 1, countryCode: "AU", title: "Australian Grand Prix", circuit: "Albert Park Circuit", location: "Melbourne, Australia", laps: 58, distanceKm: 306.124, lapRecord: "1:19.813", lapRecordHolder: "Charles Leclerc", previousPole: "Max Verstappen", dates: "Mar 6 – 8", winner: "G. Russell" },
+  china: { round: 2, countryCode: "CN", title: "Chinese Grand Prix", circuit: "Shanghai International Circuit", location: "Shanghai, China", laps: 56, distanceKm: 305.066, lapRecord: "1:32.238", lapRecordHolder: "Michael Schumacher", previousPole: "Lando Norris", dates: "Mar 13 – 15", winner: "A. Antonelli" },
+  japan: { round: 3, countryCode: "JP", title: "Japanese Grand Prix", circuit: "Suzuka Circuit", location: "Suzuka, Japan", laps: 53, distanceKm: 307.471, lapRecord: "1:30.983", lapRecordHolder: "Lewis Hamilton", previousPole: "Max Verstappen", dates: "Apr 3 – 5", winner: "A. Antonelli" },
+  miami: { round: 4, countryCode: "US", title: "Miami Grand Prix", circuit: "Miami International Autodrome", location: "Miami, United States", venue: "Hard Rock Stadium", laps: 57, distanceKm: 308.326, lapRecord: "1:29.708", lapRecordHolder: "Max Verstappen", previousPole: "Max Verstappen", dates: "May 1 – 3", winner: "A. Antonelli" },
   canada: { round: 5, countryCode: "CA", title: "Canadian Grand Prix", circuit: "Circuit Gilles Villeneuve", location: "Montreal, Canada", laps: 70, distanceKm: 305.27, lapRecord: "1:13.078", lapRecordHolder: "Valtteri Bottas", previousPole: "George Russell", dates: "May 22 – 24" },
   monaco: { round: 6, countryCode: "MC", title: "Monaco Grand Prix", circuit: "Circuit de Monaco", location: "Monte Carlo, Monaco", laps: 78, distanceKm: 260.286, lapRecord: "1:12.909", lapRecordHolder: "Lewis Hamilton", previousPole: "Charles Leclerc", dates: "Jun 5 – 7" },
   spain_madrid: { round: 7, countryCode: "ES", title: "Spanish Grand Prix", circuit: "Madrid", location: "Madrid, Spain", laps: 57, distanceKm: 309.7, lapRecord: "—", lapRecordHolder: "—", previousPole: "—", dates: "Jun 12 – 14" },
@@ -150,21 +150,30 @@ export const getStandings = async () => {
 
 export const getCalendar = async () => {
   try {
-    const { data } = await fetchCached(`${BASE_URL}/2026.json`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
-    const apiRaces = data.MRData.RaceTable.Races || []
+    // Parallel fetch for calendar rounds and actual race results
+    const [calendarRes, resultsRes] = await Promise.all([
+      fetchCached(`${BASE_URL}/2026.json`),
+      fetchCached(`${BASE_URL}/2026/results.json?limit=100`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
+    ]).catch(() => [{ data: { MRData: { RaceTable: { Races: [] } } } }, { data: { MRData: { RaceTable: { Races: [] } } } }])
+
+    const apiResults = resultsRes.data?.MRData?.RaceTable?.Races || []
+    // Create a map for quick lookup: round -> winner name
+    const resultsMap = new Map(apiResults.map(r => [
+      Number(r.round), 
+      `${r.Results[0].Driver.givenName[0]}. ${r.Results[0].Driver.familyName}`
+    ]))
+
     const now = new Date('2026-05-07T00:00:00Z')
-    
-    // If API is empty (likely because it's 2026), use our metadata to build the list
     const raceSource = Object.values(RACE_METADATA_2026)
     
     const processedRounds = raceSource.map(m => {
       const raceMonth = m.dates.split(' ')[0]
       const raceDay = m.dates.split(' ')[1]
-      const raceDateStr = `2026-${raceMonth}-${raceDay}`.replace('Mar', '03').replace('Apr', '04').replace('May', '05').replace('Jun', '06').replace('Jul', '07').replace('Aug', '08').replace('Sep', '09').replace('Oct', '10').replace('Nov', '11').replace('Dec', '12')
+      const monthMap = { 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' }
+      const raceDateStr = `2026-${monthMap[raceMonth]}-${raceDay.padStart(2, '0')}T14:00:00Z`
       const raceDate = new Date(raceDateStr)
       
       const isPast = raceDate < now
-      // Round 5 (Canada) is the next one for May 7th
       const isNext = m.round === 5 
 
       return {
@@ -174,13 +183,14 @@ export const getCalendar = async () => {
         country: m.location.split(', ').pop(),
         name: m.title,
         circuit: m.circuit,
-        date: raceDateStr,
+        date: m.dates,
         status: isPast ? 'DONE' : (isNext ? 'UP NEXT' : 'UPCOMING'),
         done: isPast,
         next: isNext,
         emoji: '🏁',
         flagUrl: `https://flagcdn.com/w80/${m.countryCode.toLowerCase()}.png`,
-        winner: isPast ? 'TBD' : ''
+        // Prioritize API results, fallback to metadata winner, then TBD if past
+        winner: resultsMap.get(m.round) || m.winner || (isPast ? 'TBD' : '')
       }
     })
 

@@ -204,6 +204,20 @@ function App() {
     }
   }, [isAuthenticated, standings, calendar, podium, race, raceStats, setHeroStats, setTicker, setStats])
 
+  // Handle theme persistence at root level
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('theme-light', 'theme-dark');
+    root.classList.add(`theme-${preferences.appearance || 'light'}`);
+  }, [preferences.appearance]);
+
+  // Handle theme persistence at root level
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('theme-light', 'theme-dark');
+    root.classList.add(`theme-${preferences.appearance || 'light'}`);
+  }, [preferences.appearance]);
+
   if (!authReady) {
     return (
       <div className="auth-page">
@@ -236,7 +250,10 @@ function App() {
   }
 
   return (
-    <div className="pit-wall-app" data-team={activeTeam}>
+    <div 
+      className="pit-wall-app" 
+      data-team={preferences.team}
+    >
       <Ticker />
       
       <main className="main-content">

@@ -17,11 +17,11 @@ const DriversStandings = () => {
           <div className="driver-row skeleton" key={`skel-d-${i}`} style={{ opacity: 0.5, animationDelay: `${4.5 + i * 0.08}s` }}>
             <div className="driver-pos">--</div>
             <div className="driver-info">
-              <div className="driver-line"><span className="driver-name" style={{ background: '#333', width: '120px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></span></div>
-              <div className="driver-team" style={{ background: '#222', width: '80px', height: '12px', display: 'inline-block', borderRadius: '4px', marginTop: '4px' }}></div>
+              <div className="driver-line"><span className="driver-name" style={{ background: 'var(--surface-3)', width: '120px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></span></div>
+              <div className="driver-team" style={{ background: 'var(--surface-2)', width: '80px', height: '12px', display: 'inline-block', borderRadius: '4px', marginTop: '4px' }}></div>
             </div>
             <div className="driver-pts-wrap">
-              <div className="driver-pts" style={{ background: '#333', width: '30px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
+              <div className="driver-pts" style={{ background: 'var(--surface-3)', width: '30px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
             </div>
           </div>
         ))
