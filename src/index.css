@@ -593,7 +593,6 @@ body {
 }
 .race-flag-big {
   font-size: 32px;
-  animation: flagWave 2.8s ease-in-out infinite;
 }
 .race-name {
   font-family: 'Playfair Display', serif;
@@ -659,6 +658,61 @@ body {
   content:''; width:7px; height:7px;
   background: var(--racing); border-radius:50%;
   animation: pulseDot 1.8s ease infinite;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.countdown-label.live {
+  color: var(--racing-hot, var(--racing));
+  opacity: 1;
+}
+.countdown-label.live::before {
+  background: var(--racing-hot, var(--racing));
+  box-shadow: 0 0 8px var(--racing-hot, var(--racing));
+}
+.countdown-label.red-flag-label {
+  color: #e10600;
+  opacity: 1;
+}
+.countdown-label.red-flag-label::before {
+  background: #e10600;
+  box-shadow: 0 0 8px #e10600;
+}
+.red-flag-alert-banner {
+  background: repeating-linear-gradient(
+    45deg,
+    #e10600,
+    #e10600 20px,
+    #8b0000 20px,
+    #8b0000 40px
+  );
+  border: 2px solid #e10600;
+  padding: 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(225, 6, 0, 0.4);
+  animation: redFlagFlashing 2s ease infinite;
+}
+.red-flag-text-pulse {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 10px rgba(255,255,255,0.8);
+  animation: blink 1.2s ease infinite;
+}
+.red-flag-subtext {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.25em;
+  margin-top: 8px;
+  opacity: 0.9;
+}
+@keyframes redFlagFlashing {
+  0%, 100% { border-color: #e10600; box-shadow: 0 0 20px rgba(225, 6, 0, 0.4); }
+  50% { border-color: #ff453a; box-shadow: 0 0 35px rgba(225, 6, 0, 0.8); }
 }
 
 .countdown {
@@ -1974,6 +2028,12 @@ body.colo-open { overflow: hidden; }
   animation: fadeUpSlow 1s ease both 2.8s;
 }
 
+.theme-light .auth-google-btn {
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+
 .auth-google-btn::before {
   content: '';
   position: absolute;
@@ -2086,8 +2146,8 @@ body.colo-open { overflow: hidden; }
 
 .auth-input-group input {
   background: var(--carbon);
-  border: 1px solid var(--rule-light);
-  color: var(--paper);
+  border: 1px solid var(--border);
+  color: var(--ink);
   padding: 12px;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
@@ -2141,7 +2201,7 @@ body.colo-open { overflow: hidden; }
 .auth-divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid var(--rule-light);
+  border-bottom: 1px solid var(--border);
 }
 
 .auth-divider span {

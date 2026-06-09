@@ -1,6 +1,8 @@
+import { useEffect, useState, useRef } from 'react'
 import useStore, { getNextRaceName } from '../store/useStore'
 import { useCountdown } from '../hooks/useCountdown'
 import { formatNumber } from '../utils/format'
+import { getLiveSessionControl } from '../services/f1Service'
 
 const RaceHero = () => {
   const { nextRace } = useStore((state) => state.race)
@@ -8,18 +10,105 @@ const RaceHero = () => {
   const isLoading = useStore((state) => state.isLoadingRace)
   const error = useStore((state) => state.errorRace)
 
+  const [liveStatus, setLiveStatus] = useState('none') // none, red_flag, safety_car, vsc, chequered_flag
+  const pollingIntervalRef = useRef(null)
+
   // Find dynamic session data for this round
   const currentRoundSessions = sessions.find(s => s.round === nextRace?.roundNumber)?.sessions || {}
   
   const now = new Date()
-  const upcomingSessions = Object.entries(currentRoundSessions)
+  const sessionList = Object.entries(currentRoundSessions)
     .map(([key, data]) => ({ key, ...data }))
-    .filter(s => new Date(s.start) > now)
     .sort((a, b) => new Date(a.start) - new Date(b.start))
 
-  const activeSession = upcomingSessions[0] || null
-  const targetDate = activeSession ? activeSession.start : nextRace?.date
-  
+  // Find if there is a session currently live (now is between start and end)
+  const scheduledLiveSession = sessionList.find(s => {
+    const start = new Date(s.start)
+    const end = new Date(s.end)
+    return now >= start && now <= end
+  })
+
+  // Detect a potentially extended session (started but within 3 hours, and not finished)
+  const potentialExtendedSession = sessionList.find(s => {
+    const start = new Date(s.start)
+    const end = new Date(s.end)
+    const hoursSinceStart = (now - start) / 3600000
+    return now > end && hoursSinceStart >= 0 && hoursSinceStart <= 3
+  })
+
+  let activeSession = null
+  let isLive = false
+  let targetDate = null
+
+  if (scheduledLiveSession) {
+    activeSession = scheduledLiveSession
+    isLive = true
+    targetDate = scheduledLiveSession.end
+  } else if (potentialExtendedSession && liveStatus !== 'chequered_flag') {
+    activeSession = potentialExtendedSession
+    isLive = true
+    targetDate = potentialExtendedSession.end
+  } else {
+    // Find the next upcoming session
+    const upcoming = sessionList.filter(s => new Date(s.start) > now)
+    if (upcoming.length > 0) {
+      activeSession = upcoming[0]
+      isLive = false
+      targetDate = activeSession.start
+    } else {
+      activeSession = null
+      isLive = false
+      targetDate = nextRace?.date
+    }
+  }
+
+  // If chequered flag is shown, force end live status and transition to next session
+  const isFinished = liveStatus === 'chequered_flag'
+  if (isLive && isFinished) {
+    isLive = false
+    const upcoming = sessionList.filter(s => new Date(s.start) > now)
+    if (upcoming.length > 0) {
+      activeSession = upcoming[0]
+      targetDate = activeSession.start
+    } else {
+      activeSession = null
+      targetDate = nextRace?.date
+    }
+  }
+
+  // Set up polling for live session control status
+  useEffect(() => {
+    const shouldPoll = activeSession && isLive && nextRace
+    
+    if (!shouldPoll) {
+      setLiveStatus('none')
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+        pollingIntervalRef.current = null
+      }
+      return
+    }
+
+    const locationName = nextRace.city || nextRace.location.split(',')[0]
+    
+    const checkLiveStatus = async () => {
+      const control = await getLiveSessionControl(locationName, activeSession.name)
+      if (control) {
+        setLiveStatus(control.status)
+      }
+    }
+
+    checkLiveStatus()
+    pollingIntervalRef.current = setInterval(checkLiveStatus, 15000)
+
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+        pollingIntervalRef.current = null
+      }
+    }
+  }, [activeSession?.name, isLive, nextRace])
+
   const { days, hours, minutes, seconds } = useCountdown(targetDate)
 
   if (isLoading) {
@@ -66,7 +155,12 @@ const RaceHero = () => {
             <div className="race-meta-row">
               <span className="race-round">◆ {nextRace.round.toUpperCase()} · {nextRace.status.toUpperCase()}</span>
               {isSprintWeekend && <span className="race-round" style={{ background: 'var(--racing)', color: '#000', padding: '2px 8px', borderRadius: '4px', marginLeft: '8px' }}>SPRINT WEEKEND</span>}
-              <span className="race-flag-big" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, letterSpacing: '-1px', fontSize: '28px' }}>{nextRace.countryCode}</span>
+              <img 
+                src={`https://flagcdn.com/w80/${nextRace.countryCode.toLowerCase()}.png`} 
+                alt={nextRace.countryCode} 
+                className="race-flag-big" 
+                style={{ width: '42px', height: '26px', objectFit: 'cover', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.1)', display: 'inline-block' }}
+              />
             </div>
             
             <h2 className="race-name">
@@ -85,8 +179,24 @@ const RaceHero = () => {
 
             <div className="race-stats" style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
               <div className="race-stat">
-                <div className="race-stat-label">{activeSession ? activeSession.name : 'Race Day'}</div>
-                <div className="race-stat-val" style={{ color: 'var(--racing)' }}>{activeSession ? formatLocalTime(activeSession.start) : nextRace.dates}</div>
+                <div className="race-stat-label">
+                  {activeSession ? (
+                    isLive ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="live-dot-pulsing" style={{ width: '6px', height: '6px', borderRadius: '50%', background: liveStatus === 'red_flag' ? '#e10600' : liveStatus === 'safety_car' || liveStatus === 'vsc' ? '#d4a017' : 'var(--racing-hot, var(--racing))', animation: 'pulseDot 1.5s ease infinite' }}></span>
+                        {activeSession.name} (LIVE)
+                      </span>
+                    ) : activeSession.name
+                  ) : 'Race Day'}
+                </div>
+                <div className="race-stat-val" style={{ color: liveStatus === 'red_flag' ? '#e10600' : liveStatus === 'safety_car' || liveStatus === 'vsc' ? '#d4a017' : isLive ? 'var(--racing-hot, var(--racing))' : 'var(--racing)' }}>
+                  {activeSession ? (
+                    liveStatus === 'red_flag' ? 'RED FLAG' :
+                    liveStatus === 'safety_car' ? 'SAFETY CAR' :
+                    liveStatus === 'vsc' ? 'VSC ACTIVE' :
+                    isLive ? 'IN PROGRESS' : formatLocalTime(activeSession.start)
+                  ) : nextRace.dates}
+                </div>
               </div>
               <div className="race-stat">
                 <div className="race-stat-label">Lap Record</div>
@@ -100,13 +210,30 @@ const RaceHero = () => {
           </div>
 
           <div className="race-right">
-            <div className="countdown-label">{activeSession ? `${activeSession.name.toUpperCase()} STARTS IN` : 'LIGHTS OUT IN'}</div>
-            <div className="countdown">
-              <div className="cd-cell"><div className="cd-num" id="cd-d">{formatNumber(days)}</div><div className="cd-label">Days</div></div>
-              <div className="cd-cell"><div className="cd-num" id="cd-h">{formatNumber(hours)}</div><div className="cd-label">Hours</div></div>
-              <div className="cd-cell"><div className="cd-num" id="cd-m">{formatNumber(minutes)}</div><div className="cd-label">Mins</div></div>
-              <div className="cd-cell"><div className="cd-num" id="cd-s">{formatNumber(seconds)}</div><div className="cd-label">Secs</div></div>
+            <div className={`countdown-label ${isLive ? 'live' : ''} ${liveStatus === 'red_flag' ? 'red-flag-label' : ''}`}>
+              {activeSession ? (
+                liveStatus === 'red_flag' ? (
+                  `${activeSession.name.toUpperCase()} SUSPENDED`
+                ) : isLive ? (
+                  `${activeSession.name.toUpperCase()} ENDS IN`
+                ) : (
+                  `${activeSession.name.toUpperCase()} STARTS IN`
+                )
+              ) : 'LIGHTS OUT IN'}
             </div>
+            {liveStatus === 'red_flag' ? (
+              <div className="red-flag-alert-banner">
+                <div className="red-flag-text-pulse">RED FLAG</div>
+                <div className="red-flag-subtext">SESSION SUSPENDED</div>
+              </div>
+            ) : (
+              <div className="countdown">
+                <div className="cd-cell"><div className="cd-num" id="cd-d">{formatNumber(days)}</div><div className="cd-label">Days</div></div>
+                <div className="cd-cell"><div className="cd-num" id="cd-h">{formatNumber(hours)}</div><div className="cd-label">Hours</div></div>
+                <div className="cd-cell"><div className="cd-num" id="cd-m">{formatNumber(minutes)}</div><div className="cd-label">Mins</div></div>
+                <div className="cd-cell"><div className="cd-num" id="cd-s">{formatNumber(seconds)}</div><div className="cd-label">Secs</div></div>
+              </div>
+            )}
           </div>
         </div>
       </div>

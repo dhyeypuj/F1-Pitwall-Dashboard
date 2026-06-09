@@ -3,21 +3,29 @@ import { ERGAST_API_BASE } from '../config/api'
 
 const BASE_URL = ERGAST_API_BASE
 
+export const formatDriverNameAbbreviated = (givenName, familyName) => {
+  if (familyName === 'Antonelli') {
+    return 'K. Antonelli'
+  }
+  const initial = givenName ? givenName[0] : ''
+  return initial ? `${initial}. ${familyName}` : familyName
+}
+
 export const RACE_METADATA_2026 = {
   australia: { round: 1, countryCode: "AU", title: "Australian Grand Prix", circuit: "Albert Park Circuit", location: "Melbourne, Australia", laps: 58, distanceKm: 306.124, lapRecord: "1:19.813", lapRecordHolder: "Charles Leclerc", previousPole: "Max Verstappen", dates: "Mar 6 – 8", winner: "G. Russell" },
-  china: { round: 2, countryCode: "CN", title: "Chinese Grand Prix", circuit: "Shanghai International Circuit", location: "Shanghai, China", laps: 56, distanceKm: 305.066, lapRecord: "1:32.238", lapRecordHolder: "Michael Schumacher", previousPole: "Lando Norris", dates: "Mar 13 – 15", winner: "A. Antonelli" },
-  japan: { round: 3, countryCode: "JP", title: "Japanese Grand Prix", circuit: "Suzuka Circuit", location: "Suzuka, Japan", laps: 53, distanceKm: 307.471, lapRecord: "1:30.983", lapRecordHolder: "Lewis Hamilton", previousPole: "Max Verstappen", dates: "Apr 3 – 5", winner: "A. Antonelli" },
-  miami: { round: 4, countryCode: "US", title: "Miami Grand Prix", circuit: "Miami International Autodrome", location: "Miami, United States", venue: "Hard Rock Stadium", laps: 57, distanceKm: 308.326, lapRecord: "1:29.708", lapRecordHolder: "Max Verstappen", previousPole: "Max Verstappen", dates: "May 1 – 3", winner: "A. Antonelli" },
-  canada: { round: 5, countryCode: "CA", title: "Canadian Grand Prix", circuit: "Circuit Gilles Villeneuve", location: "Montreal, Canada", laps: 70, distanceKm: 305.27, lapRecord: "1:13.078", lapRecordHolder: "Valtteri Bottas", previousPole: "George Russell", dates: "May 22 – 24" },
-  monaco: { round: 6, countryCode: "MC", title: "Monaco Grand Prix", circuit: "Circuit de Monaco", location: "Monte Carlo, Monaco", laps: 78, distanceKm: 260.286, lapRecord: "1:12.909", lapRecordHolder: "Lewis Hamilton", previousPole: "Charles Leclerc", dates: "Jun 5 – 7" },
-  spain_madrid: { round: 7, countryCode: "ES", title: "Spanish Grand Prix", circuit: "Madrid", location: "Madrid, Spain", laps: 57, distanceKm: 309.7, lapRecord: "—", lapRecordHolder: "—", previousPole: "—", dates: "Jun 12 – 14" },
+  china: { round: 2, countryCode: "CN", title: "Chinese Grand Prix", circuit: "Shanghai International Circuit", location: "Shanghai, China", laps: 56, distanceKm: 305.066, lapRecord: "1:32.238", lapRecordHolder: "Michael Schumacher", previousPole: "Lando Norris", dates: "Mar 13 – 15", winner: "K. Antonelli" },
+  japan: { round: 3, countryCode: "JP", title: "Japanese Grand Prix", circuit: "Suzuka Circuit", location: "Suzuka, Japan", laps: 53, distanceKm: 307.471, lapRecord: "1:30.983", lapRecordHolder: "Lewis Hamilton", previousPole: "Max Verstappen", dates: "Mar 27 – 29", winner: "K. Antonelli" },
+  miami: { round: 4, countryCode: "US", title: "Miami Grand Prix", circuit: "Miami International Autodrome", location: "Miami, United States", venue: "Hard Rock Stadium", laps: 57, distanceKm: 308.326, lapRecord: "1:29.708", lapRecordHolder: "Max Verstappen", previousPole: "Max Verstappen", dates: "May 1 – 3", winner: "K. Antonelli" },
+  canada: { round: 5, countryCode: "CA", title: "Canadian Grand Prix", circuit: "Circuit Gilles Villeneuve", location: "Montreal, Canada", laps: 70, distanceKm: 305.27, lapRecord: "1:13.078", lapRecordHolder: "Valtteri Bottas", previousPole: "George Russell", dates: "May 22 – 24", winner: "K. Antonelli" },
+  monaco: { round: 6, countryCode: "MC", title: "Monaco Grand Prix", circuit: "Circuit de Monaco", location: "Monte Carlo, Monaco", laps: 78, distanceKm: 260.286, lapRecord: "1:12.909", lapRecordHolder: "Lewis Hamilton", previousPole: "Charles Leclerc", dates: "Jun 5 – 7", winner: "K. Antonelli" },
+  spain_barcelona: { round: 7, countryCode: "ES", title: "Barcelona-Catalunya Grand Prix", circuit: "Circuit de Barcelona-Catalunya", location: "Barcelona, Spain", laps: 66, distanceKm: 307.236, lapRecord: "1:16.330", lapRecordHolder: "Max Verstappen", previousPole: "Lando Norris", dates: "Jun 12 – 14" },
   austria: { round: 8, countryCode: "AT", title: "Austrian Grand Prix", circuit: "Red Bull Ring", location: "Spielberg, Austria", laps: 71, distanceKm: 306.452, lapRecord: "1:05.619", lapRecordHolder: "Carlos Sainz", previousPole: "Max Verstappen", dates: "Jun 26 – 28" },
   britain: { round: 9, countryCode: "GB", title: "British Grand Prix", circuit: "Silverstone Circuit", location: "Silverstone, United Kingdom", laps: 52, distanceKm: 306.198, lapRecord: "1:27.097", lapRecordHolder: "Max Verstappen", previousPole: "George Russell", dates: "Jul 3 – 5" },
   belgium: { round: 10, countryCode: "BE", title: "Belgian Grand Prix", circuit: "Circuit de Spa-Francorchamps", location: "Stavelot, Belgium", laps: 44, distanceKm: 308.052, lapRecord: "1:44.701", lapRecordHolder: "Sergio Pérez", previousPole: "Charles Leclerc", dates: "Jul 17 – 19" },
   hungary: { round: 11, countryCode: "HU", title: "Hungarian Grand Prix", circuit: "Hungaroring", location: "Budapest, Hungary", laps: 70, distanceKm: 306.63, lapRecord: "1:16.627", lapRecordHolder: "Lewis Hamilton", previousPole: "Lando Norris", dates: "Jul 24 – 26" },
   netherlands: { round: 12, countryCode: "NL", title: "Dutch Grand Prix", circuit: "Circuit Zandvoort", location: "Zandvoort, Netherlands", laps: 72, distanceKm: 306.587, lapRecord: "1:11.097", lapRecordHolder: "Lewis Hamilton", previousPole: "Lando Norris", dates: "Aug 21 – 23" },
   italy_monza: { round: 13, countryCode: "IT", title: "Italian Grand Prix", circuit: "Autodromo Nazionale Monza", location: "Monza, Italy", laps: 53, distanceKm: 306.72, lapRecord: "1:21.046", lapRecordHolder: "Rubens Barrichello", previousPole: "Lando Norris", dates: "Sep 4 – 6" },
-  spain_barcelona: { round: 14, countryCode: "ES", title: "Barcelona Grand Prix", circuit: "Circuit de Barcelona-Catalunya", location: "Barcelona, Spain", laps: 66, distanceKm: 307.236, lapRecord: "1:16.330", lapRecordHolder: "Max Verstappen", previousPole: "Lando Norris", dates: "Sep 11 – 13" },
+  spain_madrid: { round: 14, countryCode: "ES", title: "Spanish Grand Prix", circuit: "Madrid", location: "Madrid, Spain", laps: 57, distanceKm: 309.7, lapRecord: "—", lapRecordHolder: "—", previousPole: "—", dates: "Sep 11 – 13" },
   azerbaijan: { round: 15, countryCode: "AZ", title: "Azerbaijan Grand Prix", circuit: "Baku City Circuit", location: "Baku, Azerbaijan", laps: 51, distanceKm: 306.049, lapRecord: "1:43.009", lapRecordHolder: "Charles Leclerc", previousPole: "Charles Leclerc", dates: "Sep 25 – 27" },
   singapore: { round: 16, countryCode: "SG", title: "Singapore Grand Prix", circuit: "Marina Bay Street Circuit", location: "Singapore", laps: 62, distanceKm: 306.143, lapRecord: "1:34.486", lapRecordHolder: "Daniel Ricciardo", previousPole: "Charles Leclerc", dates: "Oct 9 – 11" },
   unitedStates: { round: 17, countryCode: "US", title: "United States Grand Prix", circuit: "Circuit of the Americas", location: "Austin, United States", laps: 56, distanceKm: 308.405, lapRecord: "1:36.169", lapRecordHolder: "Charles Leclerc", previousPole: "Lando Norris", dates: "Oct 23 – 25" },
@@ -69,24 +77,24 @@ const getTeamColor = (id) => {
 
 export const getNextRace = async () => {
   try {
-    // For 2026 Concept, we use our static metadata as the source of truth
-    const now = new Date('2026-05-07T00:00:00Z') // Current concept date
+    // For 2026 Concept, we use our static metadata as the source of truth and compare against system date
+    const now = new Date()
     const races = Object.values(RACE_METADATA_2026)
     
+    const monthMap = { 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' }
     // Convert metadata dates into real Date objects for comparison
     // Australia is Mar 6-8, China is Mar 13-15, etc.
     // Let's find the first race whose date is in the future relative to our concept date
     const raceMeta = races.find(m => {
       const raceMonth = m.dates.split(' ')[0]
       const raceDay = m.dates.split(' ')[1]
-      const raceDateStr = `2026-${raceMonth}-${raceDay}`.replace('Mar', '03').replace('Apr', '04').replace('May', '05').replace('Jun', '06')
+      const raceDateStr = `2026-${monthMap[raceMonth] || '01'}-${raceDay.padStart(2, '0')}T14:00:00Z`
       return new Date(raceDateStr) > now
     }) || races[4] // Fallback to Canada (Round 5) if none found or for demo
 
     // Pull the start date from m.dates (e.g., "May 22 – 24")
     const raceMonth = raceMeta.dates.split(' ')[0]
     const raceDay = raceMeta.dates.split(' ')[1]
-    const monthMap = { 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' }
     const isoDate = `2026-${monthMap[raceMonth]}-${raceDay.padStart(2, '0')}T14:00:00Z`
 
     return {
@@ -129,7 +137,7 @@ export const getStandings = async () => {
     const rawConstructors = constructorsRes.data.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || []
     const drivers = rawDrivers.map((d, i) => ({ 
       pos: String(d.position).padStart(2, '0'), 
-      name: `${d.Driver.givenName[0]}. ${d.Driver.familyName}`, 
+      name: formatDriverNameAbbreviated(d.Driver.givenName, d.Driver.familyName), 
       code: d.Driver.code || d.Driver.familyName.substring(0, 3).toUpperCase(), 
       team: getTeamDisplayName(d.Constructors[0]?.constructorId) || 'Unknown', 
       nationality: d.Driver.nationality, 
@@ -148,6 +156,48 @@ export const getStandings = async () => {
   } catch (error) { console.error('Error fetching standings:', error); throw new Error('Failed to load standings'); }
 }
 
+const openF1WinnerCache = new Map()
+
+export const getOpenF1WinnerForRound = async (roundNumber, location) => {
+  if (openF1WinnerCache.has(roundNumber)) {
+    return openF1WinnerCache.get(roundNumber)
+  }
+  try {
+    // 1. Get meeting key for 2026 at this location
+    const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=2026&location=${encodeURIComponent(location)}`)
+    const meeting = meetingsRes.data?.[0]
+    if (!meeting) return null
+    
+    // 2. Get race session key
+    const sessionsRes = await axios.get(`https://api.openf1.org/v1/sessions?meeting_key=${meeting.meeting_key}&session_name=Race`)
+    const session = sessionsRes.data?.[0]
+    if (!session) return null
+    
+    // 3. Get positions filtered by position=1
+    const posRes = await axios.get(`https://api.openf1.org/v1/position?session_key=${session.session_key}&position=1`)
+    const p1Records = posRes.data
+    if (!p1Records || p1Records.length === 0) return null
+    
+    // Sort by date to get the final record (finishing P1)
+    p1Records.sort((a, b) => new Date(a.date) - new Date(b.date))
+    const finalP1 = p1Records[p1Records.length - 1]
+    const winnerNum = finalP1.driver_number
+    
+    // 4. Get driver details
+    const driverRes = await axios.get(`https://api.openf1.org/v1/drivers?session_key=${session.session_key}&driver_number=${winnerNum}`)
+    const driver = driverRes.data?.[0]
+    if (!driver) return null
+    
+    const winnerName = formatDriverNameAbbreviated(driver.first_name, driver.last_name)
+    
+    openF1WinnerCache.set(roundNumber, winnerName)
+    return winnerName
+  } catch (err) {
+    console.error(`Error fetching OpenF1 winner for round ${roundNumber}:`, err)
+    return null
+  }
+}
+
 export const getCalendar = async () => {
   try {
     // Parallel fetch for calendar rounds and actual race results
@@ -160,21 +210,69 @@ export const getCalendar = async () => {
     // Create a map for quick lookup: round -> winner name
     const resultsMap = new Map(apiResults.map(r => [
       Number(r.round), 
-      `${r.Results[0].Driver.givenName[0]}. ${r.Results[0].Driver.familyName}`
+      formatDriverNameAbbreviated(r.Results[0].Driver.givenName, r.Results[0].Driver.familyName)
     ]))
 
-    const now = new Date('2026-05-07T00:00:00Z')
+    const now = new Date()
     const raceSource = Object.values(RACE_METADATA_2026)
     
-    const processedRounds = raceSource.map(m => {
+    const monthMap = { 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' }
+    
+    // Find the next race dynamically to mark it in the calendar
+    const nextRaceMeta = raceSource.find(m => {
       const raceMonth = m.dates.split(' ')[0]
       const raceDay = m.dates.split(' ')[1]
-      const monthMap = { 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' }
+      const raceDateStr = `2026-${monthMap[raceMonth] || '01'}-${raceDay.padStart(2, '0')}T14:00:00Z`
+      return new Date(raceDateStr) > now
+    }) || raceSource[4]
+    const nextRound = nextRaceMeta.round
+
+    const locationMap = {
+      1: 'Melbourne',
+      2: 'Shanghai',
+      3: 'Suzuka',
+      4: 'Miami Gardens',
+      5: 'Montréal',
+      6: 'Monte Carlo',
+      7: 'Barcelona',
+      8: 'Spielberg',
+      9: 'Silverstone',
+      10: 'Stavelot',
+      11: 'Budapest',
+      12: 'Zandvoort',
+      13: 'Monza',
+      14: 'Madrid',
+      15: 'Baku',
+      16: 'Singapore',
+      17: 'Austin',
+      18: 'Mexico City',
+      19: 'São Paulo',
+      20: 'Las Vegas',
+      21: 'Lusail',
+      22: 'Abu Dhabi'
+    }
+
+    const processedRounds = await Promise.all(raceSource.map(async m => {
+      const raceMonth = m.dates.split(' ')[0]
+      const raceDay = m.dates.split(' ')[1]
       const raceDateStr = `2026-${monthMap[raceMonth]}-${raceDay.padStart(2, '0')}T14:00:00Z`
       const raceDate = new Date(raceDateStr)
       
       const isPast = raceDate < now
-      const isNext = m.round === 5 
+      const isNext = m.round === nextRound 
+
+      let winnerName = resultsMap.get(m.round)
+
+      // Fallback to OpenF1 if race is past and winner is missing from results endpoint
+      if (!winnerName && isPast) {
+        const location = locationMap[m.round]
+        if (location) {
+          winnerName = await getOpenF1WinnerForRound(m.round, location)
+        }
+      }
+
+      // Final fallback to mock winner, then TBD
+      winnerName = winnerName || m.winner || (isPast ? 'TBD' : '')
 
       return {
         id: m.round,
@@ -189,10 +287,9 @@ export const getCalendar = async () => {
         next: isNext,
         emoji: '🏁',
         flagUrl: `https://flagcdn.com/w80/${m.countryCode.toLowerCase()}.png`,
-        // Prioritize API results, fallback to metadata winner, then TBD if past
-        winner: resultsMap.get(m.round) || m.winner || (isPast ? 'TBD' : '')
+        winner: winnerName
       }
-    })
+    }))
 
     return {
       meta: `${raceSource.length} Rounds · Mar → Dec 2026`,
@@ -223,4 +320,55 @@ export const getRaceStats = async () => {
     const fl = race.Results.find(r => r.FastestLap?.rank === '1')
     return { latestRaceName: race.raceName, fastestLap: fl ? { time: fl.FastestLap.Time.time, driver: fl.Driver.familyName, team: getTeamDisplayName(fl.Constructor.constructorId) } : null }
   } catch (error) { console.error('Error fetching race stats:', error); return null; }
+}
+
+export const getLiveSessionControl = async (location, sessionName) => {
+  try {
+    // 1. Get meeting key
+    const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=2026&location=${encodeURIComponent(location)}`)
+    const meeting = meetingsRes.data?.[0]
+    if (!meeting) return null
+    
+    // 2. Get session key
+    const sessionsRes = await axios.get(`https://api.openf1.org/v1/sessions?meeting_key=${meeting.meeting_key}&session_name=${encodeURIComponent(sessionName)}`)
+    const session = sessionsRes.data?.[0]
+    if (!session) return null
+    
+    // 3. Get race control messages
+    const raceControlRes = await axios.get(`https://api.openf1.org/v1/race_control?session_key=${session.session_key}`)
+    const messages = raceControlRes.data || []
+    
+    // 4. Parse the latest status from messages
+    let status = 'none' // Can be: 'none', 'red_flag', 'safety_car', 'vsc', 'chequered_flag'
+    
+    for (const msg of messages) {
+      const text = String(msg.message).toUpperCase()
+      
+      if (text.includes('RED FLAG')) {
+        status = 'red_flag'
+      } else if (text.includes('SAFETY CAR DEPLOYED')) {
+        status = 'safety_car'
+      } else if (text.includes('VIRTUAL SAFETY CAR DEPLOYED')) {
+        status = 'vsc'
+      } else if (text.includes('TRACK CLEAR') || text.includes('CLEAR IN TRACK') || text.includes('SAFETY CAR IN THIS LAP')) {
+        if (status === 'safety_car' || status === 'vsc') {
+          status = 'none'
+        }
+      } else if (text.includes('CHEQUERED FLAG')) {
+        status = 'chequered_flag'
+      } else if (text.includes('RESUMED') || text.includes('TRACK CLEAR') || text.includes('RE-START')) {
+        if (status === 'red_flag') {
+          status = 'none'
+        }
+      }
+    }
+    
+    return {
+      status,
+      sessionKey: session.session_key
+    }
+  } catch (err) {
+    console.error(`Error fetching live session control status:`, err)
+    return null
+  }
 }
