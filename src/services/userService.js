@@ -1,5 +1,6 @@
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from './firebase'
+import { logger } from './logger'
 
 const USERS_COLLECTION = 'users'
 
@@ -18,7 +19,7 @@ export const saveUserToFirestore = async (user) => {
       lastLogin: serverTimestamp()
     }, { merge: true })
   } catch (error) {
-    console.error('Failed to save user to Firestore:', error)
+    logger.error('Failed to save user to Firestore', error)
   }
 }
 
@@ -30,7 +31,7 @@ export const getUserPreferences = async (uid) => {
   const defaults = {
     team: 'ferrari',
     theme: 'dark',
-    appearance: 'light',
+    appearance: 'system',
     widgets: {
       news: true,
       standings: true,
@@ -40,18 +41,14 @@ export const getUserPreferences = async (uid) => {
     }
   }
 
-  // 1. Try local storage cache first
-  try {
-    const cached = localStorage.getItem(`f1_prefs_${uid}`)
-    if (cached) {
-      const parsed = JSON.parse(cached)
-      return {
-        ...defaults,
-        ...parsed
+  const getCachedPreferences = () => {
+    try {
+      const cached = localStorage.getItem(`f1_prefs_${uid}`)
+      if (cached) {
+        return JSON.parse(cached)
       }
-    }
-  } catch (err) {
-    console.warn('Failed to parse cached user preferences:', err)
+    } catch (e) {}
+    return null
   }
 
   try {
@@ -60,10 +57,19 @@ export const getUserPreferences = async (uid) => {
 
     if (snapshot.exists()) {
       const data = snapshot.data()
+      const appearance = data.appearance || data.theme || defaults.appearance
+      let theme = data.theme || defaults.theme
+      if (appearance === 'system') {
+        const systemIsDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        theme = systemIsDark ? 'dark' : 'light'
+      } else {
+        theme = appearance
+      }
+
       const prefs = {
         team: data.team || data.favoriteTeam || defaults.team,
-        theme: data.theme || defaults.theme,
-        appearance: data.appearance || defaults.appearance,
+        theme,
+        appearance,
         hasSelectedTeam: data.hasSelectedTeam !== undefined ? !!data.hasSelectedTeam : false,
         widgets: {
           ...defaults.widgets,
@@ -71,7 +77,7 @@ export const getUserPreferences = async (uid) => {
         }
       }
       
-      // Save cache
+      // Update local storage cache
       try {
         localStorage.setItem(`f1_prefs_${uid}`, JSON.stringify(prefs))
       } catch (e) {}
@@ -79,17 +85,30 @@ export const getUserPreferences = async (uid) => {
       return prefs
     }
 
+    // Document doesn't exist yet, return defaults
     return { ...defaults, hasSelectedTeam: false }
   } catch (error) {
-    console.error('Failed to fetch user preferences from Firestore:', error)
+    logger.error('Failed to fetch user preferences from Firestore, falling back to cache', error)
     
-    // 2. Return local storage or default if Firestore fails
-    try {
-      const cached = localStorage.getItem(`f1_prefs_${uid}`)
-      if (cached) {
-        return JSON.parse(cached)
+    // Fallback to cache if database fetch fails (e.g. offline)
+    const cached = getCachedPreferences()
+    if (cached) {
+      const appearance = cached.appearance || cached.theme || defaults.appearance
+      let theme = cached.theme || defaults.theme
+      if (appearance === 'system') {
+        const systemIsDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        theme = systemIsDark ? 'dark' : 'light'
+      } else {
+        theme = appearance
       }
-    } catch (e) {}
+
+      return {
+        ...defaults,
+        ...cached,
+        theme,
+        appearance
+      }
+    }
 
     return { ...defaults, hasSelectedTeam: false }
   }
@@ -103,7 +122,7 @@ export const updateUserPreferences = async (uid, preferences) => {
     // 1. Write to localStorage cache first
     localStorage.setItem(`f1_prefs_${uid}`, JSON.stringify(preferences))
   } catch (err) {
-    console.warn('Failed to cache preferences in localStorage:', err)
+    logger.warn('Failed to cache preferences in localStorage', err)
   }
 
   try {
@@ -113,6 +132,6 @@ export const updateUserPreferences = async (uid, preferences) => {
       updatedAt: serverTimestamp()
     }, { merge: true })
   } catch (error) {
-    console.error('Failed to update user preferences in Firestore:', error)
+    logger.error('Failed to update user preferences in Firestore', error)
   }
 }

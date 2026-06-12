@@ -1,28 +1,103 @@
+import { useState, useEffect } from 'react'
 import useStore, { getTopDriver } from '../store/useStore'
 import { logout } from '../services/authService'
+import { getTeamLogo, getDriverImage } from '../services/f1Service'
+import { analytics } from '../services/analytics'
 
 const Hero = () => {
   const user = useStore((state) => state.user)
   const heroStats = useStore((state) => state.heroStats)
+  const preferences = useStore((state) => state.preferences)
+
+  const [img1Error, setImg1Error] = useState(false)
+  const [img2Error, setImg2Error] = useState(false)
+
+  // Reset driver image error checks when user swaps teams
+  useEffect(() => {
+    setImg1Error(false)
+    setImg2Error(false)
+  }, [preferences.team])
 
   const handleLogout = async () => {
     try {
+      analytics.trackLogout()
       await logout()
     } catch (err) {
       console.error('Logout failed:', err)
     }
   }
 
+  const activeSeason = useStore((state) => state.activeSeason)
+  const standings = useStore((state) => state.standings)
+  const teamId = preferences?.team || 'ferrari'
+  const activeTeamDrivers = (standings?.drivers || []).filter(d => d.constructorId === teamId)
+
+  let driver1 = null
+  let driver2 = null
+
+  if (activeTeamDrivers.length >= 2) {
+    driver1 = {
+      name: activeTeamDrivers[0].name,
+      code: activeTeamDrivers[0].code,
+      image: getDriverImage(activeTeamDrivers[0].name, teamId, activeSeason)
+    }
+    driver2 = {
+      name: activeTeamDrivers[1].name,
+      code: activeTeamDrivers[1].code,
+      image: getDriverImage(activeTeamDrivers[1].name, teamId, activeSeason)
+    }
+  } else if (activeTeamDrivers.length === 1) {
+    driver1 = {
+      name: activeTeamDrivers[0].name,
+      code: activeTeamDrivers[0].code,
+      image: getDriverImage(activeTeamDrivers[0].name, teamId, activeSeason)
+    }
+  }
+
   return (
     <section className="hero">
+      {/* Background Graphics restricted strictly to Hero container context */}
+      <div className="hero-bg-graphics">
+        {/* Dynamic centered background team logo */}
+        <img 
+          className="bg-team-logo" 
+          src={getTeamLogo(preferences.team, activeSeason)} 
+          alt="" 
+        />
+
+        {/* Left Driver Profile Face Watermark (renders only if image loads successfully) */}
+        {driver1?.image && !img1Error && (
+          <div className="bg-driver bg-driver-left" style={{ backgroundImage: `url(${driver1.image})` }}>
+            <img 
+              src={driver1.image} 
+              style={{ display: 'none' }} 
+              onError={() => setImg1Error(true)} 
+              alt=""
+            />
+          </div>
+        )}
+
+        {/* Right Driver Profile Face Watermark (renders only if image loads successfully) */}
+        {driver2?.image && !img2Error && (
+          <div className="bg-driver bg-driver-right" style={{ backgroundImage: `url(${driver2.image})` }}>
+            <img 
+              src={driver2.image} 
+              style={{ display: 'none' }} 
+              onError={() => setImg2Error(true)} 
+              alt=""
+            />
+          </div>
+        )}
+      </div>
+
       <span className="speed-line"></span>
       <span className="speed-line"></span>
       <span className="speed-line"></span>
 
-      <div className="hero-top">
+      <div className="hero-top" style={{ position: 'relative', zIndex: 1 }}>
         <div className="brand-eyebrow">
           <span className="checker-flag"></span>
-          <span>Personal Edition · F1 2026</span>
+          <span>Personal Edition · F1 {activeSeason}</span>
         </div>
         <div className="brand-right">
           <div className="greeting" id="greeting">{user?.greeting}</div>
@@ -34,7 +109,7 @@ const Hero = () => {
         </div>
       </div>
 
-      <div className="title-wrap">
+      <div className="title-wrap" style={{ position: 'relative', zIndex: 1 }}>
         <h1 className="hero-title">
           <span className="line1"><span>{user?.name}'s</span></span>
           <span className="line2"><span>Pit Wall.</span></span>
@@ -42,12 +117,12 @@ const Hero = () => {
         <div className="title-underline"></div>
       </div>
 
-      <div className="hero-sub">
+      <div className="hero-sub" style={{ position: 'relative', zIndex: 1 }}>
         <span className="live-badge">Live Edition</span>
         <span>Drivers · Constructors · Paddock · Calendar</span>
       </div>
 
-      <div className="h-status-grid">
+      <div className="h-status-grid" style={{ position: 'relative', zIndex: 1 }}>
         {heroStats.length === 0 ? (
           <>
             <div className="h-stat-box skeleton" style={{ opacity: 0.5 }}><div className="h-stat-val">--</div><div className="h-stat-lbl">Loading...</div></div>
