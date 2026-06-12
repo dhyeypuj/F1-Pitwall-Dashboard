@@ -1,12 +1,17 @@
 import { create } from 'zustand'
+import { getActiveSeasonSync } from '../services/seasonService'
+
+const initialSeason = getActiveSeasonSync()
 
 const useStore = create((set) => ({
+  activeSeason: initialSeason,
+  setActiveSeason: (activeSeason) => set({ activeSeason }),
   authReady: false,
   user: null,
   preferences: {
     team: "ferrari",
     theme: "dark",
-    appearance: "light",
+    appearance: "system",
     hasSelectedTeam: true, // Default to true so it doesn't flash for guests, but will be set by App.jsx from Firebase
     widgets: {
       news: true,
@@ -18,17 +23,26 @@ const useStore = create((set) => ({
   },
   isSettingsOpen: false,
   toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
-  updatePreference: (key, value) => set((state) => ({
-    preferences: {
+  updatePreference: (key, value) => set((state) => {
+    const newPrefs = {
       ...state.preferences,
       [key]: value
+    };
+    if (key === 'appearance') {
+      if (value === 'dark' || value === 'light') {
+        newPrefs.theme = value;
+      } else if (value === 'system') {
+        const systemIsDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        newPrefs.theme = systemIsDark ? 'dark' : 'light';
+      }
     }
-  })),
+    return { preferences: newPrefs };
+  }),
   heroStats: [],
   ticker: [],
   calendar: {
-    meta: "22 Rounds · Mar → Dec 2026",
-    progress: "13.6%",
+    meta: `Rounds · ${initialSeason}`,
+    progress: "0%",
     rounds: []
   },
   sessions: [],

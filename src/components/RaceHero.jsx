@@ -7,6 +7,7 @@ import { getLiveSessionControl } from '../services/f1Service'
 const RaceHero = () => {
   const { nextRace } = useStore((state) => state.race)
   const sessions = useStore((state) => state.sessions)
+  const calendar = useStore((state) => state.calendar)
   const isLoading = useStore((state) => state.isLoadingRace)
   const error = useStore((state) => state.errorRace)
 
@@ -174,7 +175,7 @@ const RaceHero = () => {
             </div>
             
             <div className="race-circuit" style={{ opacity: 0.9, fontSize: '1rem', marginTop: '8px' }}>
-              Round {nextRace.roundNumber} of 22 · {nextRace.laps} laps · {nextRace.distance} km
+              Round {nextRace.roundNumber} of {calendar?.rounds?.length || 24} · {nextRace.laps} laps · {nextRace.distance} km
             </div>
 
             <div className="race-stats" style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
