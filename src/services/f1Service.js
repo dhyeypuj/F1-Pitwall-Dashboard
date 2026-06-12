@@ -1,39 +1,21 @@
 import axios from 'axios'
 import { ERGAST_API_BASE } from '../config/api'
+import { getRaceMetadata } from '../config/raceMetadata'
+import { 
+  getActiveSeason, 
+  getActiveSeasonSync,
+  getSeasonSchedule, 
+  getRaceStatus, 
+  getCurrentRound, 
+  getSeasonCompletionPercent, 
+  formatRaceWeekendDatesFromStrings 
+} from './seasonService'
 
 const BASE_URL = ERGAST_API_BASE
 
 export const formatDriverNameAbbreviated = (givenName, familyName) => {
-  if (familyName === 'Antonelli') {
-    return 'K. Antonelli'
-  }
   const initial = givenName ? givenName[0] : ''
   return initial ? `${initial}. ${familyName}` : familyName
-}
-
-export const RACE_METADATA_2026 = {
-  australia: { round: 1, countryCode: "AU", title: "Australian Grand Prix", circuit: "Albert Park Circuit", location: "Melbourne, Australia", laps: 58, distanceKm: 306.124, lapRecord: "1:19.813", lapRecordHolder: "Charles Leclerc", previousPole: "Max Verstappen", dates: "Mar 6 – 8", winner: "G. Russell" },
-  china: { round: 2, countryCode: "CN", title: "Chinese Grand Prix", circuit: "Shanghai International Circuit", location: "Shanghai, China", laps: 56, distanceKm: 305.066, lapRecord: "1:32.238", lapRecordHolder: "Michael Schumacher", previousPole: "Lando Norris", dates: "Mar 13 – 15", winner: "K. Antonelli" },
-  japan: { round: 3, countryCode: "JP", title: "Japanese Grand Prix", circuit: "Suzuka Circuit", location: "Suzuka, Japan", laps: 53, distanceKm: 307.471, lapRecord: "1:30.983", lapRecordHolder: "Lewis Hamilton", previousPole: "Max Verstappen", dates: "Mar 27 – 29", winner: "K. Antonelli" },
-  miami: { round: 4, countryCode: "US", title: "Miami Grand Prix", circuit: "Miami International Autodrome", location: "Miami, United States", venue: "Hard Rock Stadium", laps: 57, distanceKm: 308.326, lapRecord: "1:29.708", lapRecordHolder: "Max Verstappen", previousPole: "Max Verstappen", dates: "May 1 – 3", winner: "K. Antonelli" },
-  canada: { round: 5, countryCode: "CA", title: "Canadian Grand Prix", circuit: "Circuit Gilles Villeneuve", location: "Montreal, Canada", laps: 70, distanceKm: 305.27, lapRecord: "1:13.078", lapRecordHolder: "Valtteri Bottas", previousPole: "George Russell", dates: "May 22 – 24", winner: "K. Antonelli" },
-  monaco: { round: 6, countryCode: "MC", title: "Monaco Grand Prix", circuit: "Circuit de Monaco", location: "Monte Carlo, Monaco", laps: 78, distanceKm: 260.286, lapRecord: "1:12.909", lapRecordHolder: "Lewis Hamilton", previousPole: "Charles Leclerc", dates: "Jun 5 – 7", winner: "K. Antonelli" },
-  spain_barcelona: { round: 7, countryCode: "ES", title: "Barcelona-Catalunya Grand Prix", circuit: "Circuit de Barcelona-Catalunya", location: "Barcelona, Spain", laps: 66, distanceKm: 307.236, lapRecord: "1:16.330", lapRecordHolder: "Max Verstappen", previousPole: "Lando Norris", dates: "Jun 12 – 14" },
-  austria: { round: 8, countryCode: "AT", title: "Austrian Grand Prix", circuit: "Red Bull Ring", location: "Spielberg, Austria", laps: 71, distanceKm: 306.452, lapRecord: "1:05.619", lapRecordHolder: "Carlos Sainz", previousPole: "Max Verstappen", dates: "Jun 26 – 28" },
-  britain: { round: 9, countryCode: "GB", title: "British Grand Prix", circuit: "Silverstone Circuit", location: "Silverstone, United Kingdom", laps: 52, distanceKm: 306.198, lapRecord: "1:27.097", lapRecordHolder: "Max Verstappen", previousPole: "George Russell", dates: "Jul 3 – 5" },
-  belgium: { round: 10, countryCode: "BE", title: "Belgian Grand Prix", circuit: "Circuit de Spa-Francorchamps", location: "Stavelot, Belgium", laps: 44, distanceKm: 308.052, lapRecord: "1:44.701", lapRecordHolder: "Sergio Pérez", previousPole: "Charles Leclerc", dates: "Jul 17 – 19" },
-  hungary: { round: 11, countryCode: "HU", title: "Hungarian Grand Prix", circuit: "Hungaroring", location: "Budapest, Hungary", laps: 70, distanceKm: 306.63, lapRecord: "1:16.627", lapRecordHolder: "Lewis Hamilton", previousPole: "Lando Norris", dates: "Jul 24 – 26" },
-  netherlands: { round: 12, countryCode: "NL", title: "Dutch Grand Prix", circuit: "Circuit Zandvoort", location: "Zandvoort, Netherlands", laps: 72, distanceKm: 306.587, lapRecord: "1:11.097", lapRecordHolder: "Lewis Hamilton", previousPole: "Lando Norris", dates: "Aug 21 – 23" },
-  italy_monza: { round: 13, countryCode: "IT", title: "Italian Grand Prix", circuit: "Autodromo Nazionale Monza", location: "Monza, Italy", laps: 53, distanceKm: 306.72, lapRecord: "1:21.046", lapRecordHolder: "Rubens Barrichello", previousPole: "Lando Norris", dates: "Sep 4 – 6" },
-  spain_madrid: { round: 14, countryCode: "ES", title: "Spanish Grand Prix", circuit: "Madrid", location: "Madrid, Spain", laps: 57, distanceKm: 309.7, lapRecord: "—", lapRecordHolder: "—", previousPole: "—", dates: "Sep 11 – 13" },
-  azerbaijan: { round: 15, countryCode: "AZ", title: "Azerbaijan Grand Prix", circuit: "Baku City Circuit", location: "Baku, Azerbaijan", laps: 51, distanceKm: 306.049, lapRecord: "1:43.009", lapRecordHolder: "Charles Leclerc", previousPole: "Charles Leclerc", dates: "Sep 25 – 27" },
-  singapore: { round: 16, countryCode: "SG", title: "Singapore Grand Prix", circuit: "Marina Bay Street Circuit", location: "Singapore", laps: 62, distanceKm: 306.143, lapRecord: "1:34.486", lapRecordHolder: "Daniel Ricciardo", previousPole: "Charles Leclerc", dates: "Oct 9 – 11" },
-  unitedStates: { round: 17, countryCode: "US", title: "United States Grand Prix", circuit: "Circuit of the Americas", location: "Austin, United States", laps: 56, distanceKm: 308.405, lapRecord: "1:36.169", lapRecordHolder: "Charles Leclerc", previousPole: "Lando Norris", dates: "Oct 23 – 25" },
-  mexico: { round: 18, countryCode: "MX", title: "Mexico City Grand Prix", circuit: "Autódromo Hermanos Rodríguez", location: "Mexico City, Mexico", laps: 71, distanceKm: 305.354, lapRecord: "1:17.774", lapRecordHolder: "Valtteri Bottas", previousPole: "Carlos Sainz", dates: "Oct 30 – Nov 1" },
-  brazil: { round: 19, countryCode: "BR", title: "São Paulo Grand Prix", circuit: "Interlagos", location: "São Paulo, Brazil", laps: 71, distanceKm: 305.879, lapRecord: "1:10.540", lapRecordHolder: "Valtteri Bottas", previousPole: "Max Verstappen", dates: "Nov 6 – 8" },
-  lasVegas: { round: 20, countryCode: "US", title: "Las Vegas Grand Prix", circuit: "Las Vegas Strip Circuit", location: "Las Vegas, United States", laps: 50, distanceKm: 305.88, lapRecord: "1:35.490", lapRecordHolder: "Oscar Piastri", previousPole: "George Russell", dates: "Nov 19 – 21" },
-  qatar: { round: 21, countryCode: "QA", title: "Qatar Grand Prix", circuit: "Lusail International Circuit", location: "Lusail, Qatar", laps: 57, distanceKm: 308.611, lapRecord: "1:22.384", lapRecordHolder: "Lando Norris", previousPole: "Max Verstappen", dates: "Nov 27 – 29" },
-  abuDhabi: { round: 22, countryCode: "AE", title: "Abu Dhabi Grand Prix", circuit: "Yas Marina Circuit", location: "Abu Dhabi, UAE", laps: 58, distanceKm: 306.183, lapRecord: "1:26.103", lapRecordHolder: "Max Verstappen", previousPole: "Max Verstappen", dates: "Dec 4 – 6" }
 }
 
 const cache = new Map()
@@ -53,75 +35,262 @@ const getFlagUrl = (nationality) => {
   return `https://flagcdn.com/w40/${(mapping[nationality] || 'un').toLowerCase()}.png`
 }
 
-const getTeamDisplayName = (id) => {
-  const names = { ferrari: 'Scuderia Ferrari HP', mercedes: 'Mercedes-AMG PETRONAS Formula One Team', red_bull: 'Oracle Red Bull Racing', redbull: 'Oracle Red Bull Racing', mclaren: 'McLaren Formula 1 Team', aston_martin: 'Aston Martin Aramco Formula One Team', astonmartin: 'Aston Martin Aramco Formula One Team', williams: 'Atlassian Williams Racing', alpine: 'BWT Alpine Formula One Team', haas: 'MoneyGram Haas F1 Team', rb: 'Visa Cash App Racing Bulls F1 Team', racingbulls: 'Visa Cash App Racing Bulls F1 Team', vcarb: 'Visa Cash App Racing Bulls F1 Team', sauber: 'Audi F1 Team', audi: 'Audi F1 Team', andretti: 'Cadillac Formula 1 Team', cadillac: 'Cadillac Formula 1 Team' }
+const getTeamDisplayName = (id, apiName, season = getActiveSeasonSync()) => {
+  const year = Number(season) || 2026
+  const names = { 
+    ferrari: 'Scuderia Ferrari HP', 
+    mercedes: 'Mercedes-AMG PETRONAS Formula One Team', 
+    red_bull: 'Oracle Red Bull Racing', 
+    redbull: 'Oracle Red Bull Racing', 
+    mclaren: 'McLaren Formula 1 Team', 
+    aston_martin: 'Aston Martin Aramco Formula One Team', 
+    astonmartin: 'Aston Martin Aramco Formula One Team', 
+    williams: 'Atlassian Williams Racing', 
+    alpine: 'BWT Alpine Formula One Team', 
+    haas: 'MoneyGram Haas F1 Team', 
+    rb: 'Visa Cash App Racing Bulls F1 Team', 
+    racingbulls: 'Visa Cash App Racing Bulls F1 Team', 
+    vcarb: 'Visa Cash App Racing Bulls F1 Team', 
+    sauber: 'Stake F1 Team Kick Sauber', 
+    kick_sauber: 'Stake F1 Team Kick Sauber',
+    alphatauri: 'Scuderia AlphaTauri',
+    torro_rosso: 'Scuderia Toro Rosso',
+    force_india: 'Sahara Force India F1 Team',
+    racing_point: 'SportPesa Racing Point F1 Team',
+    renault: 'Renault DP World F1 Team',
+    audi: 'Audi F1 Team', 
+    andretti: 'Cadillac Formula 1 Team', 
+    cadillac: 'Cadillac Formula 1 Team' 
+  }
+  
+  if (year < 2026) {
+    names.ferrari = 'Scuderia Ferrari'
+    names.williams = 'Williams Racing'
+    names.sauber = 'Stake F1 Team Kick Sauber'
+  }
+  if (year < 2024) {
+    names.sauber = 'Alfa Romeo F1 Team Stake'
+    names.rb = 'Scuderia AlphaTauri'
+    names.racingbulls = 'Scuderia AlphaTauri'
+    names.vcarb = 'Scuderia AlphaTauri'
+  }
+  
   const sid = String(id).toLowerCase().replace(/\s+/g, '_')
-  return names[sid] || id
+  return names[sid] || apiName || id
 }
 
-const getTeamPU = (id) => {
-  const pus = { ferrari: 'Ferrari S.p.A.', haas: 'Ferrari S.p.A.', cadillac: 'Ferrari S.p.A.', andretti: 'Ferrari S.p.A.', mercedes: 'Mercedes-AMG High Performance Powertrains', mclaren: 'Mercedes-AMG High Performance Powertrains', williams: 'Mercedes-AMG High Performance Powertrains', alpine: 'Mercedes-AMG High Performance Powertrains', red_bull: 'Red Bull Ford Powertrains', redbull: 'Red Bull Ford Powertrains', rb: 'Red Bull Ford Powertrains', vcarb: 'Red Bull Ford Powertrains', racingbulls: 'Red Bull Ford Powertrains', aston_martin: 'Honda Racing Corporation', astonmartin: 'Honda Racing Corporation', audi: 'Audi Formula Racing GmbH', sauber: 'Audi Formula Racing GmbH' }
+const getTeamPU = (id, season = getActiveSeasonSync()) => {
+  const year = Number(season) || 2026
+  const pus = { 
+    ferrari: 'Ferrari S.p.A.', 
+    haas: 'Ferrari S.p.A.', 
+    cadillac: 'Ferrari S.p.A.', 
+    andretti: 'Ferrari S.p.A.', 
+    mercedes: 'Mercedes-AMG High Performance Powertrains', 
+    mclaren: 'Mercedes-AMG High Performance Powertrains', 
+    williams: 'Mercedes-AMG High Performance Powertrains', 
+    alpine: 'Mercedes-AMG High Performance Powertrains', 
+    red_bull: 'Red Bull Ford Powertrains', 
+    redbull: 'Red Bull Ford Powertrains', 
+    rb: 'Red Bull Ford Powertrains', 
+    vcarb: 'Red Bull Ford Powertrains', 
+    racingbulls: 'Red Bull Ford Powertrains', 
+    aston_martin: 'Honda Racing Corporation', 
+    astonmartin: 'Honda Racing Corporation', 
+    audi: 'Audi Formula Racing GmbH', 
+    sauber: 'Audi Formula Racing GmbH' 
+  }
+  
+  if (year < 2026) {
+    pus.red_bull = 'Honda RBPT'
+    pus.redbull = 'Honda RBPT'
+    pus.rb = 'Honda RBPT'
+    pus.vcarb = 'Honda RBPT'
+    pus.racingbulls = 'Honda RBPT'
+    pus.sauber = 'Ferrari S.p.A.'
+    pus.aston_martin = 'Mercedes-AMG High Performance Powertrains'
+    pus.astonmartin = 'Mercedes-AMG High Performance Powertrains'
+  }
+  
   const sid = String(id).toLowerCase().replace(/\s+/g, '_')
   return pus[sid] || 'Internal Power Unit'
 }
 
-const getTeamLogo = (id) => {
-  const mapping = { mercedes: 'mercedes', red_bull: 'red-bull-racing', ferrari: 'ferrari', mclaren: 'mclaren', aston_martin: 'aston-martin', alpine: 'alpine', haas: 'haas', williams: 'williams', rb: 'vcarb', sauber: 'audi', andretti: 'cadillac' }
-  return `/assets/logos/${(mapping[id] || id.replace('_', '-'))}.png`
+export const getTeamLogo = (id, season = getActiveSeasonSync()) => {
+  const year = Number(season) || 2026
+  let teamPath = id.toLowerCase()
+  if (teamPath === 'red_bull') teamPath = 'redbull'
+  if (teamPath === 'aston_martin') teamPath = 'astonmartin'
+  
+  if (year < 2026) {
+    if (teamPath === 'audi') teamPath = 'sauber'
+    if (teamPath === 'cadillac' || teamPath === 'andretti') teamPath = 'sauber'
+  } else {
+    if (teamPath === 'sauber') teamPath = 'audi'
+    if (teamPath === 'andretti') teamPath = 'cadillac'
+  }
+
+  const cdnPaths = {
+    ferrari: 'ferrari',
+    mercedes: 'mercedes',
+    redbull: 'redbullracing',
+    red_bull: 'redbullracing',
+    mclaren: 'mclaren',
+    astonmartin: 'astonmartin',
+    aston_martin: 'astonmartin',
+    williams: 'williams',
+    alpine: 'alpine',
+    haas: 'haasf1team',
+    rb: 'racingbulls',
+    racingbulls: 'racingbulls',
+    sauber: 'sauber',
+    audi: 'audi',
+    cadillac: 'cadillac',
+    andretti: 'cadillac'
+  }
+
+  const folder = cdnPaths[teamPath] || teamPath
+  
+  let filename = `${folder}logo.svg`
+  if (folder === 'redbullracing') {
+    filename = 'redbullracinglogo.svg'
+  } else if (folder === 'haasf1team') {
+    filename = 'haasf1teamlogo.svg'
+  }
+  
+  return `https://media.formula1.com/image/upload/v1740000001/common/f1/${year}/${folder}/${year}${filename}`
 }
 
 const getTeamColor = (id) => {
-  const colors = { mercedes: 'var(--mercedes)', red_bull: 'var(--redbull)', ferrari: 'var(--ferrari)', mclaren: 'var(--mclaren)', aston_martin: 'var(--astonmartin)', alpine: 'var(--alpine)', haas: 'var(--haas)', williams: 'var(--williams)', rb: 'var(--racingbulls)', sauber: 'var(--audi)', andretti: 'var(--cadillac)' }
+  const colors = {
+    mercedes: 'var(--mercedes)',
+    red_bull: 'var(--redbull)',
+    redbull: 'var(--redbull)',
+    ferrari: 'var(--ferrari)',
+    mclaren: 'var(--mclaren)',
+    aston_martin: 'var(--astonmartin)',
+    astonmartin: 'var(--astonmartin)',
+    alpine: 'var(--alpine)',
+    haas: 'var(--haas)',
+    williams: 'var(--williams)',
+    rb: 'var(--racingbulls)',
+    racingbulls: 'var(--racingbulls)',
+    sauber: 'var(--audi)',
+    audi: 'var(--audi)',
+    andretti: 'var(--cadillac)',
+    cadillac: 'var(--cadillac)'
+  }
   return colors[id] || '#666'
 }
 
+export const getCdnConstructorPath = (constructorId) => {
+  const mapping = {
+    ferrari: 'ferrari',
+    mercedes: 'mercedes',
+    red_bull: 'redbullracing',
+    redbull: 'redbullracing',
+    mclaren: 'mclaren',
+    aston_martin: 'astonmartin',
+    astonmartin: 'astonmartin',
+    williams: 'williams',
+    alpine: 'alpine',
+    haas: 'haasf1team',
+    rb: 'racingbulls',
+    racingbulls: 'racingbulls',
+    sauber: 'audi',
+    audi: 'audi',
+    andretti: 'cadillac',
+    cadillac: 'cadillac'
+  }
+  return mapping[constructorId.toLowerCase()] || constructorId.toLowerCase()
+}
+
+export const getDriverImage = (driverName, constructorId, season = getActiveSeasonSync()) => {
+  const year = Number(season) || 2026
+  const team = getCdnConstructorPath(constructorId)
+  const normName = driverName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  
+  const driverCodes = {
+    "charles leclerc": "chalec01",
+    "lewis hamilton": "lewham01",
+    "max verstappen": "maxver01",
+    "lando norris": "lannor01",
+    "oscar piastri": "oscpia01",
+    "george russell": "georus01",
+    "andrea kimi antonelli": "andant01",
+    "kimi antonelli": "andant01",
+    "carlos sainz": "carsai01",
+    "alexander albon": "alealb01",
+    "alex albon": "alealb01",
+    "pierre gasly": "piegas01",
+    "franco colapinto": "fracol01",
+    "esteban ocon": "estoco01",
+    "oliver bearman": "olibea01",
+    "liam lawson": "lialaw01",
+    "arvid lindblad": "arvlin01",
+    "nico hulkenberg": "nichul01",
+    "nico hülkenberg": "nichul01",
+    "gabriel bortoleto": "gabbor01",
+    "sergio perez": "serper01",
+    "sergio pérez": "serper01",
+    "valtteri bottas": "valbot01"
+  }
+  
+  const code = driverCodes[normName] || (normName.split(' ')[0].substring(0,3) + normName.split(' ').pop().substring(0,3) + '01')
+  
+  return `https://media.formula1.com/image/upload/c_lfill,w_440/q_auto/d_common:f1:${year}:fallback:driver:${year}fallbackdriverfront.webp/v1740000001/common/f1/${year}/${team}/${code}/${year}${team}${code}front.webp`
+}
+
+
 export const getNextRace = async () => {
   try {
-    // For 2026 Concept, we use our static metadata as the source of truth and compare against system date
-    const now = new Date()
-    const races = Object.values(RACE_METADATA_2026)
-    
-    const monthMap = { 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' }
-    // Convert metadata dates into real Date objects for comparison
-    // Australia is Mar 6-8, China is Mar 13-15, etc.
-    // Let's find the first race whose date is in the future relative to our concept date
-    const raceMeta = races.find(m => {
-      const raceMonth = m.dates.split(' ')[0]
-      const raceDay = m.dates.split(' ')[1]
-      const raceDateStr = `2026-${monthMap[raceMonth] || '01'}-${raceDay.padStart(2, '0')}T14:00:00Z`
-      return new Date(raceDateStr) > now
-    }) || races[4] // Fallback to Canada (Round 5) if none found or for demo
+    const season = await getActiveSeason()
+    const races = await getSeasonSchedule(season)
+    if (races.length === 0) return null
 
-    // Pull the start date from m.dates (e.g., "May 22 – 24")
-    const raceMonth = raceMeta.dates.split(' ')[0]
-    const raceDay = raceMeta.dates.split(' ')[1]
-    const isoDate = `2026-${monthMap[raceMonth]}-${raceDay.padStart(2, '0')}T14:00:00Z`
+    const now = new Date()
+    const nextRaceObj = races.find(r => getRaceStatus(r, now) !== 'completed') || races[races.length - 1]
+    
+    const meta = getRaceMetadata(
+      nextRaceObj.Circuit.circuitId,
+      nextRaceObj.Circuit.Location.country,
+      nextRaceObj.Circuit.Location.locality,
+      nextRaceObj.raceName
+    )
+
+    const formattedDates = formatRaceWeekendDatesFromStrings(nextRaceObj.date, nextRaceObj.FirstPractice?.date)
+    
+    const isoDate = nextRaceObj.time 
+      ? (nextRaceObj.time.endsWith('Z') ? `${nextRaceObj.date}T${nextRaceObj.time}` : `${nextRaceObj.date}T${nextRaceObj.time}Z`)
+      : `${nextRaceObj.date}T14:00:00Z`
+
+    const statusVal = getRaceStatus(nextRaceObj, now)
 
     return {
-      name: raceMeta.title,
-      round: `Round ${String(raceMeta.round).padStart(2, '0')}`,
-      status: 'Up Next',
+      name: nextRaceObj.raceName,
+      round: `Round ${String(nextRaceObj.round).padStart(2, '0')}`,
+      status: statusVal === 'live' ? 'Live' : 'Up Next',
       flag: '🏁',
-      city: raceMeta.location.split(',')[0],
-      country: raceMeta.location.split(', ')[1],
-      title: raceMeta.title,
-      countryCode: raceMeta.countryCode,
-      circuit: raceMeta.circuit,
-      location: raceMeta.location,
-      venue: raceMeta.location,
-      roundNumber: raceMeta.round,
+      city: nextRaceObj.Circuit.Location.locality,
+      country: nextRaceObj.Circuit.Location.country,
+      title: nextRaceObj.raceName,
+      countryCode: meta.countryCode,
+      circuit: nextRaceObj.Circuit.circuitName,
+      location: `${nextRaceObj.Circuit.Location.locality}, ${nextRaceObj.Circuit.Location.country}`,
+      venue: nextRaceObj.Circuit.circuitName,
+      roundNumber: Number(nextRaceObj.round),
       date: isoDate, 
-      details: `Round ${raceMeta.round} · ${raceMeta.circuit}`,
-      laps: raceMeta.laps,
-      distance: raceMeta.distanceKm,
-      lapRecord: raceMeta.lapRecord !== "—" ? `${raceMeta.lapRecord} · ${raceMeta.lapRecordHolder}` : "—",
-      previousPole: raceMeta.previousPole,
-      dates: raceMeta.dates,
+      details: `Round ${nextRaceObj.round} · ${nextRaceObj.Circuit.circuitName}`,
+      laps: meta.laps,
+      distance: meta.distanceKm,
+      lapRecord: meta.lapRecord !== "—" ? `${meta.lapRecord} · ${meta.lapRecordHolder}` : "—",
+      previousPole: meta.previousPole,
+      dates: formattedDates,
       stats: [
-        { label: "Laps", value: raceMeta.laps },
-        { label: "Distance", value: `${raceMeta.distanceKm} km` },
-        { label: "Record", value: raceMeta.lapRecord !== "—" ? `${raceMeta.lapRecord} · ${raceMeta.lapRecordHolder}` : "—" },
-        { label: "Prev. Pole", value: raceMeta.previousPole }
+        { label: "Laps", value: meta.laps },
+        { label: "Distance", value: `${meta.distanceKm} km` },
+        { label: "Record", value: meta.lapRecord !== "—" ? `${meta.lapRecord} · ${meta.lapRecordHolder}` : "—" },
+        { label: "Prev. Pole", value: meta.previousPole }
       ]
     }
   } catch (error) {
@@ -132,17 +301,23 @@ export const getNextRace = async () => {
 
 export const getStandings = async () => {
   try {
-    const [driversRes, constructorsRes] = await Promise.all([fetchCached(`${BASE_URL}/2026/driverStandings.json`), fetchCached(`${BASE_URL}/2026/constructorStandings.json`)])
+    const season = await getActiveSeason()
+    const [driversRes, constructorsRes] = await Promise.all([
+      fetchCached(`${BASE_URL}/${season}/driverStandings.json`), 
+      fetchCached(`${BASE_URL}/${season}/constructorStandings.json`)
+    ])
     const rawDrivers = driversRes.data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || []
     const rawConstructors = constructorsRes.data.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || []
+    
     const drivers = rawDrivers.map((d, i) => ({ 
       pos: String(d.position).padStart(2, '0'), 
       name: formatDriverNameAbbreviated(d.Driver.givenName, d.Driver.familyName), 
       code: d.Driver.code || d.Driver.familyName.substring(0, 3).toUpperCase(), 
-      team: getTeamDisplayName(d.Constructors[0]?.constructorId) || 'Unknown', 
+      team: getTeamDisplayName(d.Constructors[0]?.constructorId, d.Constructors[0]?.name, season) || 'Unknown', 
+      constructorId: d.Constructors[0]?.constructorId,
       nationality: d.Driver.nationality, 
       flagUrl: getFlagUrl(d.Driver.nationality), 
-      logoUrl: getTeamLogo(d.Constructors[0]?.constructorId), 
+      logoUrl: getTeamLogo(d.Constructors[0]?.constructorId, season), 
       points: Number(d.points), 
       gap: i === 0 ? null : `−${rawDrivers[0].points - d.points}`, 
       width: rawDrivers.length > 0 ? `${Math.round((Number(d.points) / Number(rawDrivers[0].points)) * 100)}%` : '0%',
@@ -150,21 +325,38 @@ export const getStandings = async () => {
       codeBg: getTeamColor(d.Constructors[0]?.constructorId), 
       codeColor: '#fff' 
     }))
+
     const maxPts = rawConstructors.length > 0 ? Number(rawConstructors[0].points) : 100
-    const constructors = rawConstructors.map(c => ({ pos: String(c.position).padStart(2, '0'), name: getTeamDisplayName(c.Constructor.constructorId), engine: getTeamPU(c.Constructor.constructorId), nationality: c.Constructor.nationality, flagUrl: getFlagUrl(c.Constructor.nationality), logoUrl: getTeamLogo(c.Constructor.constructorId), points: Number(c.points), width: maxPts > 0 ? `${Math.round((Number(c.points) / maxPts) * 100)}%` : '0%', color: getTeamColor(c.Constructor.constructorId) }))
+    const constructors = rawConstructors.map(c => ({ 
+      pos: String(c.position).padStart(2, '0'), 
+      name: getTeamDisplayName(c.Constructor.constructorId, c.Constructor.name, season), 
+      engine: getTeamPU(c.Constructor.constructorId, season), 
+      nationality: c.Constructor.nationality, 
+      flagUrl: getFlagUrl(c.Constructor.nationality), 
+      logoUrl: getTeamLogo(c.Constructor.constructorId, season), 
+      points: Number(c.points), 
+      width: maxPts > 0 ? `${Math.round((Number(c.points) / maxPts) * 100)}%` : '0%', 
+      color: getTeamColor(c.Constructor.constructorId) 
+    }))
+    
     return { drivers, constructors }
-  } catch (error) { console.error('Error fetching standings:', error); throw new Error('Failed to load standings'); }
+  } catch (error) { 
+    console.error('Error fetching standings:', error); 
+    throw new Error('Failed to load standings'); 
+  }
 }
 
 const openF1WinnerCache = new Map()
 
 export const getOpenF1WinnerForRound = async (roundNumber, location) => {
-  if (openF1WinnerCache.has(roundNumber)) {
-    return openF1WinnerCache.get(roundNumber)
+  const cacheKey = `${roundNumber}_${location}`
+  if (openF1WinnerCache.has(cacheKey)) {
+    return openF1WinnerCache.get(cacheKey)
   }
   try {
-    // 1. Get meeting key for 2026 at this location
-    const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=2026&location=${encodeURIComponent(location)}`)
+    const season = await getActiveSeason()
+    // 1. Get meeting key for active season at this location
+    const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=${season}&location=${encodeURIComponent(location)}`)
     const meeting = meetingsRes.data?.[0]
     if (!meeting) return null
     
@@ -190,7 +382,7 @@ export const getOpenF1WinnerForRound = async (roundNumber, location) => {
     
     const winnerName = formatDriverNameAbbreviated(driver.first_name, driver.last_name)
     
-    openF1WinnerCache.set(roundNumber, winnerName)
+    openF1WinnerCache.set(cacheKey, winnerName)
     return winnerName
   } catch (err) {
     console.error(`Error fetching OpenF1 winner for round ${roundNumber}:`, err)
@@ -200,13 +392,16 @@ export const getOpenF1WinnerForRound = async (roundNumber, location) => {
 
 export const getCalendar = async () => {
   try {
+    const season = await getActiveSeason()
     // Parallel fetch for calendar rounds and actual race results
     const [calendarRes, resultsRes] = await Promise.all([
-      fetchCached(`${BASE_URL}/2026.json`),
-      fetchCached(`${BASE_URL}/2026/results.json?limit=100`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
+      fetchCached(`${BASE_URL}/${season}.json`),
+      fetchCached(`${BASE_URL}/${season}/results.json?limit=100`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
     ]).catch(() => [{ data: { MRData: { RaceTable: { Races: [] } } } }, { data: { MRData: { RaceTable: { Races: [] } } } }])
 
+    const races = calendarRes.data?.MRData?.RaceTable?.Races || []
     const apiResults = resultsRes.data?.MRData?.RaceTable?.Races || []
+    
     // Create a map for quick lookup: round -> winner name
     const resultsMap = new Map(apiResults.map(r => [
       Number(r.round), 
@@ -214,118 +409,128 @@ export const getCalendar = async () => {
     ]))
 
     const now = new Date()
-    const raceSource = Object.values(RACE_METADATA_2026)
-    
-    const monthMap = { 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' }
-    
-    // Find the next race dynamically to mark it in the calendar
-    const nextRaceMeta = raceSource.find(m => {
-      const raceMonth = m.dates.split(' ')[0]
-      const raceDay = m.dates.split(' ')[1]
-      const raceDateStr = `2026-${monthMap[raceMonth] || '01'}-${raceDay.padStart(2, '0')}T14:00:00Z`
-      return new Date(raceDateStr) > now
-    }) || raceSource[4]
-    const nextRound = nextRaceMeta.round
+    const currentRound = getCurrentRound(races, now)
 
-    const locationMap = {
-      1: 'Melbourne',
-      2: 'Shanghai',
-      3: 'Suzuka',
-      4: 'Miami Gardens',
-      5: 'Montréal',
-      6: 'Monte Carlo',
-      7: 'Barcelona',
-      8: 'Spielberg',
-      9: 'Silverstone',
-      10: 'Stavelot',
-      11: 'Budapest',
-      12: 'Zandvoort',
-      13: 'Monza',
-      14: 'Madrid',
-      15: 'Baku',
-      16: 'Singapore',
-      17: 'Austin',
-      18: 'Mexico City',
-      19: 'São Paulo',
-      20: 'Las Vegas',
-      21: 'Lusail',
-      22: 'Abu Dhabi'
-    }
+    const processedRounds = await Promise.all(races.map(async r => {
+      const meta = getRaceMetadata(
+        r.Circuit.circuitId,
+        r.Circuit.Location.country,
+        r.Circuit.Location.locality,
+        r.raceName
+      )
 
-    const processedRounds = await Promise.all(raceSource.map(async m => {
-      const raceMonth = m.dates.split(' ')[0]
-      const raceDay = m.dates.split(' ')[1]
-      const raceDateStr = `2026-${monthMap[raceMonth]}-${raceDay.padStart(2, '0')}T14:00:00Z`
-      const raceDate = new Date(raceDateStr)
+      const formattedDates = formatRaceWeekendDatesFromStrings(r.date, r.FirstPractice?.date)
+      const raceStatusVal = getRaceStatus(r, now)
       
-      const isPast = raceDate < now
-      const isNext = m.round === nextRound 
+      const isPast = raceStatusVal === 'completed'
+      const isLive = raceStatusVal === 'live'
+      const isNext = Number(r.round) === currentRound
 
-      let winnerName = resultsMap.get(m.round)
+      let winnerName = resultsMap.get(Number(r.round))
 
       // Fallback to OpenF1 if race is past and winner is missing from results endpoint
       if (!winnerName && isPast) {
-        const location = locationMap[m.round]
-        if (location) {
-          winnerName = await getOpenF1WinnerForRound(m.round, location)
-        }
+        winnerName = await getOpenF1WinnerForRound(Number(r.round), r.Circuit.Location.locality)
       }
 
-      // Final fallback to mock winner, then TBD
-      winnerName = winnerName || m.winner || (isPast ? 'TBD' : '')
+      // Final fallback to TBD
+      winnerName = winnerName || (isPast ? 'TBD' : '')
 
       return {
-        id: m.round,
-        round: m.round,
-        num: `R${String(m.round).padStart(2, '0')}${isNext ? ' · NEXT' : ''}`,
-        country: m.location.split(', ').pop(),
-        name: m.title,
-        circuit: m.circuit,
-        date: m.dates,
-        status: isPast ? 'DONE' : (isNext ? 'UP NEXT' : 'UPCOMING'),
+        id: Number(r.round),
+        round: Number(r.round),
+        num: `R${String(r.round).padStart(2, '0')}${isNext ? ' · NEXT' : ''}`,
+        country: r.Circuit.Location.country,
+        name: r.raceName,
+        circuit: r.Circuit.circuitName,
+        date: formattedDates,
+        status: isLive ? 'LIVE' : (isPast ? 'DONE' : (isNext ? 'UP NEXT' : 'UPCOMING')),
         done: isPast,
-        next: isNext,
+        next: isNext || isLive,
         emoji: '🏁',
-        flagUrl: `https://flagcdn.com/w80/${m.countryCode.toLowerCase()}.png`,
+        flagUrl: `https://flagcdn.com/w80/${meta.countryCode.toLowerCase()}.png`,
         winner: winnerName
       }
     }))
 
+    const pct = getSeasonCompletionPercent(races, now)
+
     return {
-      meta: `${raceSource.length} Rounds · Mar → Dec 2026`,
-      progress: `${Math.round((processedRounds.filter(r => r.done).length / raceSource.length) * 100)}%`,
+      meta: `${races.length} Rounds · ${season}`,
+      progress: `${pct.toFixed(1)}%`,
       rounds: processedRounds
     }
   } catch (error) {
     console.error('Error fetching calendar:', error)
-    return { meta: '22 Rounds · 2026', progress: '0%', rounds: [] }
+    const activeYear = getActiveSeasonSync()
+    return { meta: `22 Rounds · ${activeYear}`, progress: '0%', rounds: [] }
   }
 }
 
 export const getLatestResults = async () => {
   try {
-    const { data } = await fetchCached(`${BASE_URL}/2026/last/results.json`)
+    const season = await getActiveSeason()
+    const { data } = await fetchCached(`${BASE_URL}/${season}/last/results.json`)
     const race = data.MRData.RaceTable.Races[0]
     if (!race || !race.Results) return { title: '', results: [], winner: null }
-    const top3 = race.Results.slice(0, 3).map((r, i) => { const cid = r.Constructor.constructorId; return { id: `p${i + 1}`, cls: `p${i + 1}`, badge: `P${i + 1}`, name: `${r.Driver.givenName} ${r.Driver.familyName}`, team: `${getTeamDisplayName(cid)} · #${r.number}`, nationality: r.Driver.nationality, flagUrl: getFlagUrl(r.Driver.nationality), logoUrl: getTeamLogo(cid), color: getTeamColor(cid), time: i === 0 ? r.Time?.time || 'Winner' : r.Time?.time || `+${r.Time?.millis}ms` } })
-    return { title: `${race.raceName} · ${race.Circuit.Location.locality} · Result`, results: top3, winner: { ...race.Results[0], Constructor: { ...race.Results[0].Constructor, name: getTeamDisplayName(race.Results[0].Constructor.constructorId) } } }
-  } catch (error) { console.error('Error fetching latest results:', error); return { title: '', results: [], winner: null }; }
+    const top3 = race.Results.slice(0, 3).map((r, i) => { 
+      const cid = r.Constructor.constructorId; 
+      return { 
+        id: `p${i + 1}`, 
+        cls: `p${i + 1}`, 
+        badge: `P${i + 1}`, 
+        name: `${r.Driver.givenName} ${r.Driver.familyName}`, 
+        team: `${getTeamDisplayName(cid, r.Constructor.name, season)} · #${r.number}`, 
+        nationality: r.Driver.nationality, 
+        flagUrl: getFlagUrl(r.Driver.nationality), 
+        logoUrl: getTeamLogo(cid, season), 
+        color: getTeamColor(cid), 
+        time: i === 0 ? r.Time?.time || 'Winner' : r.Time?.time || `+${r.Time?.millis}ms` 
+      } 
+    })
+    return { 
+      title: `${race.raceName} · ${race.Circuit.Location.locality} · Result`, 
+      results: top3, 
+      winner: { 
+        ...race.Results[0], 
+        Constructor: { 
+          ...race.Results[0].Constructor, 
+          name: getTeamDisplayName(race.Results[0].Constructor.constructorId, race.Results[0].Constructor.name, season) 
+        } 
+      } 
+    }
+  } catch (error) { 
+    console.error('Error fetching latest results:', error); 
+    return { title: '', results: [], winner: null }; 
+  }
 }
 
 export const getRaceStats = async () => {
   try {
-    const { data } = await fetchCached(`${BASE_URL}/2026/last/results.json`)
+    const season = await getActiveSeason()
+    const { data } = await fetchCached(`${BASE_URL}/${season}/last/results.json`)
     const race = data.MRData.RaceTable.Races[0]
     if (!race || !race.Results) return null
     const fl = race.Results.find(r => r.FastestLap?.rank === '1')
-    return { latestRaceName: race.raceName, fastestLap: fl ? { time: fl.FastestLap.Time.time, driver: fl.Driver.familyName, team: getTeamDisplayName(fl.Constructor.constructorId) } : null }
-  } catch (error) { console.error('Error fetching race stats:', error); return null; }
+    return { 
+      latestRaceName: race.raceName, 
+      fastestLap: fl ? { 
+        time: fl.FastestLap.Time.time, 
+        driver: fl.Driver.familyName, 
+        team: getTeamDisplayName(fl.Constructor.constructorId, fl.Constructor.name, season) 
+      } : null 
+    }
+  } catch (error) { 
+    console.error('Error fetching race stats:', error); 
+    return null; 
+  }
 }
 
 export const getLiveSessionControl = async (location, sessionName) => {
   try {
+    const season = await getActiveSeason()
     // 1. Get meeting key
-    const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=2026&location=${encodeURIComponent(location)}`)
+    const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=${season}&location=${encodeURIComponent(location)}`)
     const meeting = meetingsRes.data?.[0]
     if (!meeting) return null
     

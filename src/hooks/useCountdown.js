@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { calculateCountdown } from '../utils/countdown'
+import { calculateCountdown, parseTimezoneSafe } from '../utils/countdown'
 
 export const useCountdown = (targetDate) => {
   const [timeLeft, setTimeLeft] = useState(() => calculateCountdown(targetDate))
 
   // Memoize timestamp to avoid parsing the string every second
-  const targetTime = targetDate ? new Date(targetDate).getTime() : null
+  const targetParsed = parseTimezoneSafe(targetDate)
+  const targetTime = targetParsed ? targetParsed.getTime() : null
 
   useEffect(() => {
     if (!targetTime) return
