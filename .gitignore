@@ -28,3 +28,10 @@ dist-ssr
 PROJECT_STRUCTURE.md
 project_structure.md
 *.ics
+
+# Temporary scratch files and scripts
+scratch/
+
+# Local monitoring docs
+docs/
+
