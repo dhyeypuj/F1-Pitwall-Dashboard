@@ -3,6 +3,7 @@ import useStore, { getNextRaceName } from '../store/useStore'
 import { useCountdown } from '../hooks/useCountdown'
 import { formatNumber } from '../utils/format'
 import { getLiveSessionControl } from '../services/f1Service'
+import { isExtendableSession } from '../services/sessionService'
 
 const RaceHero = () => {
   const { nextRace } = useStore((state) => state.race)
@@ -30,7 +31,9 @@ const RaceHero = () => {
   })
 
   // Detect a potentially extended session (started but within 3 hours, and not finished)
+  // Only the main Race session qualifies — practices/qualifying have fixed durations
   const potentialExtendedSession = sessionList.find(s => {
+    if (!isExtendableSession(s.key, s.name)) return false
     const start = new Date(s.start)
     const end = new Date(s.end)
     const hoursSinceStart = (now - start) / 3600000

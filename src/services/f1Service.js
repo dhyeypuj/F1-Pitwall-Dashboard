@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ERGAST_API_BASE } from '../config/api'
 import { getRaceMetadata } from '../config/raceMetadata'
+import { logger } from './logger'
 import { 
   getActiveSeason, 
   getActiveSeasonSync,
@@ -212,33 +213,141 @@ export const getDriverImage = (driverName, constructorId, season = getActiveSeas
   
   const driverCodes = {
     "charles leclerc": "chalec01",
+    "c. leclerc": "chalec01",
     "lewis hamilton": "lewham01",
+    "l. hamilton": "lewham01",
     "max verstappen": "maxver01",
+    "m. verstappen": "maxver01",
     "lando norris": "lannor01",
+    "l. norris": "lannor01",
     "oscar piastri": "oscpia01",
+    "o. piastri": "oscpia01",
     "george russell": "georus01",
+    "g. russell": "georus01",
     "andrea kimi antonelli": "andant01",
     "kimi antonelli": "andant01",
+    "a. antonelli": "andant01",
+    "k. antonelli": "andant01",
     "carlos sainz": "carsai01",
+    "c. sainz": "carsai01",
     "alexander albon": "alealb01",
     "alex albon": "alealb01",
+    "a. albon": "alealb01",
     "pierre gasly": "piegas01",
+    "p. gasly": "piegas01",
     "franco colapinto": "fracol01",
+    "f. colapinto": "fracol01",
     "esteban ocon": "estoco01",
+    "e. ocon": "estoco01",
     "oliver bearman": "olibea01",
+    "o. bearman": "olibea01",
     "liam lawson": "lialaw01",
+    "l. lawson": "lialaw01",
     "arvid lindblad": "arvlin01",
+    "a. lindblad": "arvlin01",
     "nico hulkenberg": "nichul01",
     "nico hülkenberg": "nichul01",
+    "n. hulkenberg": "nichul01",
+    "n. hülkenberg": "nichul01",
     "gabriel bortoleto": "gabbor01",
+    "g. bortoleto": "gabbor01",
     "sergio perez": "serper01",
     "sergio pérez": "serper01",
-    "valtteri bottas": "valbot01"
+    "s. perez": "serper01",
+    "s. pérez": "serper01",
+    "valtteri bottas": "valbot01",
+    "v. bottas": "valbot01",
+    "fernando alonso": "feralo01",
+    "f. alonso": "feralo01",
+    "lance stroll": "lanstr01",
+    "l. stroll": "lanstr01",
+    "isack hadjar": "isahad01",
+    "i. hadjar": "isahad01"
   }
   
   const code = driverCodes[normName] || (normName.split(' ')[0].substring(0,3) + normName.split(' ').pop().substring(0,3) + '01')
+  const wasInMap = !!driverCodes[normName]
   
-  return `https://media.formula1.com/image/upload/c_lfill,w_440/q_auto/d_common:f1:${year}:fallback:driver:${year}fallbackdriverfront.webp/v1740000001/common/f1/${year}/${team}/${code}/${year}${team}${code}front.webp`
+  const url = `https://media.formula1.com/image/upload/c_lfill,w_440/q_auto/d_common:f1:${year}:fallback:driver:${year}fallbackdriverfront.webp/v1740000001/common/f1/${year}/${team}/${code}/${year}${team}${code}front.webp`
+  
+  logger.debug(`[DriverImage] Resolved image URL`, {
+    input: { driverName, constructorId, season: year },
+    resolved: { normName, team, code, codeFromMap: wasInMap },
+    url
+  })
+  
+  return url
+}
+
+/**
+ * Validates whether a driver image URL actually resolves to a real asset.
+ * Performs a HEAD request and logs diagnostics about the CDN response.
+ * Call this from browser DevTools: window.__validateDriverImages()
+ */
+export const validateDriverImageUrl = async (driverName, constructorId, season) => {
+  const url = getDriverImage(driverName, constructorId, season)
+  const year = Number(season) || Number(getActiveSeasonSync()) || 2026
+  const team = getCdnConstructorPath(constructorId)
+  const normName = driverName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+
+  // Build alternate URLs to test different failure hypotheses
+  const urlWithoutVersion = url.replace('/v1740000001/', '/')
+  const urlWithoutFallback = `https://media.formula1.com/image/upload/c_lfill,w_440/q_auto/v1740000001/common/f1/${year}/${team}/${normName.split(' ')[0].substring(0,3)}${normName.split(' ').pop().substring(0,3)}01/${year}${team}${normName.split(' ')[0].substring(0,3)}${normName.split(' ').pop().substring(0,3)}01front.webp`
+
+  const results = {}
+  const testUrls = {
+    'original (with version + fallback)': url,
+    'without version (latest)': urlWithoutVersion,
+  }
+
+  for (const [label, testUrl] of Object.entries(testUrls)) {
+    try {
+      const resp = await fetch(testUrl, { method: 'HEAD' })
+      const contentType = resp.headers.get('content-type') || 'unknown'
+      const contentLength = resp.headers.get('content-length') || 'unknown'
+      results[label] = {
+        status: resp.status,
+        ok: resp.ok,
+        contentType,
+        contentLength,
+        isFallback: contentLength !== 'unknown' && Number(contentLength) < 5000, // Fallback silhouette is typically very small
+        url: testUrl
+      }
+    } catch (err) {
+      results[label] = { error: err.message, url: testUrl }
+    }
+  }
+
+  const diagnosis = []
+  const orig = results['original (with version + fallback)']
+  const noVer = results['without version (latest)']
+
+  if (orig?.ok && noVer?.ok) {
+    if (orig.isFallback && !noVer.isFallback) {
+      diagnosis.push('STALE_VERSION: Version v1740000001 serves fallback; removing version resolves to actual asset')
+    } else if (orig.isFallback && noVer.isFallback) {
+      diagnosis.push('MISSING_ASSET: Both versioned and unversioned URLs serve fallback — asset may not exist for this driver/team/year')
+    } else {
+      diagnosis.push('OK: Original URL serves a real asset')
+    }
+  } else if (!orig?.ok) {
+    diagnosis.push('CDN_ERROR: Original URL returned non-200')
+  }
+
+  const report = {
+    driver: driverName,
+    constructor: constructorId,
+    season: year,
+    team,
+    results,
+    diagnosis
+  }
+
+  logger.info(`[DriverImage Validation] ${driverName}`, report)
+  console.table(Object.entries(results).map(([label, r]) => ({ label, ...r })))
+  console.log('Diagnosis:', diagnosis.join('; '))
+
+  return report
 }
 
 
@@ -312,6 +421,7 @@ export const getStandings = async () => {
     const drivers = rawDrivers.map((d, i) => ({ 
       pos: String(d.position).padStart(2, '0'), 
       name: formatDriverNameAbbreviated(d.Driver.givenName, d.Driver.familyName), 
+      fullName: `${d.Driver.givenName} ${d.Driver.familyName}`,
       code: d.Driver.code || d.Driver.familyName.substring(0, 3).toUpperCase(), 
       team: getTeamDisplayName(d.Constructors[0]?.constructorId, d.Constructors[0]?.name, season) || 'Unknown', 
       constructorId: d.Constructors[0]?.constructorId,
@@ -393,10 +503,12 @@ export const getOpenF1WinnerForRound = async (roundNumber, location) => {
 export const getCalendar = async () => {
   try {
     const season = await getActiveSeason()
-    // Parallel fetch for calendar rounds and actual race results
+    // Fetch only P1 finishers (1 result per race) for calendar winners.
+    // Using /results/1.json instead of /results.json avoids the row-level limit
+    // truncation that caused later rounds (e.g. Monaco) to show 'TBD'.
     const [calendarRes, resultsRes] = await Promise.all([
       fetchCached(`${BASE_URL}/${season}.json`),
-      fetchCached(`${BASE_URL}/${season}/results.json?limit=100`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
+      fetchCached(`${BASE_URL}/${season}/results/1.json?limit=100`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
     ]).catch(() => [{ data: { MRData: { RaceTable: { Races: [] } } } }, { data: { MRData: { RaceTable: { Races: [] } } } }])
 
     const races = calendarRes.data?.MRData?.RaceTable?.Races || []
@@ -427,14 +539,30 @@ export const getCalendar = async () => {
       const isNext = Number(r.round) === currentRound
 
       let winnerName = resultsMap.get(Number(r.round))
+      let winnerSource = winnerName ? 'ergast' : null
 
       // Fallback to OpenF1 if race is past and winner is missing from results endpoint
       if (!winnerName && isPast) {
         winnerName = await getOpenF1WinnerForRound(Number(r.round), r.Circuit.Location.locality)
+        if (winnerName) winnerSource = 'openf1'
       }
 
       // Final fallback to TBD
-      winnerName = winnerName || (isPast ? 'TBD' : '')
+      if (!winnerName && isPast) {
+        winnerName = 'TBD'
+        winnerSource = 'fallback'
+      } else if (!winnerName) {
+        winnerName = ''
+        winnerSource = null
+      }
+
+      logger.debug(`[Calendar] Round ${r.round} winner resolved`, {
+        round: Number(r.round),
+        raceName: r.raceName,
+        winner: winnerName,
+        source: winnerSource,
+        status: raceStatusVal
+      })
 
       return {
         id: Number(r.round),

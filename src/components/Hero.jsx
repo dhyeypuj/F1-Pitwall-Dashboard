@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import useStore, { getTopDriver } from '../store/useStore'
 import { logout } from '../services/authService'
-import { getTeamLogo, getDriverImage } from '../services/f1Service'
+import { getTeamLogo, getDriverImage, getCdnConstructorPath } from '../services/f1Service'
 import { analytics } from '../services/analytics'
 
 const Hero = () => {
@@ -30,7 +30,41 @@ const Hero = () => {
   const activeSeason = useStore((state) => state.activeSeason)
   const standings = useStore((state) => state.standings)
   const teamId = preferences?.team || 'ferrari'
-  const activeTeamDrivers = (standings?.drivers || []).filter(d => d.constructorId === teamId)
+
+  const driverPriority = {
+    "george russell": 1, "g. russell": 1,
+    "andrea kimi antonelli": 2, "kimi antonelli": 2, "a. antonelli": 2, "k. antonelli": 2,
+    "charles leclerc": 1, "c. leclerc": 1,
+    "lewis hamilton": 2, "l. hamilton": 2,
+    "lando norris": 1, "l. norris": 1,
+    "oscar piastri": 2, "o. piastri": 2,
+    "max verstappen": 1, "m. verstappen": 1,
+    "isack hadjar": 2, "i. hadjar": 2,
+    "fernando alonso": 1, "f. alonso": 1,
+    "lance stroll": 2, "l. stroll": 2,
+    "liam lawson": 1, "l. lawson": 1,
+    "arvid lindblad": 2, "a. lindblad": 2,
+    "pierre gasly": 1, "p. gasly": 1,
+    "franco colapinto": 2, "f. colapinto": 2,
+    "nico hulkenberg": 1, "nico hülkenberg": 1, "n. hulkenberg": 1, "n. hülkenberg": 1,
+    "gabriel bortoleto": 2, "g. bortoleto": 2,
+    "esteban ocon": 1, "e. ocon": 1,
+    "oliver bearman": 2, "o. bearman": 2,
+    "valtteri bottas": 1, "v. bottas": 1,
+    "sergio perez": 2, "sergio pérez": 2, "s. perez": 2, "s. pérez": 2,
+    "alexander albon": 1, "alex albon": 1, "a. albon": 1,
+    "carlos sainz": 2, "c. sainz": 2
+  }
+
+  const activeTeamDrivers = (standings?.drivers || [])
+    .filter(d => getCdnConstructorPath(d.constructorId) === getCdnConstructorPath(teamId))
+    .sort((a, b) => {
+      const aName = (a.fullName || a.name || '').toLowerCase()
+      const bName = (b.fullName || b.name || '').toLowerCase()
+      const aPri = driverPriority[aName] || 99
+      const bPri = driverPriority[bName] || 99
+      return aPri - bPri
+    })
 
   let driver1 = null
   let driver2 = null
@@ -39,18 +73,18 @@ const Hero = () => {
     driver1 = {
       name: activeTeamDrivers[0].name,
       code: activeTeamDrivers[0].code,
-      image: getDriverImage(activeTeamDrivers[0].name, teamId, activeSeason)
+      image: getDriverImage(activeTeamDrivers[0].fullName || activeTeamDrivers[0].name, teamId, activeSeason)
     }
     driver2 = {
       name: activeTeamDrivers[1].name,
       code: activeTeamDrivers[1].code,
-      image: getDriverImage(activeTeamDrivers[1].name, teamId, activeSeason)
+      image: getDriverImage(activeTeamDrivers[1].fullName || activeTeamDrivers[1].name, teamId, activeSeason)
     }
   } else if (activeTeamDrivers.length === 1) {
     driver1 = {
       name: activeTeamDrivers[0].name,
       code: activeTeamDrivers[0].code,
-      image: getDriverImage(activeTeamDrivers[0].name, teamId, activeSeason)
+      image: getDriverImage(activeTeamDrivers[0].fullName || activeTeamDrivers[0].name, teamId, activeSeason)
     }
   }
 

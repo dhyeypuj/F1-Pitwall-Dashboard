@@ -7,6 +7,14 @@ import * as Sentry from '@sentry/react'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 
+// Expose driver image diagnostics in development mode
+if (import.meta.env.DEV) {
+  import('./services/f1Service').then(({ validateDriverImageUrl }) => {
+    window.__validateDriverImages = validateDriverImageUrl
+    console.log('[DevTools] Driver image validator available: window.__validateDriverImages(driverName, constructorId, season)')
+  })
+}
+
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,

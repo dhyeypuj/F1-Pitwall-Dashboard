@@ -84,3 +84,19 @@ export const getNextSession = (sessions) => {
 
   return upcoming[0] || null
 }
+
+/**
+ * Determines whether a session type is eligible for the extended-time grace window.
+ * Only the main Race session can run past its scheduled end time due to
+ * red flags, safety cars, or other delays. Practice and qualifying sessions
+ * have fixed durations and should transition immediately when their end time passes.
+ *
+ * @param {string} sessionKey - The session key (e.g., 'race', 'fp1', 'qualifying')
+ * @param {string} [sessionName] - The display name of the session (e.g., 'Race', 'Practice 1')
+ * @returns {boolean} True if the session is eligible for an extended grace window.
+ */
+export const isExtendableSession = (sessionKey, sessionName) => {
+  const key = (sessionKey || '').toLowerCase()
+  const name = (sessionName || '').toLowerCase()
+  return key === 'race' || name === 'race'
+}
