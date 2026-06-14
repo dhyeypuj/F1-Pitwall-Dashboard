@@ -39,35 +39,39 @@ const getFlagUrl = (nationality) => {
 const getTeamDisplayName = (id, apiName, season = getActiveSeasonSync()) => {
   const year = Number(season) || 2026
   const names = { 
-    ferrari: 'Scuderia Ferrari HP', 
-    mercedes: 'Mercedes-AMG PETRONAS Formula One Team', 
-    red_bull: 'Oracle Red Bull Racing', 
-    redbull: 'Oracle Red Bull Racing', 
-    mclaren: 'McLaren Formula 1 Team', 
-    aston_martin: 'Aston Martin Aramco Formula One Team', 
-    astonmartin: 'Aston Martin Aramco Formula One Team', 
-    williams: 'Atlassian Williams Racing', 
-    alpine: 'BWT Alpine Formula One Team', 
-    haas: 'MoneyGram Haas F1 Team', 
-    rb: 'Visa Cash App Racing Bulls F1 Team', 
-    racingbulls: 'Visa Cash App Racing Bulls F1 Team', 
-    vcarb: 'Visa Cash App Racing Bulls F1 Team', 
-    sauber: 'Stake F1 Team Kick Sauber', 
-    kick_sauber: 'Stake F1 Team Kick Sauber',
+    ferrari: 'Ferrari', 
+    mercedes: 'Mercedes', 
+    red_bull: 'Red Bull Racing', 
+    redbull: 'Red Bull Racing', 
+    mclaren: 'McLaren', 
+    aston_martin: 'Aston Martin', 
+    astonmartin: 'Aston Martin', 
+    williams: 'Williams', 
+    alpine: 'Alpine', 
+    haas: 'Haas', 
+    rb: 'Racing Bulls', 
+    racingbulls: 'Racing Bulls', 
+    vcarb: 'Racing Bulls', 
+    sauber: 'Audi', 
+    kick_sauber: 'Audi',
     alphatauri: 'Scuderia AlphaTauri',
     torro_rosso: 'Scuderia Toro Rosso',
     force_india: 'Sahara Force India F1 Team',
     racing_point: 'SportPesa Racing Point F1 Team',
     renault: 'Renault DP World F1 Team',
-    audi: 'Audi F1 Team', 
-    andretti: 'Cadillac Formula 1 Team', 
-    cadillac: 'Cadillac Formula 1 Team' 
+    audi: 'Audi', 
+    andretti: 'Cadillac', 
+    cadillac: 'Cadillac' 
   }
   
   if (year < 2026) {
     names.ferrari = 'Scuderia Ferrari'
     names.williams = 'Williams Racing'
     names.sauber = 'Stake F1 Team Kick Sauber'
+    names.kick_sauber = 'Stake F1 Team Kick Sauber'
+    names.audi = 'Audi F1 Team'
+    names.andretti = 'Andretti Cadillac'
+    names.cadillac = 'Andretti Cadillac'
   }
   if (year < 2024) {
     names.sauber = 'Alfa Romeo F1 Team Stake'
@@ -280,6 +284,104 @@ export const getDriverImage = (driverName, constructorId, season = getActiveSeas
 }
 
 /**
+ * Returns the URL to a driver's official stylized number image from the F1 CDN.
+ * These are the same team-branded number graphics used on formula1.com.
+ * @param {string} driverName - Full driver name (e.g. "Lando Norris") or abbreviated (e.g. "L. Norris")
+ * @param {string} constructorId - Constructor/team ID (e.g. "mclaren", "ferrari")
+ * @param {string|number} [season] - Season year (defaults to active season)
+ * @returns {string} URL to the driver number image on the F1 CDN
+ */
+export const getDriverNumberImage = (driverName, constructorId, season = getActiveSeasonSync()) => {
+  const normName = driverName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  
+  const driverCodes = {
+    "charles leclerc": "chalec01",
+    "c. leclerc": "chalec01",
+    "lewis hamilton": "lewham01",
+    "l. hamilton": "lewham01",
+    "max verstappen": "maxver01",
+    "m. verstappen": "maxver01",
+    "lando norris": "lannor01",
+    "l. norris": "lannor01",
+    "oscar piastri": "oscpia01",
+    "o. piastri": "oscpia01",
+    "george russell": "georus01",
+    "g. russell": "georus01",
+    "andrea kimi antonelli": "andant01",
+    "kimi antonelli": "andant01",
+    "a. antonelli": "andant01",
+    "k. antonelli": "andant01",
+    "carlos sainz": "carsai01",
+    "c. sainz": "carsai01",
+    "alexander albon": "alealb01",
+    "alex albon": "alealb01",
+    "a. albon": "alealb01",
+    "pierre gasly": "piegas01",
+    "p. gasly": "piegas01",
+    "franco colapinto": "fracol01",
+    "f. colapinto": "fracol01",
+    "esteban ocon": "estoco01",
+    "e. ocon": "estoco01",
+    "oliver bearman": "olibea01",
+    "o. bearman": "olibea01",
+    "liam lawson": "lialaw01",
+    "l. lawson": "lialaw01",
+    "arvid lindblad": "arvlin01",
+    "a. lindblad": "arvlin01",
+    "nico hulkenberg": "nichul01",
+    "n. hulkenberg": "nichul01",
+    "gabriel bortoleto": "gabbor01",
+    "g. bortoleto": "gabbor01",
+    "sergio perez": "serper01",
+    "s. perez": "serper01",
+    "valtteri bottas": "valbot01",
+    "v. bottas": "valbot01",
+    "fernando alonso": "feralo01",
+    "f. alonso": "feralo01",
+    "lance stroll": "lanstr01",
+    "l. stroll": "lanstr01",
+    "isack hadjar": "isahad01",
+    "i. hadjar": "isahad01"
+  }
+
+  const code = driverCodes[normName] || (normName.split(' ')[0].substring(0,3) + normName.split(' ').pop().substring(0,3) + '01')
+  
+  const driverNumbers = {
+    lannor01: '1-norris',
+    oscpia01: '81-piastri',
+    maxver01: '3-verstappen',
+    isahad01: '6-hadjar',
+    chalec01: '16-leclerc',
+    lewham01: '44-hamilton',
+    georus01: '63-russell',
+    andant01: '12-antonelli',
+    carsai01: '55-sainz',
+    alealb01: '23-albon',
+    feralo01: '14-alonso',
+    lanstr01: '18-stroll',
+    piegas01: '10-gasly',
+    fracol01: '43-colapinto',
+    estoco01: '31-ocon',
+    olibea01: '87-bearman',
+    lialaw01: '30-lawson',
+    arvlin01: '41-lindblad',
+    nichul01: '27-hulkenberg',
+    gabbor01: '5-bortoleto',
+    serper01: '11-perez',
+    valbot01: '77-bottas'
+  }
+
+  const filenameKey = driverNumbers[code]
+  if (filenameKey) {
+    return `/assets/driver-numbers/${filenameKey}.svg`
+  }
+
+  const year = Number(season) || 2026
+  const team = getCdnConstructorPath(constructorId)
+  return `https://media.formula1.com/image/upload/c_fit,w_876,h_742/q_auto/v1740000001/common/f1/${year}/${team}/${code}/${year}${team}${code}numberwhitefrless.webp`
+}
+
+/**
  * Validates whether a driver image URL actually resolves to a real asset.
  * Performs a HEAD request and logs diagnostics about the CDN response.
  * Call this from browser DevTools: window.__validateDriverImages()
@@ -422,6 +524,7 @@ export const getStandings = async () => {
       pos: String(d.position).padStart(2, '0'), 
       name: formatDriverNameAbbreviated(d.Driver.givenName, d.Driver.familyName), 
       fullName: `${d.Driver.givenName} ${d.Driver.familyName}`,
+      imageUrl: getDriverImage(`${d.Driver.givenName} ${d.Driver.familyName}`, d.Constructors[0]?.constructorId, season),
       code: d.Driver.code || d.Driver.familyName.substring(0, 3).toUpperCase(), 
       team: getTeamDisplayName(d.Constructors[0]?.constructorId, d.Constructors[0]?.name, season) || 'Unknown', 
       constructorId: d.Constructors[0]?.constructorId,

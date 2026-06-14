@@ -6,6 +6,7 @@
 export const defaultMetadata = {
   countryCode: "UN",
   trackLength: "—",
+  distanceKm: "—",
   cornerCount: 0,
   drsZones: 0,
   lapRecord: "—",
@@ -316,26 +317,45 @@ const manualAliases = {
 }
 
 export const getRaceMetadata = (circuitId, countryName, localityName, raceName) => {
+  let result = { ...defaultMetadata };
+
   // Try exact lookup on normalized circuitId first
   const cIdNorm = normalizeName(circuitId);
+  let foundMeta = null;
   if (cIdNorm && normalizedIndex[cIdNorm]) {
-    return { ...defaultMetadata, ...normalizedIndex[cIdNorm] };
-  }
-
-  // Try exact lookup on manual aliases
-  const searchTerms = [circuitId, localityName, countryName, raceName]
-  for (const term of searchTerms) {
-    if (term) {
-      const normTerm = normalizeName(term);
-      const aliasKey = manualAliases[normTerm];
-      if (aliasKey && circuitMetadata[aliasKey]) {
-        return { ...defaultMetadata, ...circuitMetadata[aliasKey] };
-      }
-      if (normalizedIndex[normTerm]) {
-        return { ...defaultMetadata, ...normalizedIndex[normTerm] };
+    foundMeta = normalizedIndex[cIdNorm];
+  } else {
+    // Try exact lookup on manual aliases
+    const searchTerms = [circuitId, localityName, countryName, raceName];
+    for (const term of searchTerms) {
+      if (term) {
+        const normTerm = normalizeName(term);
+        const aliasKey = manualAliases[normTerm];
+        if (aliasKey && circuitMetadata[aliasKey]) {
+          foundMeta = circuitMetadata[aliasKey];
+          break;
+        }
+        if (normalizedIndex[normTerm]) {
+          foundMeta = normalizedIndex[normTerm];
+          break;
+        }
       }
     }
   }
 
-  return { ...defaultMetadata };
+  if (foundMeta) {
+    result = { ...result, ...foundMeta };
+  }
+
+  // Calculate distanceKm dynamically if trackLength and laps are available and distanceKm is not already set
+  if (result.distanceKm === "—") {
+    if (result.trackLength && result.trackLength !== "—" && result.laps) {
+      const lenVal = parseFloat(result.trackLength);
+      if (!isNaN(lenVal)) {
+        result.distanceKm = (lenVal * result.laps).toFixed(3);
+      }
+    }
+  }
+
+  return result;
 }
