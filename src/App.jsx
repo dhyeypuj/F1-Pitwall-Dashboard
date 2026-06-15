@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Hero from './components/Hero'
 import NewsFeed from './components/NewsFeed'
+import LiveFeedPage from './pages/LiveFeedPage'
 import DriversStandings from './components/DriversStandings'
 import ConstructorsStandings from './components/ConstructorsStandings'
 import RaceHero from './components/RaceHero'
@@ -46,6 +47,15 @@ function App() {
   const setRaceStats = useStore(state => state.setRaceStats)
   const setLoading = useStore(state => state.setLoading)
   const setError = useStore(state => state.setError)
+  
+  const currentPage = useStore(state => state.currentPage)
+  const setCurrentPage = useStore(state => state.setCurrentPage)
+  const commentaryTab = useStore(state => state.commentaryTab)
+  const setCommentaryTab = useStore(state => state.setCommentaryTab)
+  const fetchCommentaryFeed = useStore(state => state.fetchCommentaryFeed)
+  const commentaryMode = useStore(state => state.commentaryMode)
+  const showAlert = useStore(state => state.showAlert)
+  const setShowAlert = useStore(state => state.setShowAlert)
 
   const standings = useStore(state => state.standings)
   const calendar = useStore(state => state.calendar)
@@ -225,6 +235,22 @@ function App() {
     return () => clearInterval(pollInterval)
   }, [isAuthenticated, activeTeam, isOnline, setLoading, setStandings, setRace, setCalendar, setPodium, setRaceStats, setNews, setError, setSessions, activeSeason])
 
+  // ── Live Telemetry/Commentary Fast Polling ─────────────────
+  useEffect(() => {
+    if (!isAuthenticated || !isOnline) return
+
+    // Initial load
+    fetchCommentaryFeed()
+
+    // Setup polling: 20 seconds for active live, 5 minutes for demo
+    const intervalTime = commentaryMode === 'live' ? 20000 : 300000
+    const pollInterval = setInterval(() => {
+      fetchCommentaryFeed()
+    }, intervalTime)
+
+    return () => clearInterval(pollInterval)
+  }, [isAuthenticated, isOnline, fetchCommentaryFeed, commentaryMode])
+
   // ── Stats derivation ────────────────────────────────
   useEffect(() => {
     if (!isAuthenticated) return
@@ -282,20 +308,23 @@ function App() {
       const gap = parseFloat(p1.points || 0) - parseFloat(p2.points || 0)
 
       const items = [
-        { id: 1, label: "Championship Lead", bigHtml: `<em>+${gap}</em> pts`, sub: `${p1.name.split(' ').pop()} over ${p2.name.split(' ').pop()}` }
+        { id: 1, label: "Drivers' Championship Lead", bigHtml: `<em>+${gap}</em> pts`, sub: `${p1.name.split(' ').pop()} over ${p2.name.split(' ').pop()}` }
       ]
 
-      if (raceStats?.fastestLap) {
+      if (standings.constructors && standings.constructors.length > 1) {
+        const c1 = standings.constructors[0]
+        const c2 = standings.constructors[1]
+        const cGap = parseFloat(c1.points || 0) - parseFloat(c2.points || 0)
         items.push({
           id: 2,
-          label: `Fastest Lap ${activeSeason}`,
-          bigHtml: raceStats.fastestLap.time || '--',
-          sub: `${raceStats.fastestLap.driver} · ${raceStats.latestRaceName}`
+          label: "Constructors' Championship Lead",
+          bigHtml: `<em>+${cGap}</em> pts`,
+          sub: `${c1.name} over ${c2.name}`
         })
       } else {
         items.push({
           id: 2,
-          label: `Fastest Lap ${activeSeason}`,
+          label: "Constructors' Championship Lead",
           bigHtml: '--',
           sub: 'No data yet'
         })
@@ -400,6 +429,17 @@ function App() {
     return <AuthPage />
   }
 
+  if (currentPage === 'live-feed') {
+    return (
+      <div 
+        className={`pit-wall-app team-${preferences.team}`} 
+        data-team={preferences.team}
+      >
+        <LiveFeedPage />
+      </div>
+    )
+  }
+
   return (
     <div 
       className={`pit-wall-app team-${preferences.team}`} 
@@ -444,6 +484,41 @@ function App() {
         <div className="offline-banner">
           <div className="offline-dot"></div>
           OFFLINE · LIMITED FUNCTIONALITY
+        </div>
+      )}
+
+      {showAlert && (
+        <div className="custom-alert-overlay" onClick={() => setShowAlert(false)}>
+          <div className="custom-alert-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="custom-alert-header">
+              <span className="custom-alert-icon">⚠️</span>
+              <h3>NO ACTIVE SESSION</h3>
+            </div>
+            <div className="custom-alert-body">
+              <p>There is no Formula 1 session currently live.</p>
+              <p className="custom-alert-sub">You can still proceed to view the Pit Wall layout, which will automatically go live as soon as the next session starts.</p>
+            </div>
+            <div className="custom-alert-footer">
+              <button 
+                type="button" 
+                className="alert-btn-cancel"
+                onClick={() => setShowAlert(false)}
+              >
+                STAY ON DASHBOARD
+              </button>
+              <button 
+                type="button" 
+                className="alert-btn-confirm"
+                onClick={() => {
+                  setShowAlert(false)
+                  setCurrentPage('live-feed')
+                  setCommentaryTab('live')
+                }}
+              >
+                PROCEED TO PIT WALL
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

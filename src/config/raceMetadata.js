@@ -11,7 +11,7 @@ export const defaultMetadata = {
   drsZones: 0,
   lapRecord: "—",
   lapRecordHolder: "—",
-  previousPole: "—",
+  previousWinner: "—",
   trackImage: "generic_track.png"
 }
 
@@ -24,7 +24,7 @@ export const circuitMetadata = {
     drsZones: 4,
     lapRecord: "1:19.813",
     lapRecordHolder: "Charles Leclerc",
-    previousPole: "Max Verstappen",
+    previousWinner: "Lando Norris",
     trackImage: "albert_park.png"
   },
   shanghai: {
@@ -35,7 +35,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:32.238",
     lapRecordHolder: "Michael Schumacher",
-    previousPole: "Lando Norris",
+    previousWinner: "Oscar Piastri",
     trackImage: "shanghai.png"
   },
   suzuka: {
@@ -46,7 +46,7 @@ export const circuitMetadata = {
     drsZones: 1,
     lapRecord: "1:30.983",
     lapRecordHolder: "Lewis Hamilton",
-    previousPole: "Max Verstappen",
+    previousWinner: "Max Verstappen",
     trackImage: "suzuka.png"
   },
   miami: {
@@ -57,7 +57,7 @@ export const circuitMetadata = {
     drsZones: 3,
     lapRecord: "1:29.708",
     lapRecordHolder: "Max Verstappen",
-    previousPole: "Max Verstappen",
+    previousWinner: "Oscar Piastri",
     trackImage: "miami.png"
   },
   villeneuve: {
@@ -68,7 +68,7 @@ export const circuitMetadata = {
     drsZones: 3,
     lapRecord: "1:13.078",
     lapRecordHolder: "Valtteri Bottas",
-    previousPole: "George Russell",
+    previousWinner: "George Russell",
     trackImage: "montreal.png"
   },
   monaco: {
@@ -79,7 +79,7 @@ export const circuitMetadata = {
     drsZones: 1,
     lapRecord: "1:12.909",
     lapRecordHolder: "Lewis Hamilton",
-    previousPole: "Charles Leclerc",
+    previousWinner: "Lando Norris",
     trackImage: "monaco.png"
   },
   catalunya: {
@@ -90,7 +90,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:16.330",
     lapRecordHolder: "Max Verstappen",
-    previousPole: "Lando Norris",
+    previousWinner: "Oscar Piastri",
     trackImage: "barcelona.png"
   },
   red_bull_ring: {
@@ -101,7 +101,7 @@ export const circuitMetadata = {
     drsZones: 3,
     lapRecord: "1:05.619",
     lapRecordHolder: "Carlos Sainz",
-    previousPole: "Max Verstappen",
+    previousWinner: "Lando Norris",
     trackImage: "spielberg.png"
   },
   silverstone: {
@@ -112,7 +112,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:27.097",
     lapRecordHolder: "Max Verstappen",
-    previousPole: "George Russell",
+    previousWinner: "Lando Norris",
     trackImage: "silverstone.png"
   },
   spa: {
@@ -123,7 +123,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:44.701",
     lapRecordHolder: "Sergio Pérez",
-    previousPole: "Charles Leclerc",
+    previousWinner: "Oscar Piastri",
     trackImage: "spa.png"
   },
   hungaroring: {
@@ -134,7 +134,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:16.627",
     lapRecordHolder: "Lewis Hamilton",
-    previousPole: "Lando Norris",
+    previousWinner: "Lando Norris",
     trackImage: "hungaroring.png"
   },
   zandvoort: {
@@ -145,7 +145,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:11.097",
     lapRecordHolder: "Lewis Hamilton",
-    previousPole: "Lando Norris",
+    previousWinner: "Oscar Piastri",
     trackImage: "zandvoort.png"
   },
   monza: {
@@ -156,7 +156,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:21.046",
     lapRecordHolder: "Rubens Barrichello",
-    previousPole: "Lando Norris",
+    previousWinner: "Max Verstappen",
     trackImage: "monza.png"
   },
   madrid: {
@@ -167,7 +167,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "—",
     lapRecordHolder: "—",
-    previousPole: "—",
+    previousWinner: "—",
     trackImage: "madrid.png"
   },
   baku: {
@@ -178,7 +178,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:43.009",
     lapRecordHolder: "Charles Leclerc",
-    previousPole: "Charles Leclerc",
+    previousWinner: "Max Verstappen",
     trackImage: "baku.png"
   },
   marina_bay: {
@@ -189,7 +189,7 @@ export const circuitMetadata = {
     drsZones: 3,
     lapRecord: "1:34.486",
     lapRecordHolder: "Daniel Ricciardo",
-    previousPole: "Charles Leclerc",
+    previousWinner: "George Russell",
     trackImage: "singapore.png"
   },
   americas: {
@@ -200,7 +200,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:36.169",
     lapRecordHolder: "Charles Leclerc",
-    previousPole: "Lando Norris",
+    previousWinner: "Max Verstappen",
     trackImage: "austin.png"
   },
   rodriguez: {
@@ -211,7 +211,7 @@ export const circuitMetadata = {
     drsZones: 3,
     lapRecord: "1:17.774",
     lapRecordHolder: "Valtteri Bottas",
-    previousPole: "Carlos Sainz",
+    previousWinner: "Lando Norris",
     trackImage: "mexico.png"
   },
   interlagos: {
@@ -222,7 +222,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:10.540",
     lapRecordHolder: "Valtteri Bottas",
-    previousPole: "Max Verstappen",
+    previousWinner: "Lando Norris",
     trackImage: "brazil.png"
   },
   las_vegas: {
@@ -233,7 +233,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:35.490",
     lapRecordHolder: "Oscar Piastri",
-    previousPole: "George Russell",
+    previousWinner: "Max Verstappen",
     trackImage: "las_vegas.png"
   },
   losail: {
@@ -244,7 +244,7 @@ export const circuitMetadata = {
     drsZones: 1,
     lapRecord: "1:22.384",
     lapRecordHolder: "Lando Norris",
-    previousPole: "Max Verstappen",
+    previousWinner: "Max Verstappen",
     trackImage: "qatar.png"
   },
   yas_marina: {
@@ -255,7 +255,7 @@ export const circuitMetadata = {
     drsZones: 2,
     lapRecord: "1:26.103",
     lapRecordHolder: "Max Verstappen",
-    previousPole: "Max Verstappen",
+    previousWinner: "Max Verstappen",
     trackImage: "abu_dhabi.png"
   }
 }

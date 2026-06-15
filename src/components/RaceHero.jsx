@@ -11,6 +11,11 @@ const RaceHero = () => {
   const calendar = useStore((state) => state.calendar)
   const isLoading = useStore((state) => state.isLoadingRace)
   const error = useStore((state) => state.errorRace)
+  
+  const setCurrentPage = useStore((state) => state.setCurrentPage)
+  const setCommentaryTab = useStore((state) => state.setCommentaryTab)
+  const commentaryMode = useStore((state) => state.commentaryMode)
+  const setShowAlert = useStore((state) => state.setShowAlert)
 
   const [liveStatus, setLiveStatus] = useState('none') // none, red_flag, safety_car, vsc, chequered_flag
   const pollingIntervalRef = useRef(null)
@@ -207,8 +212,8 @@ const RaceHero = () => {
                 <div className="race-stat-val">{nextRace.lapRecord}</div>
               </div>
               <div className="race-stat">
-                <div className="race-stat-label">Prev. Pole</div>
-                <div className="race-stat-val">{nextRace.previousPole}</div>
+                <div className="race-stat-label">Prev. Winner</div>
+                <div className="race-stat-val">{nextRace.previousWinner}</div>
               </div>
             </div>
           </div>
@@ -238,6 +243,23 @@ const RaceHero = () => {
                 <div className="cd-cell"><div className="cd-num" id="cd-s">{formatNumber(seconds)}</div><div className="cd-label">Secs</div></div>
               </div>
             )}
+
+            <div className="countdown-tabs">
+              <button 
+                type="button" 
+                className="countdown-tab-btn"
+                onClick={() => {
+                  if (commentaryMode === 'demo') {
+                    setShowAlert(true)
+                  } else {
+                    setCurrentPage('live-feed')
+                    setCommentaryTab('live')
+                  }
+                }}
+              >
+                📡 LIVE PIT WALL (TELEMETRY & COMMENTARY)
+              </button>
+            </div>
           </div>
         </div>
       </div>

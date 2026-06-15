@@ -100,3 +100,94 @@ export const isExtendableSession = (sessionKey, sessionName) => {
   const name = (sessionName || '').toLowerCase()
   return key === 'race' || name === 'race'
 }
+
+/**
+ * Resolves the latest meeting and session from OpenF1 for the current year.
+ * Handles 401 unauthorized errors gracefully (e.g., when a live race weekend blocks free access).
+ */
+let cachedSession = null
+let lastFetchedTime = 0
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+export const getLatestOpenF1Session = async () => {
+  const now = Date.now()
+  if (cachedSession && (now - lastFetchedTime < CACHE_TTL)) {
+    return cachedSession
+  }
+
+  const currentYear = new Date().getFullYear()
+  try {
+    const meetingsRes = await fetch(`https://api.openf1.org/v1/meetings?year=${currentYear}`)
+    if (!meetingsRes.ok) {
+      if (meetingsRes.status === 401) {
+        return { error: 'unauthorized', detail: 'OpenF1 restricted access during live session.' }
+      }
+      throw new Error(`HTTP error! status: ${meetingsRes.status}`)
+    }
+    const meetings = await meetingsRes.json()
+    if (!meetings || meetings.length === 0) return null
+
+    const latestMeeting = meetings[meetings.length - 1]
+
+    const sessionsRes = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${latestMeeting.meeting_key}`)
+    if (!sessionsRes.ok) {
+      if (sessionsRes.status === 401) {
+        return { error: 'unauthorized', detail: 'OpenF1 restricted access during live session.' }
+      }
+      throw new Error(`HTTP error! status: ${sessionsRes.status}`)
+    }
+    const sessions = await sessionsRes.json()
+    if (!sessions || sessions.length === 0) return null
+
+    // Prefer active race session, or default to latest
+    const raceSession = sessions.find(s => s.session_name === 'Race') || sessions[sessions.length - 1]
+    
+    cachedSession = raceSession
+    lastFetchedTime = now
+    
+    return raceSession
+  } catch (error) {
+    console.error('Error resolving latest OpenF1 session:', error)
+    if (error.status === 401 || (error.message && error.message.includes('401'))) {
+      return { error: 'unauthorized', detail: 'OpenF1 restricted access during live session.' }
+    }
+    throw error
+  }
+}
+
+/**
+ * Fetches race control messages for a specific session from OpenF1.
+ * Handles 401 unauthorized errors gracefully.
+ */
+export const getOpenF1RaceControl = async (sessionKey) => {
+  if (!sessionKey) return []
+  try {
+    const response = await fetch(`https://api.openf1.org/v1/race_control?session_key=${sessionKey}`)
+    if (!response.ok) {
+      if (response.status === 401) {
+        return { error: 'unauthorized', detail: 'OpenF1 restricted access during live session.' }
+      }
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const data = await response.json()
+    
+    // Normalize messages
+    return data.map((msg, index) => ({
+      id: msg.id || `openf1-rc-${index}-${Date.now()}`,
+      timestamp: msg.date ? new Date(msg.date).toLocaleTimeString() : new Date().toLocaleTimeString(),
+      lap_number: msg.lap_number || 0,
+      category: msg.category || 'INFO',
+      message: msg.message || '',
+      flag: msg.flag || null,
+      scope: msg.scope || null
+    }))
+  } catch (error) {
+    console.error('Error fetching OpenF1 race control messages:', error)
+    if (error.status === 401 || (error.message && error.message.includes('401'))) {
+      return { error: 'unauthorized', detail: 'OpenF1 restricted access during live session.' }
+    }
+    throw error
+  }
+}
+
+

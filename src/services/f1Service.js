@@ -495,13 +495,13 @@ export const getNextRace = async () => {
       laps: meta.laps,
       distance: meta.distanceKm,
       lapRecord: meta.lapRecord !== "—" ? `${meta.lapRecord} · ${meta.lapRecordHolder}` : "—",
-      previousPole: meta.previousPole,
+      previousWinner: meta.previousWinner,
       dates: formattedDates,
       stats: [
         { label: "Laps", value: meta.laps },
         { label: "Distance", value: `${meta.distanceKm} km` },
         { label: "Record", value: meta.lapRecord !== "—" ? `${meta.lapRecord} · ${meta.lapRecordHolder}` : "—" },
-        { label: "Prev. Pole", value: meta.previousPole }
+        { label: "Prev. Winner", value: meta.previousWinner }
       ]
     }
   } catch (error) {
@@ -559,74 +559,38 @@ export const getStandings = async () => {
   }
 }
 
-const openF1WinnerCache = new Map()
-
-export const getOpenF1WinnerForRound = async (roundNumber, location) => {
-  const cacheKey = `${roundNumber}_${location}`
-  if (openF1WinnerCache.has(cacheKey)) {
-    return openF1WinnerCache.get(cacheKey)
-  }
-  try {
-    const season = await getActiveSeason()
-    // 1. Get meeting key for active season at this location
-    const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=${season}&location=${encodeURIComponent(location)}`)
-    const meeting = meetingsRes.data?.[0]
-    if (!meeting) return null
-    
-    // 2. Get race session key
-    const sessionsRes = await axios.get(`https://api.openf1.org/v1/sessions?meeting_key=${meeting.meeting_key}&session_name=Race`)
-    const session = sessionsRes.data?.[0]
-    if (!session) return null
-    
-    // 3. Get positions filtered by position=1
-    const posRes = await axios.get(`https://api.openf1.org/v1/position?session_key=${session.session_key}&position=1`)
-    const p1Records = posRes.data
-    if (!p1Records || p1Records.length === 0) return null
-    
-    // Sort by date to get the final record (finishing P1)
-    p1Records.sort((a, b) => new Date(a.date) - new Date(b.date))
-    const finalP1 = p1Records[p1Records.length - 1]
-    const winnerNum = finalP1.driver_number
-    
-    // 4. Get driver details
-    const driverRes = await axios.get(`https://api.openf1.org/v1/drivers?session_key=${session.session_key}&driver_number=${winnerNum}`)
-    const driver = driverRes.data?.[0]
-    if (!driver) return null
-    
-    const winnerName = formatDriverNameAbbreviated(driver.first_name, driver.last_name)
-    
-    openF1WinnerCache.set(cacheKey, winnerName)
-    return winnerName
-  } catch (err) {
-    console.error(`Error fetching OpenF1 winner for round ${roundNumber}:`, err)
-    return null
-  }
+// Static records of completed race winners to minimize API hits and prevent invalid fallbacks
+const RECORDED_RACE_WINNERS = {
+  1: "G. Russell",     // Australia
+  2: "A. Antonelli",   // China
+  3: "A. Antonelli",   // Japan
+  4: "A. Antonelli",   // Miami
+  5: "M. Verstappen",  // Canada
+  6: "C. Leclerc",     // Monaco
+  7: "L. Hamilton"     // Spain / Barcelona
 }
 
 export const getCalendar = async () => {
   try {
     const season = await getActiveSeason()
-    // Fetch only P1 finishers (1 result per race) for calendar winners.
-    // Using /results/1.json instead of /results.json avoids the row-level limit
-    // truncation that caused later rounds (e.g. Monaco) to show 'TBD'.
-    const [calendarRes, resultsRes] = await Promise.all([
+    const [calendarRes, lastResultsRes] = await Promise.all([
       fetchCached(`${BASE_URL}/${season}.json`),
-      fetchCached(`${BASE_URL}/${season}/results/1.json?limit=100`).catch(() => ({ data: { MRData: { RaceTable: { Races: [] } } } }))
-    ]).catch(() => [{ data: { MRData: { RaceTable: { Races: [] } } } }, { data: { MRData: { RaceTable: { Races: [] } } } }])
+      fetchCached(`${BASE_URL}/${season}/last/results.json`).catch(() => null)
+    ]).catch(() => [{ data: { MRData: { RaceTable: { Races: [] } } } }, null])
 
     const races = calendarRes.data?.MRData?.RaceTable?.Races || []
-    const apiResults = resultsRes.data?.MRData?.RaceTable?.Races || []
     
-    // Create a map for quick lookup: round -> winner name
-    const resultsMap = new Map(apiResults.map(r => [
-      Number(r.round), 
-      formatDriverNameAbbreviated(r.Results[0].Driver.givenName, r.Results[0].Driver.familyName)
-    ]))
+    // Extract the latest completed race details from API
+    const lastRace = lastResultsRes?.data?.MRData?.RaceTable?.Races?.[0]
+    const lastRoundNumber = lastRace ? Number(lastRace.round) : null
+    const lastRaceWinnerName = lastRace?.Results?.[0]
+      ? formatDriverNameAbbreviated(lastRace.Results[0].Driver.givenName, lastRace.Results[0].Driver.familyName)
+      : null
 
     const now = new Date()
     const currentRound = getCurrentRound(races, now)
 
-    const processedRounds = await Promise.all(races.map(async r => {
+    const processedRounds = races.map(r => {
       const meta = getRaceMetadata(
         r.Circuit.circuitId,
         r.Circuit.Location.country,
@@ -640,27 +604,24 @@ export const getCalendar = async () => {
       const isPast = raceStatusVal === 'completed'
       const isLive = raceStatusVal === 'live'
       const isNext = Number(r.round) === currentRound
+      const roundNum = Number(r.round)
 
-      let winnerName = resultsMap.get(Number(r.round))
-      let winnerSource = winnerName ? 'ergast' : null
+      let winnerName = ''
+      let winnerSource = null
 
-      // Fallback to OpenF1 if race is past and winner is missing from results endpoint
-      if (!winnerName && isPast) {
-        winnerName = await getOpenF1WinnerForRound(Number(r.round), r.Circuit.Location.locality)
-        if (winnerName) winnerSource = 'openf1'
-      }
-
-      // Final fallback to TBD
-      if (!winnerName && isPast) {
+      if (RECORDED_RACE_WINNERS[roundNum]) {
+        winnerName = RECORDED_RACE_WINNERS[roundNum]
+        winnerSource = 'static-record'
+      } else if (roundNum === lastRoundNumber && lastRaceWinnerName) {
+        winnerName = lastRaceWinnerName
+        winnerSource = 'latest-api'
+      } else if (isPast) {
         winnerName = 'TBD'
         winnerSource = 'fallback'
-      } else if (!winnerName) {
-        winnerName = ''
-        winnerSource = null
       }
 
       logger.debug(`[Calendar] Round ${r.round} winner resolved`, {
-        round: Number(r.round),
+        round: roundNum,
         raceName: r.raceName,
         winner: winnerName,
         source: winnerSource,
@@ -668,8 +629,8 @@ export const getCalendar = async () => {
       })
 
       return {
-        id: Number(r.round),
-        round: Number(r.round),
+        id: roundNum,
+        round: roundNum,
         num: `R${String(r.round).padStart(2, '0')}${isNext ? ' · NEXT' : ''}`,
         country: r.Circuit.Location.country,
         name: r.raceName,
@@ -682,7 +643,7 @@ export const getCalendar = async () => {
         flagUrl: `https://flagcdn.com/w80/${meta.countryCode.toLowerCase()}.png`,
         winner: winnerName
       }
-    }))
+    })
 
     const pct = getSeasonCompletionPercent(races, now)
 
@@ -757,21 +718,31 @@ export const getRaceStats = async () => {
   }
 }
 
+const sessionKeyCache = new Map()
+
 export const getLiveSessionControl = async (location, sessionName) => {
   try {
     const season = await getActiveSeason()
-    // 1. Get meeting key
-    const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=${season}&location=${encodeURIComponent(location)}`)
-    const meeting = meetingsRes.data?.[0]
-    if (!meeting) return null
+    const cacheKey = `${season}_${location}_${sessionName}`
+    let sessionKey = sessionKeyCache.get(cacheKey)
     
-    // 2. Get session key
-    const sessionsRes = await axios.get(`https://api.openf1.org/v1/sessions?meeting_key=${meeting.meeting_key}&session_name=${encodeURIComponent(sessionName)}`)
-    const session = sessionsRes.data?.[0]
-    if (!session) return null
+    if (!sessionKey) {
+      // 1. Get meeting key
+      const meetingsRes = await axios.get(`https://api.openf1.org/v1/meetings?year=${season}&location=${encodeURIComponent(location)}`)
+      const meeting = meetingsRes.data?.[0]
+      if (!meeting) return null
+      
+      // 2. Get session key
+      const sessionsRes = await axios.get(`https://api.openf1.org/v1/sessions?meeting_key=${meeting.meeting_key}&session_name=${encodeURIComponent(sessionName)}`)
+      const session = sessionsRes.data?.[0]
+      if (!session) return null
+      
+      sessionKey = session.session_key
+      sessionKeyCache.set(cacheKey, sessionKey)
+    }
     
     // 3. Get race control messages
-    const raceControlRes = await axios.get(`https://api.openf1.org/v1/race_control?session_key=${session.session_key}`)
+    const raceControlRes = await axios.get(`https://api.openf1.org/v1/race_control?session_key=${sessionKey}`)
     const messages = raceControlRes.data || []
     
     // 4. Parse the latest status from messages
@@ -780,18 +751,18 @@ export const getLiveSessionControl = async (location, sessionName) => {
     for (const msg of messages) {
       const text = String(msg.message).toUpperCase()
       
-      if (text.includes('RED FLAG')) {
-        status = 'red_flag'
-      } else if (text.includes('SAFETY CAR DEPLOYED')) {
-        status = 'safety_car'
+      if (text.includes('CHEQUERED FLAG')) {
+        status = 'chequered_flag'
       } else if (text.includes('VIRTUAL SAFETY CAR DEPLOYED')) {
         status = 'vsc'
+      } else if (text.includes('SAFETY CAR DEPLOYED')) {
+        status = 'safety_car'
+      } else if (text.includes('RED FLAG')) {
+        status = 'red_flag'
       } else if (text.includes('TRACK CLEAR') || text.includes('CLEAR IN TRACK') || text.includes('SAFETY CAR IN THIS LAP')) {
         if (status === 'safety_car' || status === 'vsc') {
           status = 'none'
         }
-      } else if (text.includes('CHEQUERED FLAG')) {
-        status = 'chequered_flag'
       } else if (text.includes('RESUMED') || text.includes('TRACK CLEAR') || text.includes('RE-START')) {
         if (status === 'red_flag') {
           status = 'none'
