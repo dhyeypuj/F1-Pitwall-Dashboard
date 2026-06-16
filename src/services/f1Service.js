@@ -565,8 +565,8 @@ const RECORDED_RACE_WINNERS = {
   2: "A. Antonelli",   // China
   3: "A. Antonelli",   // Japan
   4: "A. Antonelli",   // Miami
-  5: "M. Verstappen",  // Canada
-  6: "C. Leclerc",     // Monaco
+  5: "A. Antonelli",  // Canada
+  6: "A. Antonelli",     // Monaco
   7: "L. Hamilton"     // Spain / Barcelona
 }
 
