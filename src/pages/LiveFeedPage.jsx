@@ -45,20 +45,30 @@ function LiveFeedPage() {
         lap: '--'
       }))
     } else {
-      // Fallback grid
+      // Fallback grid - Full 22 drivers aligned with current 2026 teams
       const fallback = [
-        { name: 'M. VERSTAPPEN', team: 'Red Bull Racing', no: '1' },
-        { name: 'L. HAMILTON', team: 'Ferrari', no: '44' },
-        { name: 'L. NORRIS', team: 'McLaren', no: '4' },
-        { name: 'C. LECLERC', team: 'Ferrari', no: '16' },
-        { name: 'O. PIASTRI', team: 'McLaren', no: '81' },
-        { name: 'G. RUSSELL', team: 'Mercedes', no: '63' },
-        { name: 'C. SAINZ', team: 'Aston Martin', no: '55' },
         { name: 'A. ANTONELLI', team: 'Mercedes', no: '12' },
-        { name: 'A. ALBON', team: 'Williams', no: '23' },
-        { name: 'F. ALONSO', team: 'Aston Martin', no: '14' },
+        { name: 'L. HAMILTON', team: 'Ferrari', no: '44' },
+        { name: 'G. RUSSELL', team: 'Mercedes', no: '63' },
+        { name: 'C. LECLERC', team: 'Ferrari', no: '16' },
+        { name: 'L. NORRIS', team: 'McLaren', no: '1' },
+        { name: 'O. PIASTRI', team: 'McLaren', no: '81' },
+        { name: 'M. VERSTAPPEN', team: 'Red Bull Racing', no: '3' },
+        { name: 'P. GASLY', team: 'Alpine', no: '10' },
+        { name: 'I. HADJAR', team: 'Red Bull Racing', no: '6' },
         { name: 'L. LAWSON', team: 'Racing Bulls', no: '30' },
-        { name: 'N. HULKENBERG', team: 'Audi', no: '27' }
+        { name: 'O. BEARMAN', team: 'Haas', no: '87' },
+        { name: 'F. COLAPINTO', team: 'Alpine', no: '43' },
+        { name: 'A. LINDBLAD', team: 'Racing Bulls', no: '41' },
+        { name: 'C. SAINZ', team: 'Williams', no: '55' },
+        { name: 'A. ALBON', team: 'Williams', no: '23' },
+        { name: 'E. OCON', team: 'Haas', no: '31' },
+        { name: 'G. BORTOLETO', team: 'Audi', no: '5' },
+        { name: 'F. ALONSO', team: 'Aston Martin', no: '14' },
+        { name: 'N. HULKENBERG', team: 'Audi', no: '27' },
+        { name: 'V. BOTTAS', team: 'Cadillac', no: '77' },
+        { name: 'S. PEREZ', team: 'Cadillac', no: '11' },
+        { name: 'L. STROLL', team: 'Aston Martin', no: '18' }
       ]
       list = fallback.map((d, index) => ({
         pos: index + 1,
@@ -72,7 +82,7 @@ function LiveFeedPage() {
         lap: '--'
       }))
     }
-    setDrivers(list.slice(0, 14)) // Top 14 drivers
+    setDrivers(list) // Set all drivers
   }, [standings])
 
   // Find active flag status from the commentary or track state
