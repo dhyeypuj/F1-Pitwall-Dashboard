@@ -153,7 +153,6 @@ const Hero = () => {
 
       <div className="hero-sub" style={{ position: 'relative', zIndex: 1 }}>
         <span className="live-badge">Live Edition</span>
-        <span>Drivers · Constructors · Paddock · Calendar</span>
       </div>
 
       <div className="h-status-grid" style={{ position: 'relative', zIndex: 1 }}>
