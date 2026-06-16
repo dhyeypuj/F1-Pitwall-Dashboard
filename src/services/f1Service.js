@@ -73,12 +73,7 @@ const getTeamDisplayName = (id, apiName, season = getActiveSeasonSync()) => {
     names.andretti = 'Andretti Cadillac'
     names.cadillac = 'Andretti Cadillac'
   }
-  if (year < 2024) {
-    names.sauber = 'Alfa Romeo F1 Team Stake'
-    names.rb = 'Scuderia AlphaTauri'
-    names.racingbulls = 'Scuderia AlphaTauri'
-    names.vcarb = 'Scuderia AlphaTauri'
-  }
+
   
   const sid = String(id).toLowerCase().replace(/\s+/g, '_')
   return names[sid] || apiName || id
