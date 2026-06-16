@@ -15,8 +15,9 @@ const ConstructorsStandings = () => {
       {isLoading ? (
         Array(10).fill(0).map((_, i) => (
           <div className="con-row skeleton" key={`skel-c-${i}`} style={{ opacity: 0.5, animationDelay: `${4.5 + i * 0.08}s` }}>
-            <div className="con-top">
+            <div className="con-top has-logo">
               <div className="con-pos">--</div>
+              <div className="con-logo-wrap skeleton-face" style={{ background: 'var(--surface-3)', border: '1.5px solid var(--surface-3)' }}></div>
               <div>
                 <div className="con-name" style={{ background: 'var(--surface-3)', width: '100px', height: '16px', display: 'inline-block', borderRadius: '4px' }}></div>
                 <div className="con-engine" style={{ background: 'var(--surface-2)', width: '60px', height: '12px', display: 'block', borderRadius: '4px', marginTop: '4px' }}></div>
@@ -36,21 +37,23 @@ const ConstructorsStandings = () => {
         constructors.map((c, i) => (
           <div 
           className="con-row" 
-          style={{ '--team-color': c.color, animationDelay: `${4.5 + i * 0.08}s` }}
+          style={{ '--team-color': c.color, animationDelay: `${i * 0.05}s` }}
           key={c.name}
         >
-          <div className="con-top">
+          <div className={`con-top ${c.logoUrl ? 'has-logo' : ''}`}>
             <div className="con-pos">{c.pos}</div>
+            {c.logoUrl && (
+              <div className="con-logo-wrap">
+                <img 
+                  src={c.logoUrl} 
+                  alt={c.name} 
+                  className="con-team-logo" 
+                  onError={(e) => { e.target.parentNode.style.display = 'none'; }}
+                />
+              </div>
+            )}
             <div>
               <div className="con-name">
-                {c.logoUrl && (
-                  <img 
-                    src={c.logoUrl} 
-                    alt={c.name} 
-                    className="con-team-logo" 
-                    onError={(e) => e.target.style.display = 'none'}
-                  />
-                )}
                 {c.name}
               </div>
               <div className="con-engine">

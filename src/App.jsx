@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Hero from './components/Hero'
 import NewsFeed from './components/NewsFeed'
+import LiveFeedPage from './pages/LiveFeedPage'
 import DriversStandings from './components/DriversStandings'
 import ConstructorsStandings from './components/ConstructorsStandings'
 import RaceHero from './components/RaceHero'
@@ -18,8 +19,12 @@ import { getF1News } from './services/newsService'
 import { getSeasonSessions } from './services/sessionService'
 import { onAuthChange } from './services/authService'
 import { saveUserToFirestore, getUserPreferences, updateUserPreferences } from './services/userService'
+import { getActiveSeason } from './services/seasonService'
+import * as Sentry from '@sentry/react'
+import { logger } from './services/logger'
 
 function App() {
+  const activeSeason = useStore((state) => state.activeSeason)
   const activeTeam = useStore((state) => state.preferences?.team || 'ferrari')
   const defaultWidgets = { news: true, standings: true, podium: true, stats: true, calendar: true }
   const widgets = { ...defaultWidgets, ...(useStore((state) => state.preferences?.widgets) || {}) }
@@ -42,6 +47,15 @@ function App() {
   const setRaceStats = useStore(state => state.setRaceStats)
   const setLoading = useStore(state => state.setLoading)
   const setError = useStore(state => state.setError)
+  
+  const currentPage = useStore(state => state.currentPage)
+  const setCurrentPage = useStore(state => state.setCurrentPage)
+  const commentaryTab = useStore(state => state.commentaryTab)
+  const setCommentaryTab = useStore(state => state.setCommentaryTab)
+  const fetchCommentaryFeed = useStore(state => state.fetchCommentaryFeed)
+  const commentaryMode = useStore(state => state.commentaryMode)
+  const showAlert = useStore(state => state.showAlert)
+  const setShowAlert = useStore(state => state.setShowAlert)
 
   const standings = useStore(state => state.standings)
   const calendar = useStore(state => state.calendar)
@@ -77,12 +91,12 @@ function App() {
           const prefs = await getUserPreferences(firebaseUser.uid)
           if (prefs) setPreferences(prefs)
         } catch (err) {
-          console.error('Error fetching preferences:', err)
+          logger.error('Error fetching preferences:', err)
         }
 
         // 2. Set user
         const hour = new Date().getHours()
-        const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+        const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening'
         const date = new Date().toLocaleDateString('en-US', {
           weekday: 'short',
           month: 'short',
@@ -90,14 +104,27 @@ function App() {
           year: 'numeric'
         }).toUpperCase().replace(/,/g, ' ·')
 
+        const rawName = firebaseUser.name?.split(' ')[0] || 'Driver'
+        const capitalizedName = rawName.charAt(0).toUpperCase() + rawName.slice(1)
+
         setUser({
           ...firebaseUser,
-          name: firebaseUser.name?.split(' ')[0] || 'Driver',
-          greeting: `${greeting}, ${firebaseUser.name?.split(' ')[0] || 'Driver'}`,
+          name: capitalizedName,
+          greeting: `${greeting}, ${capitalizedName}`,
           date
         })
+
+        // Set Sentry User Context for production debugging
+        Sentry.setUser({
+          id: firebaseUser.uid,
+          username: capitalizedName,
+          email: firebaseUser.email || ''
+        })
+
+        logger.info(`User authenticated successfully: ${firebaseUser.uid}`)
       } else {
         setUser(null)
+        Sentry.setUser(null)
       }
       setAuthReady(true)
     })
@@ -132,33 +159,97 @@ function App() {
     if (!isAuthenticated || !isOnline) return
 
     const fetchData = async () => {
-      setLoading('isLoadingStandings', true)
-      getStandings().then(data => setStandings(data)).catch(err => setError('errorStandings', err.message)).finally(() => setLoading('isLoadingStandings', false))
+      try {
+        const season = await getActiveSeason()
+        useStore.getState().setActiveSeason(season)
 
-      setLoading('isLoadingRace', true)
-      getNextRace().then(data => setRace(data)).catch(err => setError('errorRace', err.message)).finally(() => setLoading('isLoadingRace', false))
+        setLoading('isLoadingStandings', true)
+        getStandings()
+          .then(data => setStandings(data))
+          .catch(err => {
+            setError('errorStandings', err.message)
+            logger.error('Failed to fetch standings from Jolpi API', err)
+          })
+          .finally(() => setLoading('isLoadingStandings', false))
 
-      setLoading('isLoadingCalendar', true)
-      getCalendar().then(data => setCalendar(data)).catch(err => setError('errorCalendar', err.message)).finally(() => setLoading('isLoadingCalendar', false))
+        setLoading('isLoadingRace', true)
+        getNextRace()
+          .then(data => setRace(data))
+          .catch(err => {
+            setError('errorRace', err.message)
+            logger.error('Failed to fetch next race schedule', err)
+          })
+          .finally(() => setLoading('isLoadingRace', false))
 
-      setLoading('isLoadingResults', true)
-      getLatestResults().then(data => setPodium(data)).catch(err => setError('errorResults', err.message)).finally(() => setLoading('isLoadingResults', false))
+        setLoading('isLoadingCalendar', true)
+        getCalendar()
+          .then(data => setCalendar(data))
+          .catch(err => {
+            setError('errorCalendar', err.message)
+            logger.error('Failed to fetch 2026 race calendar', err)
+          })
+          .finally(() => setLoading('isLoadingCalendar', false))
 
-      setLoading('isLoadingStats', true)
-      getRaceStats().then(data => setRaceStats(data)).catch(err => setError('errorStats', err.message)).finally(() => setLoading('isLoadingStats', false))
+        setLoading('isLoadingResults', true)
+        getLatestResults()
+          .then(data => setPodium(data))
+          .catch(err => {
+            setError('errorResults', err.message)
+            logger.error('Failed to fetch latest race results', err)
+          })
+          .finally(() => setLoading('isLoadingResults', false))
 
-      setLoading('isLoadingNews', true)
-      getF1News(activeTeam).then(data => setNews(data)).catch(err => setError('errorNews', err.message)).finally(() => setLoading('isLoadingNews', false))
+        setLoading('isLoadingStats', true)
+        getRaceStats()
+          .then(data => setRaceStats(data))
+          .catch(err => {
+            setError('errorStats', err.message)
+            logger.error('Failed to fetch season race statistics', err)
+          })
+          .finally(() => setLoading('isLoadingStats', false))
 
-      setLoading('isLoadingSessions', true)
-      getSeasonSessions(2024).then(data => setSessions(data)).catch(err => console.error('Failed to fetch sessions:', err)).finally(() => setLoading('isLoadingSessions', false))
+        setLoading('isLoadingNews', true)
+        getF1News(activeTeam)
+          .then(data => setNews(data))
+          .catch(err => {
+            setError('errorNews', err.message)
+            logger.error('Failed to fetch F1 news feeds from proxy', err)
+          })
+          .finally(() => setLoading('isLoadingNews', false))
+
+        setLoading('isLoadingSessions', true)
+        getSeasonSessions(season)
+          .then(data => setSessions(data))
+          .catch(err => {
+            logger.error('Failed to fetch telemetry/timing session metadata from OpenF1', err)
+          })
+          .finally(() => setLoading('isLoadingSessions', false))
+      } catch (err) {
+        logger.error('Critical failure during data hydration', err)
+      }
     }
 
     fetchData()
     const pollInterval = setInterval(fetchData, 600000) // 10 min polling for all data in production
 
     return () => clearInterval(pollInterval)
-  }, [isAuthenticated, activeTeam, isOnline, setLoading, setStandings, setRace, setCalendar, setPodium, setRaceStats, setNews, setError, setSessions])
+  }, [isAuthenticated, activeTeam, isOnline, setLoading, setStandings, setRace, setCalendar, setPodium, setRaceStats, setNews, setError, setSessions, activeSeason])
+
+  // ── Live Telemetry/Commentary Fast Polling ─────────────────
+  useEffect(() => {
+    if (!isAuthenticated || !isOnline) return
+
+    // Initial load
+    fetchCommentaryFeed()
+
+    // Setup polling: 20 seconds for active live, 5 minutes for demo
+    const intervalTime = commentaryMode === 'live' ? 20000 : 300000
+    const pollInterval = setInterval(() => {
+      fetchCommentaryFeed()
+    }, intervalTime)
+
+    return () => clearInterval(pollInterval)
+  }, [isAuthenticated, isOnline, fetchCommentaryFeed, commentaryMode])
 
   // ── Stats derivation ────────────────────────────────
   useEffect(() => {
@@ -172,60 +263,149 @@ function App() {
       ])
     }
 
-    if (standings.drivers.length > 0 && standings.constructors.length > 0 && race.nextRace && podium.winner && raceStats) {
+    if (standings.drivers.length > 0 && standings.constructors.length > 0 && race.nextRace) {
       const topDriver = standings.drivers[0]
       const topConstructor = standings.constructors[0]
       const nextRace = race.nextRace
-      const winner = podium.winner
+      const winner = podium?.winner
+      const latestStats = raceStats
 
-      setTicker([
+      const tickerItems = [
         { sym: 'WDC', val: topDriver.name.toUpperCase(), pts: `${topDriver.points} pts` },
         { sym: 'WCC', val: topConstructor.name.toUpperCase(), pts: `${topConstructor.points} pts` },
-        { sym: 'NEXT', val: nextRace.title.replace('Grand Prix', 'GP').toUpperCase(), pts: `${nextRace.dates.split(' ')[0]} ${nextRace.dates.split(' – ').pop()}`.toUpperCase() },
-        { sym: 'WINNER', val: winner.Driver.familyName.toUpperCase(), pts: raceStats.latestRaceName.toUpperCase() },
-        { sym: 'FL', val: raceStats.fastestLap?.driver.toUpperCase() || '--', pts: raceStats.fastestLap?.time || '--' },
-        { sym: 'P2', val: standings.drivers[1]?.name.toUpperCase() || '--', pts: `${standings.drivers[1]?.points || 0} pts` },
-        { sym: 'P3', val: standings.drivers[2]?.name.toUpperCase() || '--', pts: `${standings.drivers[2]?.points || 0} pts` },
-        { sym: 'P4', val: standings.drivers[3]?.name.toUpperCase() || '--', pts: `${standings.drivers[3]?.points || 0} pts` }
-      ])
+        { sym: 'NEXT', val: nextRace.title.replace('Grand Prix', 'GP').toUpperCase(), pts: (nextRace.dates || '').toUpperCase() },
+      ]
+
+      if (winner && latestStats) {
+        tickerItems.push(
+          { sym: 'WINNER', val: (winner.Driver?.familyName || '').toUpperCase(), pts: latestStats.latestRaceName.toUpperCase() }
+        )
+      }
+      if (latestStats?.fastestLap) {
+        tickerItems.push(
+          { sym: 'FL', val: latestStats.fastestLap.driver.toUpperCase(), pts: latestStats.fastestLap.time }
+        )
+      }
+
+      // Add other standings positions if available
+      for (let idx = 1; idx <= 4; idx++) {
+        const driver = standings.drivers[idx]
+        if (driver) {
+          tickerItems.push({
+            sym: `P${idx + 1}`,
+            val: driver.name.toUpperCase(),
+            pts: `${driver.points} pts`
+          })
+        }
+      }
+
+      setTicker(tickerItems)
     }
 
-    if (standings.drivers.length > 1 && raceStats && podium.winner) {
+    if (standings.drivers.length > 1) {
       const p1 = standings.drivers[0]
       const p2 = standings.drivers[1]
-      const gap = parseFloat(p1.points) - parseFloat(p2.points)
+      const gap = parseFloat(p1.points || 0) - parseFloat(p2.points || 0)
 
-      setStats([
-        { id: 1, label: "Championship Lead", bigHtml: `<em>+${gap}</em> pts`, sub: `${p1.name.split(' ').pop()} over ${p2.name.split(' ').pop()}` },
-        { id: 2, label: `Fastest Lap 2026`, bigHtml: raceStats.fastestLap?.time || '--', sub: `${raceStats.fastestLap?.driver || '--'} · ${raceStats.latestRaceName}` },
-        { id: 3, label: "Recent Winner", bigHtml: podium.winner.Driver.familyName, sub: `${podium.winner.Constructor.name} · ${raceStats.latestRaceName}` },
-        { id: 4, label: "Next Race", bigHtml: race.nextRace ? race.nextRace.title.replace('Grand Prix', 'GP') : '--', sub: race.nextRace ? `${race.nextRace.dates.split(' ')[0]} ${race.nextRace.dates.split(' – ').pop()}` : '--' }
-      ])
+      const items = [
+        { id: 1, label: "Drivers' Championship Lead", bigHtml: `<em>+${gap}</em> pts`, sub: `${p1.name.split(' ').pop()} over ${p2.name.split(' ').pop()}` }
+      ]
+
+      if (standings.constructors && standings.constructors.length > 1) {
+        const c1 = standings.constructors[0]
+        const c2 = standings.constructors[1]
+        const cGap = parseFloat(c1.points || 0) - parseFloat(c2.points || 0)
+        items.push({
+          id: 2,
+          label: "Constructors' Championship Lead",
+          bigHtml: `<em>+${cGap}</em> pts`,
+          sub: `${c1.name} over ${c2.name}`
+        })
+      } else {
+        items.push({
+          id: 2,
+          label: "Constructors' Championship Lead",
+          bigHtml: '--',
+          sub: 'No data yet'
+        })
+      }
+
+      if (podium?.winner && raceStats) {
+        items.push({
+          id: 3,
+          label: "Recent Winner",
+          bigHtml: podium.winner.Driver?.familyName || 'TBD',
+          sub: `${podium.winner.Constructor?.name || ''} · ${raceStats.latestRaceName}`
+        })
+      } else {
+        items.push({
+          id: 3,
+          label: "Recent Winner",
+          bigHtml: 'TBD',
+          sub: 'No races completed'
+        })
+      }
+
+      if (race.nextRace) {
+        items.push({
+          id: 4,
+          label: "Next Race",
+          bigHtml: race.nextRace.title.replace('Grand Prix', 'GP'),
+          sub: race.nextRace.dates || '--'
+        })
+      } else {
+        items.push({
+          id: 4,
+          label: "Next Race",
+          bigHtml: '--',
+          sub: '--'
+        })
+      }
+
+      setStats(items)
     }
-  }, [isAuthenticated, standings, calendar, podium, race, raceStats, setHeroStats, setTicker, setStats])
+  }, [isAuthenticated, standings, calendar, podium, race, raceStats, setHeroStats, setTicker, setStats, activeSeason])
 
-  // Handle theme persistence at root level
+  const appearance = useStore(state => state.preferences?.appearance)
+
+  // Handle theme persistence at root level, resolving system settings dynamically
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('theme-light', 'theme-dark');
-    root.classList.add(`theme-${preferences.appearance || 'light'}`);
-  }, [preferences.appearance]);
+    
+    const applyTheme = () => {
+      root.classList.remove('theme-light', 'theme-dark');
+      let activeAppearance = appearance || 'system';
+      if (activeAppearance === 'system') {
+        const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        activeAppearance = systemIsDark ? 'dark' : 'light';
+      }
+      root.classList.add(`theme-${activeAppearance}`);
+    };
 
-  // Handle theme persistence at root level
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.remove('theme-light', 'theme-dark');
-    root.classList.add(`theme-${preferences.appearance || 'light'}`);
-  }, [preferences.appearance]);
+    applyTheme();
+
+    if (appearance === 'system' || !appearance) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = () => applyTheme();
+      
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', listener);
+        return () => mediaQuery.removeEventListener('change', listener);
+      } else {
+        mediaQuery.addListener(listener);
+        return () => mediaQuery.removeListener(listener);
+      }
+    }
+  }, [appearance]);
 
   if (!authReady) {
     return (
       <div className="auth-page">
-        <div className="auth-card" style={{ textAlign: 'center', border: '1px solid var(--paper-3)', background: '#fff' }}>
+        <div className="auth-card" style={{ textAlign: 'center', border: '1px solid var(--paper-3)' }}>
           <div className="auth-accent"></div>
           <div className="auth-eyebrow" style={{ justifyContent: 'center', marginBottom: '32px' }}>
             <span className="checker-flag"></span>
-            <span style={{ color: 'var(--carbon)', letterSpacing: '0.2em' }}>AUTHENTICATING SYSTEMS</span>
+            <span style={{ color: 'var(--ink)', letterSpacing: '0.2em' }}>AUTHENTICATING SYSTEMS</span>
           </div>
           <div style={{ padding: '40px 0' }}>
             <span className="auth-spinner" style={{ 
@@ -249,9 +429,20 @@ function App() {
     return <AuthPage />
   }
 
+  if (currentPage === 'live-feed') {
+    return (
+      <div 
+        className={`pit-wall-app team-${preferences.team}`} 
+        data-team={preferences.team}
+      >
+        <LiveFeedPage />
+      </div>
+    )
+  }
+
   return (
     <div 
-      className="pit-wall-app" 
+      className={`pit-wall-app team-${preferences.team}`} 
       data-team={preferences.team}
     >
       <Ticker />
@@ -293,6 +484,41 @@ function App() {
         <div className="offline-banner">
           <div className="offline-dot"></div>
           OFFLINE · LIMITED FUNCTIONALITY
+        </div>
+      )}
+
+      {showAlert && (
+        <div className="custom-alert-overlay" onClick={() => setShowAlert(false)}>
+          <div className="custom-alert-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="custom-alert-header">
+              <span className="custom-alert-icon">⚠️</span>
+              <h3>NO ACTIVE SESSION</h3>
+            </div>
+            <div className="custom-alert-body">
+              <p>There is no Formula 1 session currently live.</p>
+              <p className="custom-alert-sub">You can still proceed to view the Pit Wall layout, which will automatically go live as soon as the next session starts.</p>
+            </div>
+            <div className="custom-alert-footer">
+              <button 
+                type="button" 
+                className="alert-btn-cancel"
+                onClick={() => setShowAlert(false)}
+              >
+                STAY ON DASHBOARD
+              </button>
+              <button 
+                type="button" 
+                className="alert-btn-confirm"
+                onClick={() => {
+                  setShowAlert(false)
+                  setCurrentPage('live-feed')
+                  setCommentaryTab('live')
+                }}
+              >
+                PROCEED TO PIT WALL
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

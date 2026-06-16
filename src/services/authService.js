@@ -7,11 +7,14 @@ import {
   updateProfile
 } from 'firebase/auth'
 import { auth, googleProvider } from './firebase'
+import { logger } from './logger'
 
 export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider)
     const user = result.user
+
+    logger.info(`Google Sign-In successful for uid: ${user.uid}`)
 
     return {
       uid: user.uid,
@@ -20,7 +23,8 @@ export const signInWithGoogle = async () => {
       picture: user.photoURL
     }
   } catch (error) {
-    throw new Error(error.message || 'Failed to sign in with Google')
+    logger.error('Google Sign-In failed', error)
+    throw new Error(error.message || 'Failed to sign in with Google', { cause: error })
   }
 }
 
@@ -30,6 +34,8 @@ export const signUpWithEmail = async (email, password, name) => {
     // Update the profile with the display name
     await updateProfile(result.user, { displayName: name })
     
+    logger.info(`Email account creation successful for uid: ${result.user.uid}`)
+
     return {
       uid: result.user.uid,
       name: name,
@@ -37,13 +43,17 @@ export const signUpWithEmail = async (email, password, name) => {
       picture: null
     }
   } catch (error) {
-    throw new Error(error.message || 'Failed to create account')
+    logger.error('Sign-up with email failed', error)
+    throw new Error(error.message || 'Failed to create account', { cause: error })
   }
 }
 
 export const signInWithEmail = async (email, password) => {
   try {
     const result = await signInWithEmailAndPassword(auth, email, password)
+    
+    logger.info(`Email login successful for uid: ${result.user.uid}`)
+
     return {
       uid: result.user.uid,
       name: result.user.displayName,
@@ -51,16 +61,18 @@ export const signInWithEmail = async (email, password) => {
       picture: result.user.photoURL
     }
   } catch (error) {
-    throw new Error(error.message || 'Invalid email or password')
+    logger.error('Sign-in with email failed', error)
+    throw new Error(error.message || 'Invalid email or password', { cause: error })
   }
 }
 
 export const logout = async () => {
   try {
     await signOut(auth)
+    logger.info('Sign-out succeeded')
   } catch (error) {
-    console.error('Sign-out failed:', error)
-    throw new Error('Failed to sign out')
+    logger.error('Sign-out failed', error)
+    throw new Error('Failed to sign out', { cause: error })
   }
 }
 
@@ -78,3 +90,4 @@ export const onAuthChange = (callback) => {
     }
   })
 }
+

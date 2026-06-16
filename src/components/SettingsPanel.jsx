@@ -1,5 +1,5 @@
 import useStore from '../store/useStore'
-import { updateUserPreferences } from '../services/userService'
+import { analytics } from '../services/analytics'
 
 export const TEAMS = [
   { id: 'ferrari', name: 'Scuderia Ferrari HP', color: '#DC0000' },
@@ -20,7 +20,7 @@ const SettingsPanel = () => {
   const toggleSettings = useStore(state => state.toggleSettings)
   const preferences = useStore(state => state.preferences)
   const updatePreference = useStore(state => state.updatePreference)
-  const user = useStore(state => state.user)
+  const activeSeason = useStore(state => state.activeSeason)
 
   if (!isOpen) return null
 
@@ -35,15 +35,29 @@ const SettingsPanel = () => {
   const widgets = { ...defaultWidgets, ...(preferences?.widgets || {}) }
 
   const handleTeamSelect = (teamId) => {
-    updatePreference('team', teamId)
+    const oldTeam = preferences?.team || 'ferrari'
+    if (oldTeam !== teamId) {
+      analytics.trackTeamChange(oldTeam, teamId)
+      updatePreference('team', teamId)
+    }
   }
 
   const handleWidgetToggle = (widgetKey) => {
+    const isVisible = !widgets[widgetKey]
+    analytics.trackWidgetToggle(widgetKey, isVisible)
     const newWidgets = {
       ...widgets,
-      [widgetKey]: !widgets[widgetKey]
+      [widgetKey]: isVisible
     }
     updatePreference('widgets', newWidgets)
+  }
+
+  const handleAppearanceChange = (nextAppearance) => {
+    const oldAppearance = preferences?.appearance || 'system'
+    if (oldAppearance !== nextAppearance) {
+      analytics.trackAppearanceChange(oldAppearance, nextAppearance)
+      updatePreference('appearance', nextAppearance)
+    }
   }
 
   return (
@@ -76,16 +90,25 @@ const SettingsPanel = () => {
 
         <div className="settings-section">
           <label className="section-label">APPEARANCE</label>
-          <div className="toggle-row">
-            <span className="toggle-label">Dark Mode</span>
-            <label className="switch">
-              <input 
-                type="checkbox" 
-                checked={preferences?.appearance === 'dark'} 
-                onChange={(e) => updatePreference('appearance', e.target.checked ? 'dark' : 'light')}
-              />
-              <span className="slider"></span>
-            </label>
+          <div className="appearance-selector">
+            <button 
+              className={`appearance-btn ${preferences?.appearance === 'light' ? 'active' : ''}`}
+              onClick={() => handleAppearanceChange('light')}
+            >
+              Light
+            </button>
+            <button 
+              className={`appearance-btn ${preferences?.appearance === 'dark' ? 'active' : ''}`}
+              onClick={() => handleAppearanceChange('dark')}
+            >
+              Dark
+            </button>
+            <button 
+              className={`appearance-btn ${preferences?.appearance === 'system' ? 'active' : ''}`}
+              onClick={() => handleAppearanceChange('system')}
+            >
+              System
+            </button>
           </div>
         </div>
 
@@ -112,7 +135,7 @@ const SettingsPanel = () => {
         </div>
 
         <div className="settings-footer">
-          <p>PERSONAL EDITION · F1 2026</p>
+          <p>PERSONAL EDITION · F1 {activeSeason}</p>
           <div className="theme-preview">
             <div className="preview-swatch primary" style={{ background: TEAMS.find(t => t.id === preferences?.team)?.color || 'var(--racing)' }}></div>
             <div className="preview-swatch accent"></div>

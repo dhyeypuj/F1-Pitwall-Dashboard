@@ -1,12 +1,39 @@
 import { useState, useRef } from 'react'
 import { signInWithGoogle, signInWithEmail, signUpWithEmail } from '../services/authService'
 import useStore from '../store/useStore'
+import { getActiveSeasonSync } from '../services/seasonService'
+import { analytics } from '../services/analytics'
 
 const AuthPage = () => {
   const setUser = useStore((state) => state.setUser)
+  const preferences = useStore((state) => state.preferences)
+  const updatePreference = useStore((state) => state.updatePreference)
+  
   const [isLogin, setIsLogin] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  const activeAppearance = preferences?.appearance || 'system'
+  const isDark = activeAppearance === 'dark' || 
+    (activeAppearance === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+  const toggleTheme = () => {
+    const nextAppearance = isDark ? 'light' : 'dark'
+    analytics.trackAppearanceChange(activeAppearance, nextAppearance)
+    updatePreference('appearance', nextAppearance)
+    
+    // Save to guest preferences in localStorage so it persists on reload
+    try {
+      const guestPrefs = {
+        ...preferences,
+        appearance: nextAppearance,
+        theme: nextAppearance
+      }
+      localStorage.setItem('f1_prefs_guest', JSON.stringify(guestPrefs))
+    } catch (e) {
+      console.error('Failed to save guest theme:', e)
+    }
+  }
   
   // Form state
   const [email, setEmail] = useState('')
@@ -17,8 +44,9 @@ const AuthPage = () => {
 
   const normalizeUser = (firebaseUser) => {
     const hour = new Date().getHours()
-    const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-    const firstName = (firebaseUser.name || 'Fan').split(' ')[0]
+    const timeGreeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening'
+    const rawFirstName = (firebaseUser.name || 'Fan').split(' ')[0]
+    const firstName = rawFirstName.charAt(0).toUpperCase() + rawFirstName.slice(1)
 
     const now = new Date()
     const dateStr = now.toLocaleDateString('en-US', {
@@ -47,6 +75,7 @@ const AuthPage = () => {
     try {
       const firebaseUser = await signInWithGoogle()
       setUser(normalizeUser(firebaseUser))
+      analytics.trackLogin('google')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -66,9 +95,11 @@ const AuthPage = () => {
       let firebaseUser
       if (isLogin) {
         firebaseUser = await signInWithEmail(email, password)
+        analytics.trackLogin('email')
       } else {
         if (!name) throw new Error('Please enter your name')
         firebaseUser = await signUpWithEmail(email, password, name)
+        analytics.trackLogin('email_signup')
       }
       setUser(normalizeUser(firebaseUser))
     } catch (err) {
@@ -81,6 +112,34 @@ const AuthPage = () => {
 
   return (
     <div className="auth-page">
+      <button 
+        type="button" 
+        className="auth-theme-toggle" 
+        onClick={toggleTheme}
+        aria-label="Toggle theme mode"
+      >
+        <div className={`theme-toggle-icon-wrapper ${isDark ? 'dark' : 'light'}`}>
+          <div className="sun-icon-svg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </div>
+          <div className="moon-icon-svg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </div>
+        </div>
+      </button>
+
       <span className="auth-speed-line"></span>
       <span className="auth-speed-line"></span>
       <span className="auth-speed-line"></span>
@@ -90,7 +149,7 @@ const AuthPage = () => {
 
         <div className="auth-eyebrow">
           <span className="checker-flag"></span>
-          <span>Personal Edition · F1 2026</span>
+          <span>Personal Edition · F1 {getActiveSeasonSync()}</span>
         </div>
 
         <h1 className="auth-title">
