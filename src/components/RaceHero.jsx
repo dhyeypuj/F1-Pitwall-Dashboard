@@ -122,12 +122,69 @@ const RaceHero = () => {
 
   if (isLoading) {
     return (
-      <section className="race-hero">
-        <div className="race-block" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', opacity: 0.5 }}>
-            <div style={{ background: '#333', width: '80px', height: '16px', borderRadius: '4px' }}></div>
-            <div style={{ background: '#333', width: '250px', height: '40px', borderRadius: '4px' }}></div>
-            <div style={{ background: '#222', width: '150px', height: '16px', borderRadius: '4px' }}></div>
+      <section className="race-hero skeleton-hero">
+        <div className="race-block">
+          <div className="race-grid">
+            <div className="race-left">
+              <div className="race-meta-row">
+                <span className="skeleton-box" style={{ width: '120px', height: '16px', borderRadius: '4px', display: 'inline-block' }}></span>
+              </div>
+              
+              <h2 className="race-name" style={{ marginTop: '12px' }}>
+                <span className="skeleton-box" style={{ width: '280px', height: '40px', borderRadius: '4px', display: 'inline-block' }}></span>
+              </h2>
+
+              <div className="race-circuit" style={{ marginTop: '12px' }}>
+                <span className="skeleton-box" style={{ width: '220px', height: '16px', borderRadius: '4px', display: 'inline-block' }}></span>
+              </div>
+              
+              <div className="race-circuit" style={{ marginTop: '8px' }}>
+                <span className="skeleton-box" style={{ width: '160px', height: '14px', borderRadius: '4px', display: 'inline-block' }}></span>
+              </div>
+
+              <div className="race-stats" style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
+                <div className="race-stat">
+                  <div className="race-stat-label"><span className="skeleton-box" style={{ width: '60px', height: '10px', borderRadius: '2px', display: 'inline-block' }}></span></div>
+                  <div className="race-stat-val" style={{ marginTop: '8px' }}><span className="skeleton-box" style={{ width: '100px', height: '16px', borderRadius: '4px', display: 'inline-block' }}></span></div>
+                </div>
+                <div className="race-stat">
+                  <div className="race-stat-label"><span className="skeleton-box" style={{ width: '60px', height: '10px', borderRadius: '2px', display: 'inline-block' }}></span></div>
+                  <div className="race-stat-val" style={{ marginTop: '8px' }}><span className="skeleton-box" style={{ width: '100px', height: '16px', borderRadius: '4px', display: 'inline-block' }}></span></div>
+                </div>
+                <div className="race-stat">
+                  <div className="race-stat-label"><span className="skeleton-box" style={{ width: '60px', height: '10px', borderRadius: '2px', display: 'inline-block' }}></span></div>
+                  <div className="race-stat-val" style={{ marginTop: '8px' }}><span className="skeleton-box" style={{ width: '100px', height: '16px', borderRadius: '4px', display: 'inline-block' }}></span></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="race-right">
+              <div className="countdown-label">
+                <span className="skeleton-box" style={{ width: '110px', height: '12px', borderRadius: '2px', display: 'inline-block' }}></span>
+              </div>
+              <div className="countdown" style={{ marginTop: '16px' }}>
+                <div className="cd-cell">
+                  <div className="cd-num skeleton-box" style={{ width: '64px', height: '64px', borderRadius: '8px' }}></div>
+                  <div className="cd-label" style={{ marginTop: '8px', background: 'transparent' }}><span className="skeleton-box" style={{ width: '36px', height: '10px', borderRadius: '2px', display: 'inline-block' }}></span></div>
+                </div>
+                <div className="cd-cell">
+                  <div className="cd-num skeleton-box" style={{ width: '64px', height: '64px', borderRadius: '8px' }}></div>
+                  <div className="cd-label" style={{ marginTop: '8px', background: 'transparent' }}><span className="skeleton-box" style={{ width: '36px', height: '10px', borderRadius: '2px', display: 'inline-block' }}></span></div>
+                </div>
+                <div className="cd-cell">
+                  <div className="cd-num skeleton-box" style={{ width: '64px', height: '64px', borderRadius: '8px' }}></div>
+                  <div className="cd-label" style={{ marginTop: '8px', background: 'transparent' }}><span className="skeleton-box" style={{ width: '36px', height: '10px', borderRadius: '2px', display: 'inline-block' }}></span></div>
+                </div>
+                <div className="cd-cell">
+                  <div className="cd-num skeleton-box" style={{ width: '64px', height: '64px', borderRadius: '8px' }}></div>
+                  <div className="cd-label" style={{ marginTop: '8px', background: 'transparent' }}><span className="skeleton-box" style={{ width: '36px', height: '10px', borderRadius: '2px', display: 'inline-block' }}></span></div>
+                </div>
+              </div>
+
+              <div className="countdown-tabs" style={{ marginTop: '24px' }}>
+                <span className="skeleton-box" style={{ width: '100%', height: '44px', borderRadius: '4px', display: 'inline-block' }}></span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

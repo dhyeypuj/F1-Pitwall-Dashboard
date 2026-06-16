@@ -4019,3 +4019,61 @@ body.colo-open { overflow: hidden; }
   color: var(--text-2);
   border: 1px solid var(--border);
 }
+/* ── Skeleton Loading Shimmer System ────────────────────────── */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-box,
+.skeleton,
+.skeleton-face,
+.skeleton-text,
+.driver-row.skeleton .driver-face-wrap,
+.driver-row.skeleton .driver-name,
+.driver-row.skeleton .driver-team,
+.driver-row.skeleton .driver-pts,
+.con-row.skeleton .con-logo-wrap,
+.con-row.skeleton .con-name,
+.con-row.skeleton .con-engine,
+.con-row.skeleton .con-pts,
+.cal-round.skeleton .cal-rnum,
+.cal-round.skeleton .cal-country,
+.cal-round.skeleton .cal-flag-name,
+.cal-round.skeleton .cal-date {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-3) 50%, var(--surface) 75%) !important;
+  background-size: 200% 100% !important;
+  animation: skeleton-shimmer 1.5s infinite linear !important;
+  border-color: transparent !important;
+  color: transparent !important;
+}
+
+/* Shimmer style for countdown boxes and buttons inside Hero skeleton */
+.skeleton-hero .skeleton-box {
+  opacity: 0.15;
+}
+
+.skeleton-hero .countdown .skeleton-box {
+  opacity: 0.25;
+}
+
+.skeleton-hero .countdown-tabs .skeleton-box {
+  opacity: 0.2;
+}
+
+/* Bypass entrance animation delays for active loading skeleton states */
+.race-hero.skeleton-hero,
+.cal-section.skeleton-cal {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+.driver-row.skeleton,
+.con-row.skeleton {
+  animation: none !important;
+  opacity: 1 !important;
+}
