@@ -772,7 +772,7 @@ export const getLiveSessionControl = async (location, sessionName) => {
     
     return {
       status,
-      sessionKey: session.session_key
+      sessionKey
     }
   } catch (err) {
     console.error(`Error fetching live session control status:`, err)
