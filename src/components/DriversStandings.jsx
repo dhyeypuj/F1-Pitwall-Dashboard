@@ -39,7 +39,7 @@ const DriversStandings = () => {
         drivers.map((d, i) => (
           <div 
             className={`driver-row ${i === 0 ? 'leader' : ''}`} 
-            style={{ '--team-color': d.color, animationDelay: `${4.5 + i * 0.08}s` }}
+            style={{ '--team-color': d.color, animationDelay: `${i * 0.05}s` }}
             key={d.code}
           >
             <div className={`driver-top ${d.imageUrl ? 'has-face' : ''}`}>

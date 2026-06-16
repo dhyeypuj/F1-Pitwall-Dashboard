@@ -4077,3 +4077,8 @@ body.colo-open { overflow: hidden; }
   animation: none !important;
   opacity: 1 !important;
 }
+/* Bypass entrance animation delays for loaded states */
+.race-hero.loaded,
+.cal-section.loaded {
+  animation-delay: 0s !important;
+}

@@ -37,7 +37,7 @@ const ConstructorsStandings = () => {
         constructors.map((c, i) => (
           <div 
           className="con-row" 
-          style={{ '--team-color': c.color, animationDelay: `${4.5 + i * 0.08}s` }}
+          style={{ '--team-color': c.color, animationDelay: `${i * 0.05}s` }}
           key={c.name}
         >
           <div className={`con-top ${c.logoUrl ? 'has-logo' : ''}`}>

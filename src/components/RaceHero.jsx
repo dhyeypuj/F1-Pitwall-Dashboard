@@ -193,7 +193,7 @@ const RaceHero = () => {
 
   if (error || !nextRace) {
     return (
-      <section className="race-hero">
+      <section className="race-hero loaded">
         <div className="race-block" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <h2 className="race-name" style={{ color: error ? 'var(--racing)' : '#666' }}>{error || 'Next Race Unavailable'}</h2>
         </div>
